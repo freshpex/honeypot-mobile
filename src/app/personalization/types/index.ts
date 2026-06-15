@@ -1,0 +1,2 @@
+export type PersonalizationModuleName = "personalization";
+

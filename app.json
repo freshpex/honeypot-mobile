@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "HoneyPot",
+    "slug": "honeypot-mobile",
+    "scheme": "honeypot",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "plugins": ["expo-secure-store", "expo-notifications"]
+  }
+}
+

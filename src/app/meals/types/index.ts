@@ -1,0 +1,2 @@
+export type MealsModuleName = "meals";
+

@@ -1,0 +1,2 @@
+export type SupportModuleName = "support";
+

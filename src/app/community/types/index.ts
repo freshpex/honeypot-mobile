@@ -1,0 +1,2 @@
+export type CommunityModuleName = "community";
+
