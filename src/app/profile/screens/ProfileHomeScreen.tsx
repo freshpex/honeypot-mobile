@@ -3,6 +3,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo, useState } from "react";
 import {
   Modal,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,7 +12,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { useAuthStore, useCustomerStore } from "@/shared/state";
@@ -139,6 +141,7 @@ const AddressSheet = ({
   onClose: () => void;
   onCreate: () => void;
 }) => {
+  const insets = useSafeAreaInsets();
   const addresses = useCustomerStore((state) => state.addresses);
   const addAddress = useCustomerStore((state) => state.addAddress);
   const removeAddress = useCustomerStore((state) => state.removeAddress);
@@ -155,9 +158,13 @@ const AddressSheet = ({
   };
 
   return (
-    <Modal animationType="slide" transparent visible={Boolean(mode)}>
-      <View style={styles.sheetOverlay}>
-        <View style={styles.sheet}>
+    <Modal animationType="slide" onRequestClose={onClose} transparent visible={Boolean(mode)}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.sheetOverlay}
+      >
+        <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Ionicons color="#FF4A17" name="close" size={14} />
           </Pressable>
@@ -222,12 +229,13 @@ const AddressSheet = ({
             </>
           )}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
 
 const DietarySheet = ({ onClose, visible }: { onClose: () => void; visible: boolean }) => {
+  const insets = useSafeAreaInsets();
   const savedPreferences = useCustomerStore((state) => state.dietaryPreferences);
   const savedAllergies = useCustomerStore((state) => state.allergies);
   const saveDietaryPreferences = useCustomerStore((state) => state.saveDietaryPreferences);
@@ -245,9 +253,13 @@ const DietarySheet = ({ onClose, visible }: { onClose: () => void; visible: bool
   };
 
   return (
-    <Modal animationType="slide" transparent visible={visible}>
-      <View style={styles.sheetOverlay}>
-        <View style={styles.sheet}>
+    <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.sheetOverlay}
+      >
+        <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Ionicons color="#837D77" name="close" size={14} />
           </Pressable>
@@ -283,7 +295,7 @@ const DietarySheet = ({ onClose, visible }: { onClose: () => void; visible: bool
             <Text style={styles.saveText}>Save Preferences</Text>
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

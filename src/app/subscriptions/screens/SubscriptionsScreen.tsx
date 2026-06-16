@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   type SubscriptionPlan,
   useSubscriptionStore,
@@ -162,9 +162,31 @@ const ChoosePlanSheet = ({
   plans,
   visible,
 }: ChoosePlanSheetProps) => (
-  <Modal animationType="slide" transparent visible={visible}>
+  <ChoosePlanSheetContent
+    activePlan={activePlan}
+    onClose={onClose}
+    onConfirm={onConfirm}
+    onSelect={onSelect}
+    plans={plans}
+    visible={visible}
+  />
+);
+
+const ChoosePlanSheetContent = ({
+  activePlan,
+  onClose,
+  onConfirm,
+  onSelect,
+  plans,
+  visible,
+}: ChoosePlanSheetProps) => {
+  const insets = useSafeAreaInsets();
+
+  return (
+  <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
     <View style={styles.overlay}>
-      <View style={styles.sheet}>
+      <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
         <Pressable onPress={onClose} style={styles.closeButton}>
           <Ionicons color="#FF4A17" name="close" size={15} />
         </Pressable>
@@ -203,7 +225,8 @@ const ChoosePlanSheet = ({
       </View>
     </View>
   </Modal>
-);
+  );
+};
 
 type PauseSubscriptionSheetProps = {
   onClose: () => void;
@@ -216,6 +239,7 @@ const PauseSubscriptionSheet = ({
   onConfirm,
   visible,
 }: PauseSubscriptionSheetProps) => {
+  const insets = useSafeAreaInsets();
   const options = useMemo(
     () => [
       {
@@ -246,9 +270,10 @@ const PauseSubscriptionSheet = ({
   );
 
   return (
-    <Modal animationType="slide" transparent visible={visible}>
+    <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
       <View style={styles.overlay}>
-        <View style={styles.pauseSheet}>
+        <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+        <View style={[styles.pauseSheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
           <Pressable onPress={onClose} style={styles.pauseCloseButton}>
             <Ionicons color="#837D77" name="close" size={14} />
           </Pressable>

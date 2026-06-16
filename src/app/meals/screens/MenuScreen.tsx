@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import {
@@ -283,12 +283,15 @@ const MealDetailSheet = ({
   onDecrement,
   onIncrement,
   quantity,
-}: MealDetailSheetProps) => (
-  <Modal animationType="slide" transparent visible={Boolean(meal)}>
+}: MealDetailSheetProps) => {
+  const insets = useSafeAreaInsets();
+
+  return (
+  <Modal animationType="slide" onRequestClose={onClose} transparent visible={Boolean(meal)}>
     <View style={styles.detailOverlay}>
       <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
       {meal ? (
-        <View style={styles.detailSheet}>
+        <View style={[styles.detailSheet, { paddingBottom: Math.max(insets.bottom + 18, 28) }]}>
           <Image source={{ uri: meal.imageUrl }} style={styles.detailImage} />
           <View style={styles.detailBody}>
             <View style={styles.detailTitleRow}>
@@ -328,7 +331,8 @@ const MealDetailSheet = ({
       ) : null}
     </View>
   </Modal>
-);
+  );
+};
 
 const NutritionCard = ({
   icon,
@@ -356,8 +360,11 @@ export const CartBar = ({
   label: string;
   onPress: () => void;
   total: number;
-}) => (
-  <Pressable onPress={onPress} style={styles.cartBar}>
+}) => {
+  const insets = useSafeAreaInsets();
+
+  return (
+  <Pressable onPress={onPress} style={[styles.cartBar, { bottom: Math.max(insets.bottom + 10, 10) }]}>
     <View style={styles.cartBarLeft}>
       <View style={styles.cartIconBubble}>
         <Ionicons color="#FFFFFF" name="cart-outline" size={18} />
@@ -369,7 +376,8 @@ export const CartBar = ({
     </View>
     <Text style={styles.cartTotal}>{formatNaira(total)}</Text>
   </Pressable>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   activeOutlineChip: {
@@ -407,7 +415,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 9,
-    bottom: 10,
     flexDirection: "row",
     height: 53,
     justifyContent: "space-between",

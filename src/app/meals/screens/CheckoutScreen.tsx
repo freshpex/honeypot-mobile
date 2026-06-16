@@ -13,8 +13,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { PaginationControls } from "@/components";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { EmptyState, PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import {
   DELIVERY_FEE,
@@ -88,92 +88,120 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.screen}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <SectionLabel icon="location-outline" title="Delivery Location" />
-          {addressPagination.pageItems.map((address) => (
-            <SelectableRow
-              key={address.id}
-              active={address.id === effectiveAddressId}
-              icon="location-outline"
-              onPress={() => setSelectedAddressId(address.id)}
-              subtitle={`${address.address}, ${address.city}`}
-              tint="#FFE8DF"
-              title={address.label}
+          {itemCount === 0 ? (
+            <EmptyState
+              actionLabel="Browse Meals"
+              icon="cart-outline"
+              message="Add meals to your cart before checking out."
+              onActionPress={() => navigation.navigate("Menu")}
+              title="Your cart is empty"
             />
-          ))}
-          <PaginationControls
-            canGoNext={addressPagination.canGoNext}
-            canGoPrevious={addressPagination.canGoPrevious}
-            onNext={addressPagination.goNext}
-            onPrevious={addressPagination.goPrevious}
-            page={addressPagination.page}
-            totalPages={addressPagination.totalPages}
-          />
-          <Pressable onPress={() => setAddressSheetOpen(true)} style={styles.addLocationRow}>
-            <Text style={styles.plus}>＋</Text>
-            <Text style={styles.addLocationText}>
-              {addresses.length ? "Add another location" : "Add new location"}
-            </Text>
-          </Pressable>
+          ) : (
+            <>
+              <SectionLabel icon="location-outline" title="Delivery Location" />
+              {addressPagination.pageItems.map((address) => (
+                <SelectableRow
+                  key={address.id}
+                  active={address.id === effectiveAddressId}
+                  icon="location-outline"
+                  onPress={() => setSelectedAddressId(address.id)}
+                  subtitle={`${address.address}, ${address.city}`}
+                  tint="#FFE8DF"
+                  title={address.label}
+                />
+              ))}
+              <PaginationControls
+                canGoNext={addressPagination.canGoNext}
+                canGoPrevious={addressPagination.canGoPrevious}
+                onNext={addressPagination.goNext}
+                onPrevious={addressPagination.goPrevious}
+                page={addressPagination.page}
+                totalPages={addressPagination.totalPages}
+              />
+              <Pressable onPress={() => setAddressSheetOpen(true)} style={styles.addLocationRow}>
+                <Text style={styles.plus}>＋</Text>
+                <Text style={styles.addLocationText}>
+                  {addresses.length ? "Add another location" : "Add new location"}
+                </Text>
+              </Pressable>
 
-          <SectionLabel icon="card-outline" title="Payment Method" />
-          <SelectableRow
-            active={false}
-            disabled
-            icon="wallet-outline"
-            onPress={() => undefined}
-            rightText="Soon"
-            subtitle="Wallet payments are coming soon"
-            tint="#FFF4D8"
-            title="HoneyPot Wallet"
-          />
-          {cardPagination.pageItems.map((card) => (
-            <SelectableRow
-              key={card.id}
-              active={card.id === effectiveCardId}
-              icon="card-outline"
-              onPress={() => setSelectedCardId(card.id)}
-              subtitle={`${card.holderName} · Expires ${card.expiry}`}
-              tint="#EBF7FF"
-              title={`Debit / Credit Card •••• ${card.last4}`}
-            />
-          ))}
-          <PaginationControls
-            canGoNext={cardPagination.canGoNext}
-            canGoPrevious={cardPagination.canGoPrevious}
-            onNext={cardPagination.goNext}
-            onPrevious={cardPagination.goPrevious}
-            page={cardPagination.page}
-            totalPages={cardPagination.totalPages}
-          />
-          <Pressable onPress={() => setCardSheetOpen(true)} style={styles.manageRow}>
-            <Text style={styles.plus}>＋</Text>
-            <Text style={styles.manageText}>
-              {cards.length ? "Add new payment card" : "Add payment card"}
-            </Text>
-            <Ionicons color="#8B8580" name="chevron-forward" size={15} />
-          </Pressable>
+              <SectionLabel icon="card-outline" title="Payment Method" />
+              <SelectableRow
+                active={false}
+                disabled
+                icon="wallet-outline"
+                onPress={() => undefined}
+                rightText="Soon"
+                subtitle="Wallet payments are coming soon"
+                tint="#FFF4D8"
+                title="HoneyPot Wallet"
+              />
+              {cardPagination.pageItems.map((card) => (
+                <SelectableRow
+                  key={card.id}
+                  active={card.id === effectiveCardId}
+                  icon="card-outline"
+                  onPress={() => setSelectedCardId(card.id)}
+                  subtitle={`${card.holderName} · Expires ${card.expiry}`}
+                  tint="#EBF7FF"
+                  title={`Debit / Credit Card •••• ${card.last4}`}
+                />
+              ))}
+              <PaginationControls
+                canGoNext={cardPagination.canGoNext}
+                canGoPrevious={cardPagination.canGoPrevious}
+                onNext={cardPagination.goNext}
+                onPrevious={cardPagination.goPrevious}
+                page={cardPagination.page}
+                totalPages={cardPagination.totalPages}
+              />
+              <Pressable
+                onPress={() => setCardSheetOpen((isOpen) => !isOpen)}
+                style={styles.manageRow}
+              >
+                <Text style={styles.plus}>＋</Text>
+                <Text style={styles.manageText}>
+                  {cards.length ? "Add new payment card" : "Add payment card"}
+                </Text>
+                <Ionicons
+                  color="#8B8580"
+                  name={cardSheetOpen ? "chevron-up" : "chevron-down"}
+                  size={15}
+                />
+              </Pressable>
+              {cardSheetOpen ? (
+                <InlineCardForm
+                  onCancel={() => setCardSheetOpen(false)}
+                  onSaved={(card) => {
+                    setSelectedCardId(card.id);
+                    setCardSheetOpen(false);
+                  }}
+                />
+              ) : null}
 
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Order Summary</Text>
-            <SummaryRow label="Subtotal" value={formatNaira(subtotal)} />
-            <SummaryRow label="Delivery Fee" value={formatNaira(DELIVERY_FEE)} />
-            <View style={styles.summaryDivider} />
-            <SummaryRow bold label="Total" value={formatNaira(total)} />
-          </View>
+              <View style={styles.summaryCard}>
+                <Text style={styles.summaryTitle}>Order Summary</Text>
+                <SummaryRow label="Subtotal" value={formatNaira(subtotal)} />
+                <SummaryRow label="Delivery Fee" value={formatNaira(DELIVERY_FEE)} />
+                <View style={styles.summaryDivider} />
+                <SummaryRow bold label="Total" value={formatNaira(total)} />
+              </View>
 
-          {!canConfirm ? (
-            <Text style={styles.validationText}>
-              Add a delivery location and select a saved card to place this order.
-            </Text>
-          ) : null}
+              {!canConfirm ? (
+                <Text style={styles.validationText}>
+                  Add a delivery location and select a saved card to place this order.
+                </Text>
+              ) : null}
 
-          <Pressable
-            disabled={!canConfirm}
-            onPress={handleConfirmOrder}
-            style={[styles.confirmButton, !canConfirm && styles.confirmButtonDisabled]}
-          >
-            <Text style={styles.confirmText}>Confirm Order — {formatNaira(total)}</Text>
-          </Pressable>
+              <Pressable
+                disabled={!canConfirm}
+                onPress={handleConfirmOrder}
+                style={[styles.confirmButton, !canConfirm && styles.confirmButtonDisabled]}
+              >
+                <Text style={styles.confirmText}>Confirm Order — {formatNaira(total)}</Text>
+              </Pressable>
+            </>
+          )}
         </ScrollView>
 
         {itemCount > 0 ? (
@@ -190,11 +218,6 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
         onClose={() => setAddressSheetOpen(false)}
         onSaved={(address) => setSelectedAddressId(address.id)}
         visible={addressSheetOpen}
-      />
-      <CardSheet
-        onClose={() => setCardSheetOpen(false)}
-        onSaved={(card) => setSelectedCardId(card.id)}
-        visible={cardSheetOpen}
       />
     </SafeAreaView>
   );
@@ -315,14 +338,12 @@ const AddressSheet = ({
   );
 };
 
-const CardSheet = ({
-  onClose,
+const InlineCardForm = ({
+  onCancel,
   onSaved,
-  visible,
 }: {
-  onClose: () => void;
+  onCancel: () => void;
   onSaved: (card: SavedCard) => void;
-  visible: boolean;
 }) => {
   const addCard = useCustomerStore((state) => state.addCard);
   const [cardNumber, setCardNumber] = useState("1234 5678 9012 3456");
@@ -341,11 +362,19 @@ const CardSheet = ({
       number: cardNumber,
     });
     onSaved(savedCard);
-    onClose();
   };
 
   return (
-    <BottomSheet onClose={onClose} title="Add Payment Card" visible={visible}>
+    <View style={styles.inlineCardForm}>
+      <View style={styles.inlineCardHeader}>
+        <View>
+          <Text style={styles.sheetTitle}>Add New Card</Text>
+          <Text style={styles.inlineCardSubtitle}>Securely save a card for checkout.</Text>
+        </View>
+        <View style={styles.soonPill}>
+          <Text style={styles.soonText}>Secure</Text>
+        </View>
+      </View>
       <SheetInput
         focused
         label="Card Number"
@@ -362,7 +391,7 @@ const CardSheet = ({
         <SheetInput label="CVV" onChangeText={setCvv} secureTextEntry value={cvv} />
       </View>
       <View style={styles.formActions}>
-        <Pressable onPress={onClose} style={styles.cancelButton}>
+        <Pressable onPress={onCancel} style={styles.cancelButton}>
           <Text style={styles.cancelText}>Cancel</Text>
         </Pressable>
         <Pressable
@@ -373,7 +402,7 @@ const CardSheet = ({
           <Text style={styles.saveText}>Save Card</Text>
         </Pressable>
       </View>
-    </BottomSheet>
+    </View>
   );
 };
 
@@ -388,21 +417,44 @@ const BottomSheet = ({
   title: string;
   visible: boolean;
 }) => (
-  <Modal animationType="slide" transparent visible={visible}>
+  <BottomSheetContent onClose={onClose} title={title} visible={visible}>
+    {children}
+  </BottomSheetContent>
+);
+
+const BottomSheetContent = ({
+  children,
+  onClose,
+  title,
+  visible,
+}: {
+  children: ReactNode;
+  onClose: () => void;
+  title: string;
+  visible: boolean;
+}) => {
+  const insets = useSafeAreaInsets();
+
+  return (
+  <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.sheetOverlay}
     >
-      <View style={styles.sheet}>
+      <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
         <Pressable onPress={onClose} style={styles.closeButton}>
           <Ionicons color="#837D77" name="close" size={14} />
         </Pressable>
         <Text style={styles.sheetTitle}>{title}</Text>
-        {children}
+        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          {children}
+        </ScrollView>
       </View>
     </KeyboardAvoidingView>
   </Modal>
-);
+  );
+};
 
 const SheetInput = ({
   focused,
@@ -546,13 +598,40 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 10,
   },
+  inlineCardForm: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderRadius: 12,
+    borderTopWidth: 1,
+    elevation: 5,
+    marginBottom: 17,
+    padding: 13,
+    ...skeuo.card,
+  },
+  inlineCardHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 2,
+  },
+  inlineCardSubtitle: {
+    color: "#817B75",
+    fontSize: 10,
+    marginTop: 3,
+  },
   manageRow: {
     alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#EEEAE6",
+    borderRadius: 9,
+    borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flexDirection: "row",
     gap: 8,
     height: 37,
     marginBottom: 17,
     paddingHorizontal: 12,
+    ...skeuo.card,
   },
   manageText: {
     color: "#817B75",

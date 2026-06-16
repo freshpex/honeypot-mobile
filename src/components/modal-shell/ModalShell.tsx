@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { skeuo } from "@/shared/theme";
 
 export type ModalShellProps = {
@@ -16,9 +17,13 @@ export const ModalShell = ({
   subtitle,
   testID,
   title = "Details",
-}: ModalShellProps) => (
+}: ModalShellProps) => {
+  const insets = useSafeAreaInsets();
+
+  return (
   <View style={styles.overlay}>
-    <View style={styles.sheet} testID={testID}>
+    {onClose ? <Pressable onPress={onClose} style={StyleSheet.absoluteFill} /> : null}
+    <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]} testID={testID}>
       <View style={styles.handle} />
       <View style={styles.header}>
         <View>
@@ -32,7 +37,8 @@ export const ModalShell = ({
       {children}
     </View>
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   closeButton: {

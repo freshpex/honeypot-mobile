@@ -1,17 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { skeuo } from "@/shared/theme";
 
 export type EmptyStateProps = {
   icon?: keyof typeof Ionicons.glyphMap;
   message?: string;
+  onActionPress?: () => void;
+  actionLabel?: string;
   testID?: string;
   title?: string;
 };
 
 export const EmptyState = ({
+  actionLabel,
   icon = "file-tray-outline",
   message = "When items are available, they will show up here.",
+  onActionPress,
   testID,
   title = "Nothing here yet",
 }: EmptyStateProps) => (
@@ -21,10 +25,34 @@ export const EmptyState = ({
     </View>
     <Text style={styles.title}>{title}</Text>
     <Text style={styles.message}>{message}</Text>
+    {actionLabel && onActionPress ? (
+      <Pressable onPress={onActionPress} style={styles.actionButton}>
+        <Text style={styles.actionText}>{actionLabel}</Text>
+      </Pressable>
+    ) : null}
   </View>
 );
 
 const styles = StyleSheet.create({
+  actionButton: {
+    alignItems: "center",
+    backgroundColor: "#FF4A17",
+    borderColor: "#FF8B68",
+    borderRadius: 9,
+    borderTopWidth: 1,
+    elevation: 6,
+    height: 38,
+    justifyContent: "center",
+    marginTop: 16,
+    minWidth: 138,
+    paddingHorizontal: 16,
+    ...skeuo.action,
+  },
+  actionText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "900",
+  },
   container: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

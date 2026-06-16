@@ -3,7 +3,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PaginationControls } from "@/components";
+import { EmptyState, PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import {
   DELIVERY_FEE,
@@ -32,58 +32,66 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.screen}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <Text style={styles.subtitle}>{itemCount} items</Text>
-          <View style={styles.itemList}>
-            {cartPagination.pageItems.map((item) => (
-              <View key={item.meal.id} style={styles.cartItem}>
-                <View style={styles.cartItemText}>
-                  <Text style={styles.itemName}>{item.meal.name}</Text>
-                  <Text style={styles.itemPrice}>{formatNaira(item.meal.price)}</Text>
-                </View>
-                <View style={styles.itemActions}>
-                  <Pressable
-                    onPress={() => decrementMeal(item.meal.id)}
-                    style={styles.roundButton}
-                  >
-                    <Text style={styles.roundButtonText}>−</Text>
-                  </Pressable>
-                  <Text style={styles.quantity}>{item.quantity}</Text>
-                  <Pressable
-                    onPress={() => incrementMeal(item.meal.id)}
-                    style={styles.roundButton}
-                  >
-                    <Text style={styles.roundButtonText}>+</Text>
-                  </Pressable>
-                  <Pressable onPress={() => removeMeal(item.meal.id)} style={styles.deleteButton}>
-                    <Ionicons color="#8B8580" name="trash-outline" size={15} />
-                  </Pressable>
-                </View>
-              </View>
-            ))}
-            <PaginationControls
-              canGoNext={cartPagination.canGoNext}
-              canGoPrevious={cartPagination.canGoPrevious}
-              onNext={cartPagination.goNext}
-              onPrevious={cartPagination.goPrevious}
-              page={cartPagination.page}
-              totalPages={cartPagination.totalPages}
+          {itemCount === 0 ? (
+            <EmptyState
+              actionLabel="Browse Meals"
+              icon="cart-outline"
+              message="Choose meals from the menu and they will appear here."
+              onActionPress={() => navigation.navigate("Menu")}
+              title="Your cart is empty"
             />
-          </View>
+          ) : (
+            <>
+              <Text style={styles.subtitle}>{itemCount} items</Text>
+              <View style={styles.itemList}>
+                {cartPagination.pageItems.map((item) => (
+                  <View key={item.meal.id} style={styles.cartItem}>
+                    <View style={styles.cartItemText}>
+                      <Text style={styles.itemName}>{item.meal.name}</Text>
+                      <Text style={styles.itemPrice}>{formatNaira(item.meal.price)}</Text>
+                    </View>
+                    <View style={styles.itemActions}>
+                      <Pressable
+                        onPress={() => decrementMeal(item.meal.id)}
+                        style={styles.roundButton}
+                      >
+                        <Text style={styles.roundButtonText}>−</Text>
+                      </Pressable>
+                      <Text style={styles.quantity}>{item.quantity}</Text>
+                      <Pressable
+                        onPress={() => incrementMeal(item.meal.id)}
+                        style={styles.roundButton}
+                      >
+                        <Text style={styles.roundButtonText}>+</Text>
+                      </Pressable>
+                      <Pressable onPress={() => removeMeal(item.meal.id)} style={styles.deleteButton}>
+                        <Ionicons color="#8B8580" name="trash-outline" size={15} />
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+                <PaginationControls
+                  canGoNext={cartPagination.canGoNext}
+                  canGoPrevious={cartPagination.canGoPrevious}
+                  onNext={cartPagination.goNext}
+                  onPrevious={cartPagination.goPrevious}
+                  page={cartPagination.page}
+                  totalPages={cartPagination.totalPages}
+                />
+              </View>
 
-          <View style={styles.summaryCard}>
-            <SummaryRow label="Subtotal" value={formatNaira(subtotal)} />
-            <SummaryRow label="Delivery Fee" value={formatNaira(DELIVERY_FEE)} />
-            <View style={styles.summaryDivider} />
-            <SummaryRow bold label="Total" value={formatNaira(total)} />
-          </View>
+              <View style={styles.summaryCard}>
+                <SummaryRow label="Subtotal" value={formatNaira(subtotal)} />
+                <SummaryRow label="Delivery Fee" value={formatNaira(DELIVERY_FEE)} />
+                <View style={styles.summaryDivider} />
+                <SummaryRow bold label="Total" value={formatNaira(total)} />
+              </View>
 
-          <Pressable
-            disabled={itemCount === 0}
-            onPress={() => navigation.navigate("Checkout")}
-            style={[styles.checkoutButton, itemCount === 0 && styles.disabledButton]}
-          >
-            <Text style={styles.checkoutText}>Proceed to Checkout — {formatNaira(total)}</Text>
-          </Pressable>
+              <Pressable onPress={() => navigation.navigate("Checkout")} style={styles.checkoutButton}>
+                <Text style={styles.checkoutText}>Proceed to Checkout — {formatNaira(total)}</Text>
+              </Pressable>
+            </>
+          )}
         </ScrollView>
 
         {itemCount > 0 ? (
