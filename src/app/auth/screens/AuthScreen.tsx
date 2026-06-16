@@ -1,4 +1,23 @@
-import { View } from "react-native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { AuthStackParamList } from "../types";
+import { LoginScreen } from "./LoginScreen";
+import { RegisterScreen } from "./RegisterScreen";
+import { ResetPasswordScreen } from "./ResetPasswordScreen";
 
-export const AuthScreen = () => <View />;
+const Stack = createNativeStackNavigator<AuthStackParamList>();
+
+export const AuthScreen = () => (
+  <Stack.Navigator
+    initialRouteName="Login"
+    screenOptions={{
+      animation: "fade",
+      contentStyle: { backgroundColor: "#FAF9F8" },
+      headerShown: false,
+    }}
+  >
+    <Stack.Screen component={LoginScreen} name="Login" />
+    <Stack.Screen component={RegisterScreen} name="Register" />
+    <Stack.Screen component={ResetPasswordScreen} name="ResetPassword" />
+  </Stack.Navigator>
+);
 

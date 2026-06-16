@@ -5,9 +5,40 @@
     "scheme": "honeypot",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./public/playstore-icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "plugins": ["expo-secure-store", "expo-notifications"]
+    "splash": {
+      "image": "./public/playstore-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAF9F8"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "icon": "./public/icon-20.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./public/ic_launcher_foreground.png",
+        "backgroundImage": "./public/ic_launcher_background.png"
+      }
+    },
+    "extra": {
+      "router": {
+        "root": "src/routes"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-notifications",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./public/playstore-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FAF9F8"
+        }
+      ]
+    ]
   }
 }
-
