@@ -14,7 +14,6 @@ type AuthScreenShellProps = PropsWithChildren<{
   iconName: keyof typeof Ionicons.glyphMap;
   subtitle: string;
   title: string;
-  variant?: "standard" | "reset";
 }>;
 
 export const AuthScreenShell = ({
@@ -22,7 +21,6 @@ export const AuthScreenShell = ({
   iconName,
   subtitle,
   title,
-  variant = "standard",
 }: AuthScreenShellProps) => (
   <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
     <KeyboardAvoidingView
@@ -32,10 +30,7 @@ export const AuthScreenShell = ({
     >
       <ScrollView
         alwaysBounceVertical={false}
-        contentContainerStyle={[
-          styles.scrollContent,
-          variant === "reset" ? styles.resetContent : styles.standardContent,
-        ]}
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -108,9 +103,6 @@ const styles = StyleSheet.create({
   keyboard: {
     flex: 1,
   },
-  resetContent: {
-    paddingTop: 72,
-  },
   safeArea: {
     backgroundColor: "#FAF9F8",
     flex: 1,
@@ -119,11 +111,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FAF9F8",
     flexGrow: 1,
+    justifyContent: "center",
     paddingBottom: 34,
     paddingHorizontal: 18,
-  },
-  standardContent: {
-    paddingTop: 30,
+    paddingTop: 34,
   },
   subtitle: {
     color: "#817B75",

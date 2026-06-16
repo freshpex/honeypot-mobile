@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -21,21 +22,33 @@ export const FormField = ({
   style,
   testID,
   ...inputProps
-}: FormFieldProps) => (
-  <View style={styles.wrapper} testID={testID}>
-    {label ? <Text style={styles.label}>{label}</Text> : null}
-    <View style={[styles.field, error && styles.fieldError]}>
-      {iconName ? <Ionicons color="#9D9A96" name={iconName} size={14} /> : null}
-      <TextInput
-        {...inputProps}
-        placeholderTextColor="#8E8A86"
-        selectionColor="#FF4A17"
-        style={[styles.input, style]}
-      />
+}: FormFieldProps) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <View style={styles.wrapper} testID={testID}>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
+      <View style={[styles.field, isFocused && styles.fieldFocused, error && styles.fieldError]}>
+        {iconName ? <Ionicons color="#9D9A96" name={iconName} size={14} /> : null}
+        <TextInput
+          {...inputProps}
+          onBlur={(event) => {
+            setIsFocused(false);
+            inputProps.onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            setIsFocused(true);
+            inputProps.onFocus?.(event);
+          }}
+          placeholderTextColor="#8E8A86"
+          selectionColor="#C8320D"
+          style={[styles.input, style]}
+        />
+      </View>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
-    {error ? <Text style={styles.error}>{error}</Text> : null}
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   error: {
@@ -60,6 +73,10 @@ const styles = StyleSheet.create({
   },
   fieldError: {
     borderColor: "#FF4A17",
+  },
+  fieldFocused: {
+    borderColor: "#C8320D",
+    borderWidth: 1,
   },
   input: {
     color: "#181817",

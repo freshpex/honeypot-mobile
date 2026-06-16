@@ -41,7 +41,6 @@ export const ResetPasswordScreen = ({ navigation }: ResetPasswordScreenProps) =>
       iconName="mail-outline"
       subtitle="We'll send you a link to reset it"
       title="Reset password"
-      variant="reset"
     >
       <View style={authScreenStyles.card}>
         <FormField

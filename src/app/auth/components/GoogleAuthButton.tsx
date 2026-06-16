@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
+    gap: 9,
     height: 35,
     justifyContent: "center",
     shadowColor: "#000000",
@@ -64,8 +65,8 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   googleMark: {
-    left: 73,
-    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
   },
   label: {
     color: "#161616",
