@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const CommunityTab = () => <View />;
+export const CommunityTab = () => <ModuleSurface icon="people-outline" title="Community" variant="tab" />;
 

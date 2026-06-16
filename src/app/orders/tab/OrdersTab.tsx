@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const OrdersTab = () => <View />;
+export const OrdersTab = () => <ModuleSurface icon="bag-handle-outline" title="Orders" variant="tab" />;
 

@@ -27,6 +27,3 @@ npm install
 cp .env.example .env
 npm run start
 ```
-
-No feature implementation has been added yet. The current files define the scalable folder boundaries for the app.
-

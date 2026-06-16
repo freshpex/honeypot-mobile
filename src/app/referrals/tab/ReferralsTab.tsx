@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const ReferralsTab = () => <View />;
+export const ReferralsTab = () => <ModuleSurface icon="share-social-outline" title="Referrals" variant="tab" />;
 

@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const CommunityModal = () => <View />;
+export const CommunityModal = () => <ModuleSurface icon="people-outline" title="Community" variant="sheet" />;
 

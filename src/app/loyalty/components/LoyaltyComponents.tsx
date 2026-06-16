@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const LoyaltyComponents = () => <View />;
+export const LoyaltyComponents = () => <ModuleSurface icon="gift-outline" title="Loyalty module" variant="card" />;
 

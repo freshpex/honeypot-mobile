@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const DashboardModal = () => <View />;
+export const DashboardModal = () => <ModuleSurface icon="home-outline" title="Dashboard details" variant="sheet" />;
 

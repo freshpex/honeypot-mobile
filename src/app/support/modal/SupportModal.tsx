@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const SupportModal = () => <View />;
+export const SupportModal = () => <ModuleSurface icon="help-circle-outline" title="Support" variant="sheet" />;
 

@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const ProfileTab = () => <View />;
+export const ProfileTab = () => <ModuleSurface icon="person-outline" title="Profile" variant="tab" />;
 

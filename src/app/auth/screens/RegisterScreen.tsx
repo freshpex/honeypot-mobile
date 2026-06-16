@@ -121,20 +121,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 14,
-    marginBottom: 18,
-    marginTop: 20,
+    marginBottom: 20,
+    marginTop: 22,
     width: "100%",
   },
   dividerText: {
     color: "#8D8781",
-    fontSize: 9,
-    lineHeight: 11,
+    fontSize: 11,
+    lineHeight: 14,
   },
   fieldGap: {
-    marginTop: 13,
+    marginTop: 15,
   },
   submitButton: {
-    marginTop: 13,
+    marginTop: 16,
     width: "100%",
   },
 });

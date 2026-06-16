@@ -54,11 +54,11 @@ const styles = StyleSheet.create({
   base: {
     alignItems: "center",
     backgroundColor: "#FF4A17",
-    borderRadius: 8,
+    borderRadius: 10,
     borderColor: "#FF7A52",
     borderTopWidth: 1,
     elevation: 6,
-    height: 35,
+    height: 44,
     justifyContent: "center",
     ...skeuo.action,
   },
@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   label: {
-    fontSize: 11,
-    fontWeight: "700",
+    fontSize: 13,
+    fontWeight: "800",
   },
   pressed: {
     opacity: 0.9,

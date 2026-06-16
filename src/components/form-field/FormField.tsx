@@ -34,7 +34,7 @@ export const FormField = ({
     <View style={styles.wrapper} testID={testID}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <View style={[styles.field, isFocused && styles.fieldFocused, error && styles.fieldError]}>
-        {iconName ? <Ionicons color="#9D9A96" name={iconName} size={14} /> : null}
+        {iconName ? <Ionicons color="#8F8983" name={iconName} size={17} /> : null}
         <TextInput
           {...inputProps}
           secureTextEntry={secureTextEntry}
@@ -59,7 +59,7 @@ export const FormField = ({
             <Ionicons
               color="#8E8A86"
               name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
-              size={16}
+              size={19}
             />
           </Pressable>
         ) : null}
@@ -72,26 +72,26 @@ export const FormField = ({
 const styles = StyleSheet.create({
   error: {
     color: "#D33B14",
-    fontSize: 10,
-    marginTop: 4,
+    fontSize: 11,
+    marginTop: 5,
   },
   eyeButton: {
     alignItems: "center",
-    height: 28,
+    height: 34,
     justifyContent: "center",
-    width: 24,
+    width: 30,
   },
   field: {
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.86)",
     borderColor: "#DEDAD6",
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
     elevation: 2,
     flexDirection: "row",
-    gap: 10,
-    height: 35,
-    paddingHorizontal: 12,
+    gap: 11,
+    height: 44,
+    paddingHorizontal: 14,
     ...skeuo.pressed,
   },
   fieldError: {
@@ -104,15 +104,15 @@ const styles = StyleSheet.create({
   input: {
     color: "#181817",
     flex: 1,
-    fontSize: 11,
+    fontSize: 14,
     height: "100%",
     padding: 0,
   },
   label: {
     color: "#191817",
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "700",
-    marginBottom: 8,
+    marginBottom: 9,
   },
   wrapper: {
     width: "100%",

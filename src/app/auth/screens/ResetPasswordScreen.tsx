@@ -75,17 +75,17 @@ const styles = StyleSheet.create({
   },
   backLinkText: {
     color: "#FF4A17",
-    fontSize: 11,
-    fontWeight: "500",
+    fontSize: 13,
+    fontWeight: "700",
   },
   submitButton: {
-    marginTop: 13,
+    marginTop: 16,
     width: "100%",
   },
   successText: {
     color: "#2F7D32",
-    fontSize: 10,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 12,
     textAlign: "center",
   },

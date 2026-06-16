@@ -1,4 +1,6 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const SubscriptionsModal = () => <View />;
+export const SubscriptionsModal = () => (
+  <ModuleSurface icon="calendar-outline" title="Subscription" variant="sheet" />
+);
 

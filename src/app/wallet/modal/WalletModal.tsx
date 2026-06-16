@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const WalletModal = () => <View />;
+export const WalletModal = () => <ModuleSurface icon="wallet-outline" title="Wallet coming soon" variant="sheet" />;
 

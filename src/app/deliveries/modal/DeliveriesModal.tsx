@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const DeliveriesModal = () => <View />;
+export const DeliveriesModal = () => <ModuleSurface icon="car-outline" title="Delivery details" variant="sheet" />;
 

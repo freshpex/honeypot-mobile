@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const AuthTab = () => <View />;
+export const AuthTab = () => <ModuleSurface icon="log-in-outline" title="Auth" variant="tab" />;
 

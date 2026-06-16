@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const ProfileComponents = () => <View />;
+export const ProfileComponents = () => <ModuleSurface icon="person-outline" title="Profile module" variant="card" />;
 

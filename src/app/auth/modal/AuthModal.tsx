@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const AuthModal = () => <View />;
+export const AuthModal = () => <ModuleSurface icon="log-in-outline" title="Authentication" variant="sheet" />;
 

@@ -52,10 +52,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.88)",
     borderColor: "#DEDAD6",
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
     elevation: 3,
-    height: 35,
+    height: 44,
     justifyContent: "center",
     ...skeuo.card,
     width: "100%",
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   },
   label: {
     color: "#161616",
-    fontSize: 11,
-    fontWeight: "600",
+    fontSize: 13,
+    fontWeight: "700",
   },
   pressed: {
     opacity: 0.9,

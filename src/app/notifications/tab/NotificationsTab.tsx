@@ -1,4 +1,6 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const NotificationsTab = () => <View />;
+export const NotificationsTab = () => (
+  <ModuleSurface icon="notifications-outline" title="Notifications" variant="tab" />
+);
 

@@ -1,4 +1,6 @@
-import { View } from "react-native";
+import { ModuleSurface } from "@/components";
 
-export const PersonalizationTab = () => <View />;
+export const PersonalizationTab = () => (
+  <ModuleSurface icon="options-outline" title="Personalization" variant="tab" />
+);
 

@@ -25,7 +25,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./public/ic_launcher_foreground.png",
         "backgroundImage": "./public/ic_launcher_background.png"
-      }
+      },
+      "package": "com.honeypot.mobile"
     },
     "extra": {
       "router": {
