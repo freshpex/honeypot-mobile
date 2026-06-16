@@ -22,6 +22,8 @@ export type SavedCard = {
 export type CustomerOrder = {
   id: string;
   date: string;
+  deliveryAddress: DeliveryAddress;
+  paymentCardLast4?: string;
   status: "Confirmed" | "Delivered" | "Cancelled";
   type: "One Off";
   total: number;
@@ -35,8 +37,8 @@ type CustomerState = {
   dietaryPreferences: string[];
   allergies: string;
   orders: CustomerOrder[];
-  addAddress: (address: Omit<DeliveryAddress, "id">) => void;
-  addCard: (card: Omit<SavedCard, "id" | "brand" | "last4"> & { number: string }) => void;
+  addAddress: (address: Omit<DeliveryAddress, "id">) => DeliveryAddress;
+  addCard: (card: Omit<SavedCard, "id" | "brand" | "last4"> & { number: string }) => SavedCard;
   addOrder: (order: Omit<CustomerOrder, "id" | "date" | "status">) => CustomerOrder;
   removeAddress: (addressId: string) => void;
   removeCard: (cardId: string) => void;
@@ -59,26 +61,29 @@ export const useCustomerStore = create<CustomerState>((set) => ({
   ],
   dietaryPreferences: ["High Protein"],
   orders: [],
-  addAddress: (address) =>
+  addAddress: (address) => {
+    const newAddress = { ...address, id: `addr-${Date.now()}` };
     set((state) => ({
       addresses: [
         ...state.addresses.map((item) => ({ ...item, isDefault: false })),
-        { ...address, id: `addr-${Date.now()}` },
+        newAddress,
       ],
-    })),
-  addCard: (card) =>
+    }));
+    return newAddress;
+  },
+  addCard: (card) => {
+    const newCard: SavedCard = {
+      brand: "Mastercard",
+      expiry: card.expiry,
+      holderName: card.holderName,
+      id: `card-${Date.now()}`,
+      last4: card.number.replace(/\s/g, "").slice(-4),
+    };
     set((state) => ({
-      cards: [
-        ...state.cards,
-        {
-          brand: "Mastercard",
-          expiry: card.expiry,
-          holderName: card.holderName,
-          id: `card-${Date.now()}`,
-          last4: card.number.replace(/\s/g, "").slice(-4),
-        },
-      ],
-    })),
+      cards: [...state.cards, newCard],
+    }));
+    return newCard;
+  },
   addOrder: (order) => {
     const newOrder: CustomerOrder = {
       ...order,

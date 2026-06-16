@@ -3,6 +3,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PaginationControls } from "@/components";
+import { usePagination } from "@/shared/hooks";
 import { useCustomerStore } from "@/shared/state";
 import type { ProfileStackParamList } from "../types";
 
@@ -17,6 +19,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
   const [holderName, setHolderName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
+  const cardPagination = usePagination(cards);
 
   const showForm = isAdding || !cards.length;
   const canSave = useMemo(
@@ -113,7 +116,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
         ) : (
           <>
             <View style={styles.cardList}>
-              {cards.map((card) => (
+              {cardPagination.pageItems.map((card) => (
                 <View key={card.id} style={styles.savedCard}>
                   <View style={styles.mastercardBadge}>
                     <Text style={styles.mastercardText}>Mastercard</Text>
@@ -129,6 +132,14 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
                   </Pressable>
                 </View>
               ))}
+              <PaginationControls
+                canGoNext={cardPagination.canGoNext}
+                canGoPrevious={cardPagination.canGoPrevious}
+                onNext={cardPagination.goNext}
+                onPrevious={cardPagination.goPrevious}
+                page={cardPagination.page}
+                totalPages={cardPagination.totalPages}
+              />
             </View>
             <Pressable onPress={() => setIsAdding(true)} style={styles.addCardButton}>
               <Text style={styles.addCardText}>＋ Add new card</Text>

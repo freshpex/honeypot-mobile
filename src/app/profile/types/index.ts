@@ -6,5 +6,6 @@ export type ProfileStackParamList = {
   MyWallet: undefined;
   PaymentHistory: undefined;
   ReferralProgram: undefined;
+  Support: undefined;
 };
 

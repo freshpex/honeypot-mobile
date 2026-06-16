@@ -3,6 +3,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PaginationControls } from "@/components";
+import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
 import type { ProfileStackParamList } from "../types";
 
@@ -17,7 +19,10 @@ export const PaymentHistoryScreen = ({ navigation }: PaymentHistoryScreenProps) 
             amount: formatNaira(order.total),
             date: order.date,
             id: order.id,
-            method: order.paymentMethod,
+            method:
+              order.paymentMethod === "Card" && order.paymentCardLast4
+                ? `Card •••• ${order.paymentCardLast4}`
+                : order.paymentMethod,
             type: order.type,
           }))
         : [
@@ -25,12 +30,13 @@ export const PaymentHistoryScreen = ({ navigation }: PaymentHistoryScreenProps) 
               amount: "₦4,300",
               date: "Jun 16, 2026",
               id: "#HP-MQGX3ZJL",
-              method: "Wallet",
+              method: "Card •••• 5380",
               type: "One Off",
             },
           ],
     [orders],
   );
+  const historyPagination = usePagination(rows);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -43,7 +49,7 @@ export const PaymentHistoryScreen = ({ navigation }: PaymentHistoryScreenProps) 
         </View>
 
         <View style={styles.historyList}>
-          {rows.map((row) => (
+          {historyPagination.pageItems.map((row) => (
             <View key={row.id} style={styles.historyCard}>
               <View style={styles.historyHeader}>
                 <View>
@@ -64,6 +70,14 @@ export const PaymentHistoryScreen = ({ navigation }: PaymentHistoryScreenProps) 
               </View>
             </View>
           ))}
+          <PaginationControls
+            canGoNext={historyPagination.canGoNext}
+            canGoPrevious={historyPagination.canGoPrevious}
+            onNext={historyPagination.goNext}
+            onPrevious={historyPagination.goPrevious}
+            page={historyPagination.page}
+            totalPages={historyPagination.totalPages}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

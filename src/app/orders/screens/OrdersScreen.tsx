@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PaginationControls } from "@/components";
+import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
 
 export const OrdersScreen = () => {
@@ -42,6 +44,7 @@ export const OrdersScreen = () => {
           : [],
     [activeTab, visibleOrders],
   );
+  const orderPagination = usePagination(orderRows);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -68,7 +71,7 @@ export const OrdersScreen = () => {
 
         {orderRows.length ? (
           <View style={styles.orderList}>
-            {orderRows.map((order) => (
+            {orderPagination.pageItems.map((order) => (
               <View key={order.id} style={styles.orderCard}>
                 <View style={styles.orderHeader}>
                   <View>
@@ -87,6 +90,14 @@ export const OrdersScreen = () => {
                 </View>
               </View>
             ))}
+            <PaginationControls
+              canGoNext={orderPagination.canGoNext}
+              canGoPrevious={orderPagination.canGoPrevious}
+              onNext={orderPagination.goNext}
+              onPrevious={orderPagination.goPrevious}
+              page={orderPagination.page}
+              totalPages={orderPagination.totalPages}
+            />
           </View>
         ) : (
           <View style={styles.emptyState}>

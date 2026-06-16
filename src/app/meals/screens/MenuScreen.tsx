@@ -12,6 +12,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PaginationControls } from "@/components";
+import { usePagination } from "@/shared/hooks";
 import {
   formatNaira,
   getCartItemCount,
@@ -119,6 +121,7 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   );
   const cartCount = useMemo(() => getCartItemCount(cartItems), [cartItems]);
   const subtotal = useMemo(() => getCartSubtotal(cartItems), [cartItems]);
+  const mealPagination = usePagination(filteredMeals);
 
   const openMeal = (meal: Meal) => {
     setDetailQuantity(1);
@@ -155,9 +158,19 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
           contentContainerStyle={[styles.mealGrid, cartCount > 0 && styles.mealGridWithCart]}
           showsVerticalScrollIndicator={false}
         >
-          {filteredMeals.map((meal) => (
+          {mealPagination.pageItems.map((meal) => (
             <MealCard key={meal.id} meal={meal} onPress={() => openMeal(meal)} />
           ))}
+          <View style={styles.paginationWide}>
+            <PaginationControls
+              canGoNext={mealPagination.canGoNext}
+              canGoPrevious={mealPagination.canGoPrevious}
+              onNext={mealPagination.goNext}
+              onPrevious={mealPagination.goPrevious}
+              page={mealPagination.page}
+              totalPages={mealPagination.totalPages}
+            />
+          </View>
         </ScrollView>
 
         {cartCount > 0 ? (
@@ -606,6 +619,9 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "900",
     marginTop: 3,
+  },
+  paginationWide: {
+    width: "100%",
   },
   quantityButton: {
     alignItems: "center",

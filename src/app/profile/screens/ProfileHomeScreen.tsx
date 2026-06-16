@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PaginationControls } from "@/components";
+import { usePagination } from "@/shared/hooks";
 import { useCustomerStore } from "@/shared/state";
 import type { ProfileStackParamList } from "../types";
 
@@ -70,7 +72,7 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
         title: "Support Center",
         color: "#8F8A85",
         tint: "#F1EFED",
-        onPress: () => undefined,
+        onPress: () => navigation.navigate("Support"),
       },
     ] satisfies {
       color: string;
@@ -138,6 +140,7 @@ const AddressSheet = ({
   const addresses = useCustomerStore((state) => state.addresses);
   const addAddress = useCustomerStore((state) => state.addAddress);
   const removeAddress = useCustomerStore((state) => state.removeAddress);
+  const addressPagination = usePagination(addresses);
   const [label, setLabel] = useState("Home");
   const [phone, setPhone] = useState("09054531822");
   const [address, setAddress] = useState("12 Ikeja, Lagos");
@@ -181,7 +184,7 @@ const AddressSheet = ({
             <>
               {addresses.length ? (
                 <View style={styles.addressList}>
-                  {addresses.map((item) => (
+                  {addressPagination.pageItems.map((item) => (
                     <View key={item.id} style={styles.addressCard}>
                       <View style={styles.addressLeft}>
                         <Ionicons color="#FF4A17" name="location-outline" size={17} />
@@ -196,6 +199,14 @@ const AddressSheet = ({
                       </Pressable>
                     </View>
                   ))}
+                  <PaginationControls
+                    canGoNext={addressPagination.canGoNext}
+                    canGoPrevious={addressPagination.canGoPrevious}
+                    onNext={addressPagination.goNext}
+                    onPrevious={addressPagination.goPrevious}
+                    page={addressPagination.page}
+                    totalPages={addressPagination.totalPages}
+                  />
                 </View>
               ) : (
                 <View style={styles.emptyAddress}>

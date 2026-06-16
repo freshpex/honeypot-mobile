@@ -3,6 +3,8 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PaginationControls } from "@/components";
+import { usePagination } from "@/shared/hooks";
 import {
   DELIVERY_FEE,
   formatNaira,
@@ -23,6 +25,7 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
   const itemCount = useMemo(() => getCartItemCount(items), [items]);
   const subtotal = useMemo(() => getCartSubtotal(items), [items]);
   const total = subtotal + DELIVERY_FEE;
+  const cartPagination = usePagination(items);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -39,7 +42,7 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.itemList}>
-            {items.map((item) => (
+            {cartPagination.pageItems.map((item) => (
               <View key={item.meal.id} style={styles.cartItem}>
                 <View style={styles.cartItemText}>
                   <Text style={styles.itemName}>{item.meal.name}</Text>
@@ -65,6 +68,14 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
                 </View>
               </View>
             ))}
+            <PaginationControls
+              canGoNext={cartPagination.canGoNext}
+              canGoPrevious={cartPagination.canGoPrevious}
+              onNext={cartPagination.goNext}
+              onPrevious={cartPagination.goPrevious}
+              page={cartPagination.page}
+              totalPages={cartPagination.totalPages}
+            />
           </View>
 
           <View style={styles.summaryCard}>

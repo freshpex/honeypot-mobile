@@ -5,6 +5,7 @@ import { PaymentHistoryScreen } from "./PaymentHistoryScreen";
 import { PaymentMethodsScreen } from "./PaymentMethodsScreen";
 import { ProfileHomeScreen } from "./ProfileHomeScreen";
 import { ReferralProgramScreen } from "./ReferralProgramScreen";
+import { SupportScreen } from "@/app/support";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -22,5 +23,6 @@ export const ProfileScreen = () => (
     <Stack.Screen component={MyWalletScreen} name="MyWallet" />
     <Stack.Screen component={PaymentHistoryScreen} name="PaymentHistory" />
     <Stack.Screen component={ReferralProgramScreen} name="ReferralProgram" />
+    <Stack.Screen component={SupportScreen} name="Support" />
   </Stack.Navigator>
 );
