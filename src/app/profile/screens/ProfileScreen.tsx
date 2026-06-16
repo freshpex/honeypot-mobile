@@ -1,11 +1,12 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SupportScreen } from "@/app/support";
+import { AppHeader } from "@/components";
 import type { ProfileStackParamList } from "../types";
 import { MyWalletScreen } from "./MyWalletScreen";
 import { PaymentHistoryScreen } from "./PaymentHistoryScreen";
 import { PaymentMethodsScreen } from "./PaymentMethodsScreen";
 import { ProfileHomeScreen } from "./ProfileHomeScreen";
 import { ReferralProgramScreen } from "./ReferralProgramScreen";
-import { SupportScreen } from "@/app/support";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -15,7 +16,13 @@ export const ProfileScreen = () => (
     screenOptions={{
       animation: "slide_from_right",
       contentStyle: { backgroundColor: "#FAF9F8" },
-      headerShown: false,
+      header: ({ route }) => (
+        <AppHeader
+          canGoBack={route.name !== "ProfileHome"}
+          title={profileTitles[route.name as keyof ProfileStackParamList]}
+        />
+      ),
+      headerShown: true,
     }}
   >
     <Stack.Screen component={ProfileHomeScreen} name="ProfileHome" />
@@ -26,3 +33,12 @@ export const ProfileScreen = () => (
     <Stack.Screen component={SupportScreen} name="Support" />
   </Stack.Navigator>
 );
+
+const profileTitles: Record<keyof ProfileStackParamList, string> = {
+  MyWallet: "My Wallet",
+  PaymentHistory: "Payment History",
+  PaymentMethods: "Payment Methods",
+  ProfileHome: "Profile",
+  ReferralProgram: "Referral Program",
+  Support: "Support",
+};

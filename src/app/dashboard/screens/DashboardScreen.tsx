@@ -88,16 +88,13 @@ export const DashboardScreen = () => {
   );
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.greeting}>Good morning</Text>
             <Text style={styles.name}>Hello, Enoch</Text>
           </View>
-          <Pressable onPress={() => navigation.navigate("Notifications")} style={styles.bell}>
-            <Ionicons color="#302A26" name="notifications-outline" size={20} />
-          </Pressable>
         </View>
 
         <Pressable onPress={() => navigation.navigate("Plan")} style={styles.statusCard}>

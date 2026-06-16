@@ -86,7 +86,7 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
   );
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>

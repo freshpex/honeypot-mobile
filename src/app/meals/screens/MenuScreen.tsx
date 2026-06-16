@@ -129,11 +129,8 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.content}>
-        <Text style={styles.title}>Menu</Text>
-        <Text style={styles.subtitle}>Browse our healthy meals</Text>
-
         <View style={styles.searchBox}>
           <Ionicons color="#8A847F" name="search-outline" size={15} />
           <TextInput

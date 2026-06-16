@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
@@ -39,15 +39,8 @@ export const PaymentHistoryScreen = ({ navigation }: PaymentHistoryScreenProps) 
   const historyPagination = usePagination(rows);
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons color="#171513" name="arrow-back" size={17} />
-          </Pressable>
-          <Text style={styles.title}>Payment History</Text>
-        </View>
-
         <View style={styles.historyList}>
           {historyPagination.pageItems.map((row) => (
             <View key={row.id} style={styles.historyCard}>

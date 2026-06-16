@@ -1,20 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const NotificationsScreen = () => {
-  const navigation = useNavigation();
-
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons color="#171513" name="arrow-back" size={18} />
-        </Pressable>
-        <Text style={styles.title}>Notifications</Text>
-      </View>
-
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.emptyState}>
         <Ionicons color="#D1CDC9" name="notifications-outline" size={34} />
         <Text style={styles.emptyText}>No notifications yet</Text>

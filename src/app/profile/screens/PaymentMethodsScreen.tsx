@@ -40,15 +40,8 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons color="#171513" name="arrow-back" size={17} />
-          </Pressable>
-          <Text style={styles.title}>Payment Methods</Text>
-        </View>
-
         <Pressable onPress={() => navigation.navigate("MyWallet")} style={styles.walletCard}>
           <View style={styles.walletIcon}>
             <Ionicons color="#FFFFFF" name="wallet-outline" size={20} />

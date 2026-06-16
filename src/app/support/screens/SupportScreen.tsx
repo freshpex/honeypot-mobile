@@ -45,15 +45,8 @@ export const SupportScreen = ({ navigation }: SupportScreenProps) => {
   const faqPagination = usePagination(faqItems);
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons color="#171513" name="arrow-back" size={17} />
-          </Pressable>
-          <Text style={styles.title}>Support</Text>
-        </View>
-
         <View style={styles.contactRow}>
           <Pressable
             onPress={() => Linking.openURL("https://wa.me/2349054531822")}

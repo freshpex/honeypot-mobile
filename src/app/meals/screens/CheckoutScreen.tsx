@@ -84,15 +84,8 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.screen}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons color="#171513" name="arrow-back" size={17} />
-          </Pressable>
-          <Text style={styles.title}>Checkout</Text>
-        </View>
-
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <SectionLabel icon="location-outline" title="Delivery Location" />
           {addressPagination.pageItems.map((address) => (

@@ -47,11 +47,8 @@ export const OrdersScreen = () => {
   const orderPagination = usePagination(orderRows);
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.content}>
-        <Text style={styles.title}>Orders</Text>
-        <Text style={styles.subtitle}>Track your meal orders</Text>
-
         <View style={styles.segment}>
           {tabs.map((tab) => {
             const isActive = activeTab === tab;

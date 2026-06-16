@@ -16,15 +16,8 @@ export const MyWalletScreen = ({ navigation }: MyWalletScreenProps) => {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons color="#171513" name="arrow-back" size={17} />
-          </Pressable>
-          <Text style={styles.title}>My Wallet</Text>
-        </View>
-
         <View style={styles.fundCard}>
           <View style={styles.fundHeader}>
             <Ionicons color="#FFFFFF" name="wallet-outline" size={18} />

@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { AppHeader } from "@/components";
 import type { MealsStackParamList } from "../types";
 import { CartScreen } from "./CartScreen";
 import { CheckoutScreen } from "./CheckoutScreen";
@@ -12,7 +13,13 @@ export const MealsScreen = () => (
     screenOptions={{
       animation: "slide_from_right",
       contentStyle: { backgroundColor: "#FAF9F8" },
-      headerShown: false,
+      header: ({ route }) => (
+        <AppHeader
+          canGoBack={route.name !== "Menu"}
+          title={mealTitles[route.name as keyof MealsStackParamList]}
+        />
+      ),
+      headerShown: true,
     }}
   >
     <Stack.Screen component={MenuScreen} name="Menu" />
@@ -20,3 +27,9 @@ export const MealsScreen = () => (
     <Stack.Screen component={CheckoutScreen} name="Checkout" />
   </Stack.Navigator>
 );
+
+const mealTitles: Record<keyof MealsStackParamList, string> = {
+  Cart: "Cart",
+  Checkout: "Checkout",
+  Menu: "Menu",
+};

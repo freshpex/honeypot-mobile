@@ -28,19 +28,10 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
   const cartPagination = usePagination(items);
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.screen}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons color="#171513" name="arrow-back" size={17} />
-          </Pressable>
-          <View>
-            <Text style={styles.title}>Cart</Text>
-            <Text style={styles.subtitle}>{itemCount} items</Text>
-          </View>
-        </View>
-
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <Text style={styles.subtitle}>{itemCount} items</Text>
           <View style={styles.itemList}>
             {cartPagination.pageItems.map((item) => (
               <View key={item.meal.id} style={styles.cartItem}>

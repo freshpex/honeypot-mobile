@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AuthScreen } from "@/app/auth";
 import { NotificationsScreen } from "@/app/notifications";
+import { AppHeader } from "@/components";
 import { AppTabs } from "./AppTabs";
 
 export type RootStackParamList = {
@@ -22,6 +23,13 @@ export const RootNavigator = () => (
   >
     <Stack.Screen component={AppTabs} name="Main" />
     <Stack.Screen component={AuthScreen} name="Auth" />
-    <Stack.Screen component={NotificationsScreen} name="Notifications" />
+    <Stack.Screen
+      component={NotificationsScreen}
+      name="Notifications"
+      options={{
+        header: () => <AppHeader canGoBack title="Notifications" />,
+        headerShown: true,
+      }}
+    />
   </Stack.Navigator>
 );

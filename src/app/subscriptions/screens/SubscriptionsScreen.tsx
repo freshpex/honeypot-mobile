@@ -70,11 +70,8 @@ export const SubscriptionsScreen = () => {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Subscription</Text>
-        <Text style={styles.subtitle}>Manage your meal plan</Text>
-
         <View style={styles.planCard}>
           <View style={styles.planHeader}>
             <View>

@@ -25,15 +25,8 @@ export const ReferralProgramScreen = ({ navigation }: ReferralProgramScreenProps
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.content}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons color="#171513" name="arrow-back" size={17} />
-          </Pressable>
-          <Text style={styles.title}>Referral Program</Text>
-        </View>
-
         <View style={styles.earnCard}>
           <Ionicons color="#FF4A17" name="share-social-outline" size={34} />
           <Text style={styles.earnTitle}>Share & Earn</Text>

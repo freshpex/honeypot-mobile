@@ -11,3 +11,4 @@ export * from "./notification-item";
 export * from "./modal-shell";
 export * from "./tab-bar";
 export * from "./pagination-controls";
+export * from "./app-header";
