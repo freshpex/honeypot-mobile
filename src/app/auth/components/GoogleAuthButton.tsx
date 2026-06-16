@@ -16,8 +16,10 @@ export const GoogleAuthButton = ({ disabled, onPress }: GoogleAuthButtonProps) =
       disabled && styles.disabled,
     ]}
   >
-    <GoogleLogo />
-    <Text style={styles.label}>Continue with Google</Text>
+    <View style={styles.contentRow}>
+      <GoogleLogo />
+      <Text style={styles.label}>Continue with Google</Text>
+    </View>
   </Pressable>
 );
 
@@ -51,8 +53,6 @@ const styles = StyleSheet.create({
     borderColor: "#DEDAD6",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    flexDirection: "row",
-    gap: 9,
     height: 35,
     justifyContent: "center",
     shadowColor: "#000000",
@@ -61,12 +61,18 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     width: "100%",
   },
+  contentRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
   disabled: {
     opacity: 0.75,
   },
   googleMark: {
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 9,
   },
   label: {
     color: "#161616",

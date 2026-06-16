@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Pressable,
   type TextInputProps,
   View,
 } from "react-native";
@@ -24,6 +25,9 @@ export const FormField = ({
   ...inputProps
 }: FormFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const hasPasswordToggle = Boolean(inputProps.secureTextEntry);
+  const secureTextEntry = hasPasswordToggle && !isPasswordVisible;
 
   return (
     <View style={styles.wrapper} testID={testID}>
@@ -32,6 +36,7 @@ export const FormField = ({
         {iconName ? <Ionicons color="#9D9A96" name={iconName} size={14} /> : null}
         <TextInput
           {...inputProps}
+          secureTextEntry={secureTextEntry}
           onBlur={(event) => {
             setIsFocused(false);
             inputProps.onBlur?.(event);
@@ -44,6 +49,19 @@ export const FormField = ({
           selectionColor="#C8320D"
           style={[styles.input, style]}
         />
+        {hasPasswordToggle ? (
+          <Pressable
+            hitSlop={10}
+            onPress={() => setIsPasswordVisible((currentValue) => !currentValue)}
+            style={styles.eyeButton}
+          >
+            <Ionicons
+              color="#8E8A86"
+              name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
+              size={16}
+            />
+          </Pressable>
+        ) : null}
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
@@ -55,6 +73,12 @@ const styles = StyleSheet.create({
     color: "#D33B14",
     fontSize: 10,
     marginTop: 4,
+  },
+  eyeButton: {
+    alignItems: "center",
+    height: 28,
+    justifyContent: "center",
+    width: 24,
   },
   field: {
     alignItems: "center",

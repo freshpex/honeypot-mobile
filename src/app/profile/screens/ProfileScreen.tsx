@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const ProfileScreen = () => {
+  const navigation = useNavigation<any>();
   const rows = useMemo(
     () => [
       {
@@ -88,7 +90,7 @@ export const ProfileScreen = () => {
           ))}
         </View>
 
-        <Pressable style={styles.logout}>
+        <Pressable onPress={() => navigation.getParent()?.navigate("Auth")} style={styles.logout}>
           <Ionicons color="#FF4A17" name="log-out-outline" size={15} />
           <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>
