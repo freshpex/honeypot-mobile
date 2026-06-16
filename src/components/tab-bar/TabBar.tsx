@@ -15,6 +15,11 @@ const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
   Orders: "cube-outline",
   Plan: "calendar-outline",
   Profile: "person-outline",
+  Overview: "speedometer-outline",
+  Users: "people-outline",
+  AdminOrders: "bag-handle-outline",
+  Logs: "document-text-outline",
+  Settings: "settings-outline",
 };
 
 const activeIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -23,6 +28,11 @@ const activeIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
   Orders: "cube",
   Plan: "calendar",
   Profile: "person",
+  Overview: "speedometer",
+  Users: "people",
+  AdminOrders: "bag-handle",
+  Logs: "document-text",
+  Settings: "settings",
 };
 
 export const TabBar = ({ descriptors, navigation, state, testID }: TabBarProps) => {

@@ -43,6 +43,7 @@ type CustomerState = {
   removeAddress: (addressId: string) => void;
   removeCard: (cardId: string) => void;
   saveDietaryPreferences: (preferences: string[], allergies: string) => void;
+  updateOrderStatus: (orderId: string, status: CustomerOrder["status"]) => void;
 };
 
 const createOrderId = () => `#HP-${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
@@ -100,4 +101,8 @@ export const useCustomerStore = create<CustomerState>((set) => ({
     set((state) => ({ cards: state.cards.filter((item) => item.id !== cardId) })),
   saveDietaryPreferences: (preferences, allergies) =>
     set({ allergies, dietaryPreferences: preferences }),
+  updateOrderStatus: (orderId, status) =>
+    set((state) => ({
+      orders: state.orders.map((order) => (order.id === orderId ? { ...order, status } : order)),
+    })),
 }));

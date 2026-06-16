@@ -13,13 +13,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
-import { useCustomerStore } from "@/shared/state";
+import { useAuthStore, useCustomerStore } from "@/shared/state";
 import { skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type ProfileHomeScreenProps = NativeStackScreenProps<ProfileStackParamList, "ProfileHome">;
 
 export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
+  const logout = useAuthStore((state) => state.logout);
   const [addressSheet, setAddressSheet] = useState<"list" | "form" | undefined>();
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
   const rows = useMemo(
@@ -114,7 +115,7 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
           ))}
         </View>
 
-        <Pressable onPress={() => navigation.getParent()?.getParent()?.navigate("Auth")} style={styles.logout}>
+        <Pressable onPress={logout} style={styles.logout}>
           <Ionicons color="#FF4A17" name="log-out-outline" size={15} />
           <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>

@@ -12,7 +12,7 @@ Expo React Native scaffold for the HoneyPot customer mobile app. This project is
 - Zustand
 - React Hook Form
 - Zod
-- NativeWind
+- React Native StyleSheet
 - Jest and React Native Testing Library
 
 ## Branches
