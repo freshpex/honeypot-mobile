@@ -3,6 +3,7 @@ import { AuthScreen } from "@/app/auth";
 import { NotificationsScreen } from "@/app/notifications";
 import { AppHeader } from "@/components";
 import { useAuthStore } from "@/shared/state";
+import { resolveThemeColor } from "@/shared/theme";
 import { AdminTabs } from "./AdminTabs";
 import { AppTabs } from "./AppTabs";
 
@@ -23,7 +24,7 @@ export const RootNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         animation: "fade",
-        contentStyle: { backgroundColor: "#FAF9F8" },
+        contentStyle: { backgroundColor: resolveThemeColor("#FAF9F8") },
         headerShown: false,
       }}
     >

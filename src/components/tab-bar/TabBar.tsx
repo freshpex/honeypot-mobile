@@ -3,7 +3,7 @@ import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type TabBarProps = Partial<BottomTabBarProps> & {
   testID?: string;
@@ -86,7 +86,7 @@ export const TabBar = ({ descriptors, navigation, state, testID }: TabBarProps) 
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   activeIconWrap: {
     backgroundColor: "#FFE8DF",
     borderColor: "#FFD0C0",

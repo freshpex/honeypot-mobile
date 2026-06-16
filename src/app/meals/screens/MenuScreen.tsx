@@ -20,7 +20,7 @@ import {
   getCartSubtotal,
   useMealCartStore,
 } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { Meal, MealsStackParamList } from "../types";
 
 type MenuScreenProps = NativeStackScreenProps<MealsStackParamList, "Menu">;
@@ -133,12 +133,12 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.content}>
         <View style={styles.searchBox}>
-          <Ionicons color="#8A847F" name="search-outline" size={15} />
+          <Ionicons color={resolveThemeColor("#8A847F")} name="search-outline" size={15} />
           <TextInput
             onChangeText={setQuery}
             placeholder="Search meals..."
-            placeholderTextColor="#8A847F"
-            selectionColor="#C8320D"
+            placeholderTextColor={resolveThemeColor("#8A847F")}
+            selectionColor={resolveThemeColor("#C8320D")}
             style={styles.searchInput}
             value={query}
           />
@@ -232,9 +232,9 @@ const FilterStrip = ({ activeValue, items, onChange, primary }: FilterStripProps
       })}
     </ScrollView>
     <View style={styles.scrollHint}>
-      <Ionicons color="#9B9691" name="caret-back" size={11} />
+      <Ionicons color={resolveThemeColor("#9B9691")} name="caret-back" size={11} />
       <View style={styles.scrollTrack} />
-      <Ionicons color="#9B9691" name="caret-forward" size={11} />
+      <Ionicons color={resolveThemeColor("#9B9691")} name="caret-forward" size={11} />
     </View>
   </View>
 );
@@ -320,7 +320,7 @@ const MealDetailSheet = ({
                 </Pressable>
               </View>
               <Pressable onPress={onAdd} style={styles.addButton}>
-                <Ionicons color="#FFFFFF" name="cart-outline" size={14} />
+                <Ionicons color={resolveThemeColor("#FFFFFF")} name="cart-outline" size={14} />
                 <Text style={styles.addButtonText}>
                   Add to Cart — {formatNaira(meal.price * quantity)}
                 </Text>
@@ -344,7 +344,7 @@ const NutritionCard = ({
   value: string;
 }) => (
   <View style={styles.nutritionCard}>
-    <Ionicons color="#FF4A17" name={icon} size={15} />
+    <Ionicons color={resolveThemeColor("#FF4A17")} name={icon} size={15} />
     <Text style={styles.nutritionValue}>{value}</Text>
     <Text style={styles.nutritionLabel}>{label}</Text>
   </View>
@@ -367,7 +367,7 @@ export const CartBar = ({
   <Pressable onPress={onPress} style={[styles.cartBar, { bottom: Math.max(insets.bottom + 10, 10) }]}>
     <View style={styles.cartBarLeft}>
       <View style={styles.cartIconBubble}>
-        <Ionicons color="#FFFFFF" name="cart-outline" size={18} />
+        <Ionicons color={resolveThemeColor("#FFFFFF")} name="cart-outline" size={18} />
       </View>
       <View>
         <Text style={styles.cartCount}>{count} {count === 1 ? "item" : "items"}</Text>
@@ -379,7 +379,7 @@ export const CartBar = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   activeOutlineChip: {
     backgroundColor: "#FFE8DF",
     borderColor: "#FF4A17",

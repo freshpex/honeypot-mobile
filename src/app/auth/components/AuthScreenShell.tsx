@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 type AuthScreenShellProps = PropsWithChildren<{
   iconName: keyof typeof Ionicons.glyphMap;
@@ -36,7 +36,7 @@ export const AuthScreenShell = ({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroIcon}>
-          <Ionicons color="#FFFFFF" name={iconName} size={20} />
+          <Ionicons color={resolveThemeColor("#FFFFFF")} name={iconName} size={20} />
         </View>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
@@ -46,7 +46,7 @@ export const AuthScreenShell = ({
   </SafeAreaView>
 );
 
-export const authScreenStyles = StyleSheet.create({
+export const authScreenStyles = createThemedStyleSheet({
   card: {
     backgroundColor: "rgba(255, 255, 255, 0.96)",
     borderColor: "#FFFFFF",
@@ -85,7 +85,7 @@ export const authScreenStyles = StyleSheet.create({
   },
 });
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   heroIcon: {
     alignItems: "center",
     backgroundColor: "#FF4A17",

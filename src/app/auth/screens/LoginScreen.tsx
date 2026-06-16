@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Button, FormField } from "@/components";
 import { demoUsers } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 import {
   AuthScreenShell,
   GoogleAuthButton,
@@ -114,7 +114,7 @@ const Divider = () => (
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   dividerLine: {
     backgroundColor: "#E6E2DE",
     flex: 1,

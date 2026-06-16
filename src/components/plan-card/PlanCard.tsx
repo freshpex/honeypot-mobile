@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type PlanCardProps = {
   isSelected?: boolean;
@@ -22,7 +22,7 @@ export const PlanCard = ({
   <Pressable onPress={onPress} style={[styles.card, isSelected && styles.selected]} testID={testID}>
     <View style={styles.left}>
       <View style={[styles.radio, isSelected && styles.radioSelected]}>
-        {isSelected ? <Ionicons color="#FFFFFF" name="checkmark" size={12} /> : null}
+        {isSelected ? <Ionicons color={resolveThemeColor("#FFFFFF")} name="checkmark" size={12} /> : null}
       </View>
       <View>
         <Text style={styles.name}>{name}</Text>
@@ -33,7 +33,7 @@ export const PlanCard = ({
   </Pressable>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   card: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

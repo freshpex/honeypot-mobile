@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
+import { createThemedStyleSheet } from "@/shared/theme";
 
 export type StatusBadgeProps = {
   label?: string;
@@ -12,7 +13,7 @@ export const StatusBadge = ({ label = "Active", testID, tone = "active" }: Statu
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   activeBadge: { backgroundColor: "#CFF8DF", borderColor: "#91E6B4" },
   activeText: { color: "#087A3B" },
   badge: {

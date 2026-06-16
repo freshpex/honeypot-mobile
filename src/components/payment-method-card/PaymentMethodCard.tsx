@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type PaymentMethodCardProps = {
   brand?: string;
@@ -26,7 +26,7 @@ export const PaymentMethodCard = ({
   >
     <View style={styles.left}>
       <View style={styles.iconWrap}>
-        <Ionicons color="#1A9BE8" name={brand as keyof typeof Ionicons.glyphMap} size={18} />
+        <Ionicons color={resolveThemeColor("#1A9BE8")} name={brand as keyof typeof Ionicons.glyphMap} size={18} />
       </View>
       <View>
         <Text style={styles.label}>{label}</Text>
@@ -39,7 +39,7 @@ export const PaymentMethodCard = ({
   </Pressable>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   card: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

@@ -1,9 +1,10 @@
 import { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { useAdminStore, useCustomerStore } from "@/shared/state";
 import type { AdminOrder, AdminOrderStatus } from "@/shared/state";
+import { createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminActionButton,
   AdminCard,
@@ -100,7 +101,7 @@ export const AdminOrdersScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   bottomRow: {
     alignItems: "center",
     flexDirection: "row",

@@ -3,7 +3,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Pressable, Share, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type ReferralProgramScreenProps = NativeStackScreenProps<ProfileStackParamList, "ReferralProgram">;
@@ -29,7 +29,7 @@ export const ReferralProgramScreen = (_props: ReferralProgramScreenProps) => {
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.content}>
         <View style={styles.earnCard}>
-          <Ionicons color="#FF4A17" name="share-social-outline" size={34} />
+          <Ionicons color={resolveThemeColor("#FF4A17")} name="share-social-outline" size={34} />
           <Text style={styles.earnTitle}>Share & Earn</Text>
           <Text style={styles.earnCopy}>
             Invite friends and both of you get ₦2,000 off your next order
@@ -40,7 +40,7 @@ export const ReferralProgramScreen = (_props: ReferralProgramScreenProps) => {
               <Text style={styles.codeText}>{REFERRAL_CODE}</Text>
             </View>
             <Pressable onPress={handleCopy} style={styles.copyButton}>
-              <Ionicons color="#FF4A17" name={copied ? "checkmark" : "copy-outline"} size={18} />
+              <Ionicons color={resolveThemeColor("#FF4A17")} name={copied ? "checkmark" : "copy-outline"} size={18} />
             </Pressable>
           </View>
         </View>
@@ -62,7 +62,7 @@ export const ReferralProgramScreen = (_props: ReferralProgramScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   backButton: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

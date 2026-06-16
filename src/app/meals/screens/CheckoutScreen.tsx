@@ -25,7 +25,7 @@ import {
   useMealCartStore,
 } from "@/shared/state";
 import type { DeliveryAddress, SavedCard } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { MealsStackParamList } from "../types";
 import { CartBar } from "./MenuScreen";
 
@@ -164,7 +164,7 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
                   {cards.length ? "Add new payment card" : "Add payment card"}
                 </Text>
                 <Ionicons
-                  color="#8B8580"
+                  color={resolveThemeColor("#8B8580")}
                   name={cardSheetOpen ? "chevron-up" : "chevron-down"}
                   size={15}
                 />
@@ -231,7 +231,7 @@ const SectionLabel = ({
   title: string;
 }) => (
   <Text style={styles.sectionLabel}>
-    <Ionicons color="#FF4A17" name={icon} size={13} /> {title}
+    <Ionicons color={resolveThemeColor("#FF4A17")} name={icon} size={13} /> {title}
   </Text>
 );
 
@@ -259,8 +259,12 @@ const SelectableRow = ({
     onPress={onPress}
     style={[styles.paymentOption, active && styles.paymentOptionActive, disabled && styles.disabledRow]}
   >
-    <View style={[styles.paymentIcon, { backgroundColor: tint }]}>
-      <Ionicons color={icon === "wallet-outline" ? "#FFB020" : "#34A8F4"} name={icon} size={18} />
+    <View style={[styles.paymentIcon, { backgroundColor: resolveThemeColor(tint) }]}>
+      <Ionicons
+        color={resolveThemeColor(icon === "wallet-outline" ? "#FFB020" : "#34A8F4")}
+        name={icon}
+        size={18}
+      />
     </View>
     <View style={styles.paymentTextWrap}>
       <Text style={styles.paymentTitle}>{title}</Text>
@@ -444,7 +448,7 @@ const BottomSheetContent = ({
       <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
       <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
         <Pressable onPress={onClose} style={styles.closeButton}>
-          <Ionicons color="#837D77" name="close" size={14} />
+          <Ionicons color={resolveThemeColor("#837D77")} name="close" size={14} />
         </Pressable>
         <Text style={styles.sheetTitle}>{title}</Text>
         <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -474,7 +478,7 @@ const SheetInput = ({
     <TextInput
       onChangeText={onChangeText}
       secureTextEntry={secureTextEntry}
-      selectionColor="#C8320D"
+      selectionColor={resolveThemeColor("#C8320D")}
       style={[styles.sheetInput, focused && styles.sheetInputFocused]}
       value={value}
     />
@@ -496,7 +500,7 @@ const SummaryRow = ({
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   addLocationRow: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

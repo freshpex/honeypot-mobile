@@ -2,13 +2,12 @@ import type { PropsWithChildren } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  StyleSheet,
   Text,
   type PressableProps,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type ButtonProps = PropsWithChildren<
   PressableProps & {
@@ -50,7 +49,7 @@ export const Button = ({
   </Pressable>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   base: {
     alignItems: "center",
     backgroundColor: "#FF4A17",

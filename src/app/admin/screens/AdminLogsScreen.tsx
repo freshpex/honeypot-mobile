@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { useAdminStore } from "@/shared/state";
+import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminActionButton,
   AdminCard,
@@ -25,7 +26,7 @@ export const AdminLogsScreen = () => {
       <AdminCard>
         <View style={styles.exportRow}>
           <View style={styles.exportIcon}>
-            <Ionicons color="#FF4A17" name="download-outline" size={22} />
+            <Ionicons color={resolveThemeColor("#FF4A17")} name="download-outline" size={22} />
           </View>
           <View style={styles.exportTextWrap}>
             <Text style={styles.exportTitle}>Download all logs</Text>
@@ -71,7 +72,7 @@ export const AdminLogsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   actor: {
     color: "#817B75",
     fontSize: 11,

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type DeliveryStatusCardProps = {
   eta?: string;
@@ -19,7 +19,7 @@ export const DeliveryStatusCard = ({
 }: DeliveryStatusCardProps) => (
   <Pressable onPress={onPress} style={styles.card} testID={testID}>
     <View style={styles.iconWrap}>
-      <Ionicons color="#FF4A17" name="car-outline" size={22} />
+      <Ionicons color={resolveThemeColor("#FF4A17")} name="car-outline" size={22} />
     </View>
     <View style={styles.content}>
       <Text style={styles.title}>{title}</Text>
@@ -31,7 +31,7 @@ export const DeliveryStatusCard = ({
   </Pressable>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   badge: {
     backgroundColor: "#E8F7FF",
     borderColor: "#BFE8FF",

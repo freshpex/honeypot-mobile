@@ -16,7 +16,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { useAuthStore, useCustomerStore } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type ProfileHomeScreenProps = NativeStackScreenProps<ProfileStackParamList, "ProfileHome">;
@@ -105,20 +105,20 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
         <View style={styles.rows}>
           {rows.map((row) => (
             <Pressable key={row.title} onPress={row.onPress} style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: row.tint }]}>
-                <Ionicons color={row.color} name={row.icon} size={18} />
+              <View style={[styles.rowIcon, { backgroundColor: resolveThemeColor(row.tint) }]}>
+                <Ionicons color={resolveThemeColor(row.color)} name={row.icon} size={18} />
               </View>
               <View style={styles.rowTextWrap}>
                 <Text style={styles.rowTitle}>{row.title}</Text>
                 {row.subtitle ? <Text style={styles.rowSubtitle}>{row.subtitle}</Text> : null}
               </View>
-              <Ionicons color="#837D77" name="chevron-forward" size={17} />
+              <Ionicons color={resolveThemeColor("#837D77")} name="chevron-forward" size={17} />
             </Pressable>
           ))}
         </View>
 
         <Pressable onPress={logout} style={styles.logout}>
-          <Ionicons color="#FF4A17" name="log-out-outline" size={15} />
+          <Ionicons color={resolveThemeColor("#FF4A17")} name="log-out-outline" size={15} />
           <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>
       </ScrollView>
@@ -166,7 +166,7 @@ const AddressSheet = ({
         <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
         <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
           <Pressable onPress={onClose} style={styles.closeButton}>
-            <Ionicons color="#FF4A17" name="close" size={14} />
+            <Ionicons color={resolveThemeColor("#FF4A17")} name="close" size={14} />
           </Pressable>
           <Text style={styles.sheetTitle}>Delivery Addresses</Text>
           {mode === "form" ? (
@@ -196,7 +196,7 @@ const AddressSheet = ({
                   {addressPagination.pageItems.map((item) => (
                     <View key={item.id} style={styles.addressCard}>
                       <View style={styles.addressLeft}>
-                        <Ionicons color="#FF4A17" name="location-outline" size={17} />
+                        <Ionicons color={resolveThemeColor("#FF4A17")} name="location-outline" size={17} />
                         <View>
                           <Text style={styles.addressTitle}>{item.label} ★</Text>
                           <Text style={styles.addressText}>{item.address}</Text>
@@ -204,7 +204,7 @@ const AddressSheet = ({
                         </View>
                       </View>
                       <Pressable onPress={() => removeAddress(item.id)}>
-                        <Ionicons color="#8B8580" name="trash-outline" size={15} />
+                        <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={15} />
                       </Pressable>
                     </View>
                   ))}
@@ -219,7 +219,7 @@ const AddressSheet = ({
                 </View>
               ) : (
                 <View style={styles.emptyAddress}>
-                  <Ionicons color="#D1CDC9" name="location-outline" size={31} />
+                  <Ionicons color={resolveThemeColor("#D1CDC9")} name="location-outline" size={31} />
                   <Text style={styles.emptySheetText}>No addresses saved yet</Text>
                 </View>
               )}
@@ -261,7 +261,7 @@ const DietarySheet = ({ onClose, visible }: { onClose: () => void; visible: bool
         <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
         <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
           <Pressable onPress={onClose} style={styles.closeButton}>
-            <Ionicons color="#837D77" name="close" size={14} />
+            <Ionicons color={resolveThemeColor("#837D77")} name="close" size={14} />
           </Pressable>
           <Text style={styles.sheetTitle}>Dietary Preferences</Text>
           <Text style={styles.sheetSubtitle}>Help us personalize your meal suggestions</Text>
@@ -281,7 +281,7 @@ const DietarySheet = ({ onClose, visible }: { onClose: () => void; visible: bool
             multiline
             onChangeText={setAllergies}
             placeholder="List any food allergies (e.g. nuts, dairy, shellfish...)"
-            placeholderTextColor="#817B75"
+            placeholderTextColor={resolveThemeColor("#817B75")}
             style={styles.allergyInput}
             value={allergies}
           />
@@ -315,14 +315,14 @@ const LabeledInput = ({
     <Text style={styles.inputLabel}>{label}</Text>
     <TextInput
       onChangeText={onChangeText}
-      selectionColor="#C8320D"
+      selectionColor={resolveThemeColor("#C8320D")}
       style={[styles.sheetInput, focused && styles.sheetInputFocused]}
       value={value}
     />
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   addSheetButton: {
     alignItems: "center",
     borderColor: "#E8E2DD",

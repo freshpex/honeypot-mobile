@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSubscriptionStore } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export const DashboardScreen = () => {
   const navigation = useNavigation<any>();
@@ -114,13 +114,13 @@ export const DashboardScreen = () => {
               <Text style={styles.statusTitle}>{selectedPlan.name} Plan</Text>
             </View>
             <View style={styles.arrowBubble}>
-              <Ionicons color="#FF4A17" name="chevron-forward" size={18} />
+              <Ionicons color={resolveThemeColor("#FF4A17")} name="chevron-forward" size={18} />
             </View>
           </View>
 
           {isPaused ? (
             <View style={styles.pausedBanner}>
-              <Ionicons color="#F0A000" name="pause-outline" size={15} />
+              <Ionicons color={resolveThemeColor("#F0A000")} name="pause-outline" size={15} />
               <Text style={styles.pausedBannerText}>Paused until {pauseResumeDate}</Text>
             </View>
           ) : null}
@@ -128,7 +128,7 @@ export const DashboardScreen = () => {
           <View style={styles.homeStats}>
             {statusCards.map((card) => (
               <View key={card.label} style={styles.homeStatCard}>
-                <Ionicons color="#FF4A17" name={card.icon} size={15} />
+                <Ionicons color={resolveThemeColor("#FF4A17")} name={card.icon} size={15} />
                 <Text style={styles.homeStatValue}>{card.value}</Text>
                 <Text style={styles.homeStatLabel}>{card.label}</Text>
               </View>
@@ -149,8 +149,8 @@ export const DashboardScreen = () => {
                 }}
                 style={[styles.quickCard, isActive && styles.quickCardActive]}
               >
-                <View style={[styles.quickIcon, { backgroundColor: action.tint }]}>
-                  <Ionicons color={action.color} name={action.icon} size={21} />
+                <View style={[styles.quickIcon, { backgroundColor: resolveThemeColor(action.tint) }]}>
+                  <Ionicons color={resolveThemeColor(action.color)} name={action.icon} size={21} />
                 </View>
                 <Text style={styles.quickLabel}>{action.label}</Text>
               </Pressable>
@@ -160,7 +160,7 @@ export const DashboardScreen = () => {
 
         <Text style={styles.sectionTitle}>Upcoming Deliveries</Text>
         <View style={styles.emptyDelivery}>
-          <Ionicons color="#C9C5C1" name="car-outline" size={32} />
+          <Ionicons color={resolveThemeColor("#C9C5C1")} name="car-outline" size={32} />
           <Text style={styles.emptyText}>No upcoming deliveries</Text>
         </View>
       </ScrollView>
@@ -168,7 +168,7 @@ export const DashboardScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   activeBadge: {
     backgroundColor: "#CFF8DF",
   },

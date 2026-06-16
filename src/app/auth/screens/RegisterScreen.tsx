@@ -9,6 +9,7 @@ import {
 } from "../components";
 import { useAuth } from "../hooks";
 import type { AuthStackParamList } from "../types";
+import { createThemedStyleSheet } from "@/shared/theme";
 
 type RegisterScreenProps = NativeStackScreenProps<AuthStackParamList, "Register">;
 
@@ -111,7 +112,7 @@ const Divider = () => (
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   dividerLine: {
     backgroundColor: "#E6E2DE",
     flex: 1,

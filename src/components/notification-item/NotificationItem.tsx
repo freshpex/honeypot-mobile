@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { Text, View } from "react-native";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type NotificationItemProps = {
   message?: string;
@@ -17,7 +17,7 @@ export const NotificationItem = ({
 }: NotificationItemProps) => (
   <View style={styles.item} testID={testID}>
     <View style={styles.iconWrap}>
-      <Ionicons color="#FF4A17" name="notifications-outline" size={18} />
+      <Ionicons color={resolveThemeColor("#FF4A17")} name="notifications-outline" size={18} />
     </View>
     <View style={styles.content}>
       <View style={styles.topRow}>
@@ -33,7 +33,7 @@ export const NotificationItem = ({
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   content: {
     flex: 1,
   },

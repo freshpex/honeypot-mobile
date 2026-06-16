@@ -12,7 +12,7 @@ import {
   getCartSubtotal,
   useMealCartStore,
 } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { MealsStackParamList } from "../types";
 import { CartBar } from "./MenuScreen";
 
@@ -65,7 +65,7 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
                         <Text style={styles.roundButtonText}>+</Text>
                       </Pressable>
                       <Pressable onPress={() => removeMeal(item.meal.id)} style={styles.deleteButton}>
-                        <Ionicons color="#8B8580" name="trash-outline" size={15} />
+                        <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={15} />
                       </Pressable>
                     </View>
                   </View>
@@ -122,7 +122,7 @@ const SummaryRow = ({
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   backButton: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

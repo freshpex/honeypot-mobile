@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useAdminStore, useAuthStore } from "@/shared/state";
+import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminActionButton,
   AdminCard,
@@ -45,7 +46,7 @@ export const AdminSettingsScreen = () => {
       <AdminCard>
         <View style={styles.adminRow}>
           <View style={styles.adminIcon}>
-            <Ionicons color="#FF4A17" name="shield-checkmark-outline" size={22} />
+            <Ionicons color={resolveThemeColor("#FF4A17")} name="shield-checkmark-outline" size={22} />
           </View>
           <View style={styles.adminText}>
             <Text style={styles.settingTitle}>Admin session</Text>
@@ -59,7 +60,7 @@ export const AdminSettingsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   adminIcon: {
     alignItems: "center",
     backgroundColor: "#FFE8DF",

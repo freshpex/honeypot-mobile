@@ -13,7 +13,7 @@ import {
   type SubscriptionPlan,
   useSubscriptionStore,
 } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export const SubscriptionsScreen = () => {
   const {
@@ -89,7 +89,7 @@ export const SubscriptionsScreen = () => {
           <View style={styles.statsGrid}>
             {stats.map((stat) => (
               <View key={stat.label} style={styles.statCard}>
-                <Ionicons color="#FF4A17" name={stat.icon} size={18} />
+                <Ionicons color={resolveThemeColor("#FF4A17")} name={stat.icon} size={18} />
                 <Text style={styles.statValue}>{stat.value}</Text>
                 <Text style={styles.statLabel}>{stat.label}</Text>
               </View>
@@ -98,7 +98,7 @@ export const SubscriptionsScreen = () => {
 
           {isPaused ? (
             <View style={styles.pausedNotice}>
-              <Ionicons color="#F0A000" name="pause-outline" size={17} />
+              <Ionicons color={resolveThemeColor("#F0A000")} name="pause-outline" size={17} />
               <View>
                 <Text style={styles.pausedTitle}>Subscription Paused</Text>
                 <Text style={styles.pausedCopy}>Resumes on {pauseResumeDate}</Text>
@@ -109,18 +109,18 @@ export const SubscriptionsScreen = () => {
 
         {isPaused ? (
           <Pressable onPress={resume} style={styles.resumeButton}>
-            <Ionicons color="#FFFFFF" name="play-outline" size={14} />
+            <Ionicons color={resolveThemeColor("#FFFFFF")} name="play-outline" size={14} />
             <Text style={styles.resumeText}>Resume Subscription</Text>
           </Pressable>
         ) : (
           <Pressable onPress={() => setIsPauseSheetOpen(true)} style={styles.secondaryButton}>
-            <Ionicons color="#27231F" name="pause-outline" size={13} />
+            <Ionicons color={resolveThemeColor("#27231F")} name="pause-outline" size={13} />
             <Text style={styles.secondaryText}>Pause Subscription</Text>
           </Pressable>
         )}
 
         <Pressable onPress={() => setIsPlanSheetOpen(true)} style={styles.secondaryButton}>
-          <Ionicons color="#27231F" name={isInactive ? "grid-outline" : "arrow-up-outline"} size={13} />
+          <Ionicons color={resolveThemeColor("#27231F")} name={isInactive ? "grid-outline" : "arrow-up-outline"} size={13} />
           <Text style={styles.secondaryText}>{isInactive ? "View Plans" : "Upgrade Plan"}</Text>
         </Pressable>
       </ScrollView>
@@ -188,7 +188,7 @@ const ChoosePlanSheetContent = ({
       <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
       <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
         <Pressable onPress={onClose} style={styles.closeButton}>
-          <Ionicons color="#FF4A17" name="close" size={15} />
+          <Ionicons color={resolveThemeColor("#FF4A17")} name="close" size={15} />
         </Pressable>
         <Text style={styles.sheetTitle}>Choose a Plan</Text>
         <Text style={styles.sheetSubtitle}>Healthy meals. Delivered your way.</Text>
@@ -203,7 +203,7 @@ const ChoosePlanSheetContent = ({
               >
                 <View style={styles.planOptionLeft}>
                   <View style={[styles.radio, isSelected && styles.radioSelected]}>
-                    {isSelected ? <Ionicons color="#FFFFFF" name="checkmark" size={11} /> : null}
+                    {isSelected ? <Ionicons color={resolveThemeColor("#FFFFFF")} name="checkmark" size={11} /> : null}
                   </View>
                   <View>
                     <Text style={styles.optionName}>{plan.name}</Text>
@@ -275,10 +275,10 @@ const PauseSubscriptionSheet = ({
         <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
         <View style={[styles.pauseSheet, { paddingBottom: Math.max(insets.bottom + 12, 24) }]}>
           <Pressable onPress={onClose} style={styles.pauseCloseButton}>
-            <Ionicons color="#837D77" name="close" size={14} />
+            <Ionicons color={resolveThemeColor("#837D77")} name="close" size={14} />
           </Pressable>
           <View style={styles.pauseTitleRow}>
-            <Ionicons color="#F0A000" name="pause-outline" size={16} />
+            <Ionicons color={resolveThemeColor("#F0A000")} name="pause-outline" size={16} />
             <Text style={styles.sheetTitle}>Pause Subscription</Text>
           </View>
           <Text style={styles.pauseDescription}>
@@ -311,7 +311,7 @@ const PauseSubscriptionSheet = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   activeBadge: {
     backgroundColor: "#CFF8DF",
     borderColor: "#89E6AD",

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 type PaginationControlsProps = {
   canGoNext: boolean;
@@ -46,7 +46,7 @@ export const PaginationControls = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   button: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

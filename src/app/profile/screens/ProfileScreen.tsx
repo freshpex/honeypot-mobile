@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SupportScreen } from "@/app/support";
 import { AppHeader } from "@/components";
+import { resolveThemeColor } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 import { MyWalletScreen } from "./MyWalletScreen";
 import { PaymentHistoryScreen } from "./PaymentHistoryScreen";
@@ -15,7 +16,7 @@ export const ProfileScreen = () => (
     initialRouteName="ProfileHome"
     screenOptions={{
       animation: "slide_from_right",
-      contentStyle: { backgroundColor: "#FAF9F8" },
+      contentStyle: { backgroundColor: resolveThemeColor("#FAF9F8") },
       header: ({ route }) => (
         <AppHeader
           canGoBack={route.name !== "ProfileHome"}

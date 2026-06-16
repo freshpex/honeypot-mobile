@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type PaymentHistoryScreenProps = NativeStackScreenProps<ProfileStackParamList, "PaymentHistory">;
@@ -51,7 +51,7 @@ export const PaymentHistoryScreen = (_props: PaymentHistoryScreenProps) => {
                   <Text style={styles.orderType}>{row.type}</Text>
                 </View>
                 <View style={styles.paidPill}>
-                  <Ionicons color="#12B76A" name="checkmark" size={9} />
+                  <Ionicons color={resolveThemeColor("#12B76A")} name="checkmark" size={9} />
                   <Text style={styles.paidText}>Paid</Text>
                 </View>
               </View>
@@ -78,7 +78,7 @@ export const PaymentHistoryScreen = (_props: PaymentHistoryScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   amount: {
     color: "#171513",
     fontSize: 13,

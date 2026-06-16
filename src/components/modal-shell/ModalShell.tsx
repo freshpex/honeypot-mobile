@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type ModalShellProps = {
   onClose?: () => void;
@@ -31,7 +31,7 @@ export const ModalShell = ({
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
         <Pressable onPress={onClose} style={styles.closeButton}>
-          <Ionicons color="#FF4A17" name="close" size={16} />
+          <Ionicons color={resolveThemeColor("#FF4A17")} name="close" size={16} />
         </Pressable>
       </View>
       {children}
@@ -40,7 +40,7 @@ export const ModalShell = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   closeButton: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

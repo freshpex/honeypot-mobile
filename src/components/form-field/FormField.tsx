@@ -8,7 +8,7 @@ import {
   type TextInputProps,
   View,
 } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type FormFieldProps = TextInputProps & {
   error?: string;
@@ -34,7 +34,7 @@ export const FormField = ({
     <View style={styles.wrapper} testID={testID}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <View style={[styles.field, isFocused && styles.fieldFocused, error && styles.fieldError]}>
-        {iconName ? <Ionicons color="#8F8983" name={iconName} size={17} /> : null}
+        {iconName ? <Ionicons color={resolveThemeColor("#8F8983")} name={iconName} size={17} /> : null}
         <TextInput
           {...inputProps}
           secureTextEntry={secureTextEntry}
@@ -46,8 +46,8 @@ export const FormField = ({
             setIsFocused(true);
             inputProps.onFocus?.(event);
           }}
-          placeholderTextColor="#8E8A86"
-          selectionColor="#C8320D"
+          placeholderTextColor={resolveThemeColor("#8E8A86")}
+          selectionColor={resolveThemeColor("#C8320D")}
           style={[styles.input, style]}
         />
         {hasPasswordToggle ? (
@@ -57,7 +57,7 @@ export const FormField = ({
             style={styles.eyeButton}
           >
             <Ionicons
-              color="#8E8A86"
+              color={resolveThemeColor("#8E8A86")}
               name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
               size={19}
             />
@@ -69,7 +69,7 @@ export const FormField = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   error: {
     color: "#D33B14",
     fontSize: 11,

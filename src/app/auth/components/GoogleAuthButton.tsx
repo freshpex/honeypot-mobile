@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { skeuo } from "@/shared/theme";
+import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 type GoogleAuthButtonProps = {
   disabled?: boolean;
@@ -47,7 +47,7 @@ const GoogleLogo = () => (
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   button: {
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.88)",

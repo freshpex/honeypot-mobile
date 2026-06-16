@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { resolveThemeColor } from "@/shared/theme";
 import type { AuthStackParamList } from "../types";
 import { LoginScreen } from "./LoginScreen";
 import { RegisterScreen } from "./RegisterScreen";
@@ -11,7 +12,7 @@ export const AuthScreen = () => (
     initialRouteName="Login"
     screenOptions={{
       animation: "fade",
-      contentStyle: { backgroundColor: "#FAF9F8" },
+      contentStyle: { backgroundColor: resolveThemeColor("#FAF9F8") },
       headerShown: false,
     }}
   >

@@ -5,7 +5,7 @@ import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "@/app/profile/types";
 
 type SupportScreenProps = NativeStackScreenProps<ProfileStackParamList, "Support">;
@@ -53,7 +53,7 @@ export const SupportScreen = (_props: SupportScreenProps) => {
             onPress={() => Linking.openURL("https://wa.me/2349054531822")}
             style={[styles.contactCard, styles.whatsappCard]}
           >
-            <Ionicons color="#14B86E" name="logo-whatsapp" size={24} />
+            <Ionicons color={resolveThemeColor("#14B86E")} name="logo-whatsapp" size={24} />
             <Text style={styles.contactTitle}>WhatsApp</Text>
             <Text style={styles.contactSubtitle}>Chat with us</Text>
           </Pressable>
@@ -61,14 +61,14 @@ export const SupportScreen = (_props: SupportScreenProps) => {
             onPress={() => Linking.openURL("mailto:support@honeypot.ng")}
             style={[styles.contactCard, styles.emailCard]}
           >
-            <Ionicons color="#34A8F4" name="mail-outline" size={24} />
+            <Ionicons color={resolveThemeColor("#34A8F4")} name="mail-outline" size={24} />
             <Text style={styles.contactTitle}>Email</Text>
             <Text style={styles.contactSubtitle}>support@honeypot.ng</Text>
           </Pressable>
         </View>
 
         <View style={styles.faqHeader}>
-          <Ionicons color="#FF4A17" name="help-circle-outline" size={15} />
+          <Ionicons color={resolveThemeColor("#FF4A17")} name="help-circle-outline" size={15} />
           <Text style={styles.faqTitle}>FAQs</Text>
         </View>
 
@@ -84,7 +84,7 @@ export const SupportScreen = (_props: SupportScreenProps) => {
                 <View style={styles.questionRow}>
                   <Text style={styles.questionText}>{faq.question}</Text>
                   <Ionicons
-                    color="#837D77"
+                    color={resolveThemeColor("#837D77")}
                     name={expanded ? "chevron-up" : "chevron-down"}
                     size={14}
                   />
@@ -108,7 +108,7 @@ export const SupportScreen = (_props: SupportScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   answerText: {
     color: "#817B75",
     fontSize: 11,

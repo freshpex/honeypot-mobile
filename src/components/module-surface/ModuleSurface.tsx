@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -31,7 +31,7 @@ export const ModuleSurface = ({
     return (
       <View style={styles.tab} testID={testID}>
         <View style={styles.tabIcon}>
-          <Ionicons color="#FF4A17" name={icon} size={15} />
+          <Ionicons color={resolveThemeColor("#FF4A17")} name={icon} size={15} />
         </View>
         <Text style={styles.tabText}>{title}</Text>
       </View>
@@ -41,7 +41,7 @@ export const ModuleSurface = ({
   const card = (
     <View style={[styles.card, variant === "sheet" && styles.sheetCard]} testID={testID}>
       <View style={styles.iconWrap}>
-        <Ionicons color="#FF4A17" name={icon} size={24} />
+        <Ionicons color={resolveThemeColor("#FF4A17")} name={icon} size={24} />
       </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
@@ -74,7 +74,7 @@ export const ModuleSurface = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   button: {
     alignItems: "center",
     alignSelf: "stretch",

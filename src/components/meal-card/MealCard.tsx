@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { Image, Pressable, Text, View } from "react-native";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type MealCardProps = {
   imageUri?: string;
@@ -27,7 +27,7 @@ export const MealCard = ({
         <Image source={{ uri: imageUri }} style={styles.image} />
       ) : (
         <View style={styles.placeholderImage}>
-          <Ionicons color="#FF4A17" name="restaurant-outline" size={30} />
+          <Ionicons color={resolveThemeColor("#FF4A17")} name="restaurant-outline" size={30} />
         </View>
       )}
       <View style={styles.tags}>
@@ -53,7 +53,7 @@ export const MealCard = ({
   </Pressable>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   body: {
     padding: 10,
   },

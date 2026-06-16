@@ -1,10 +1,11 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Button, FormField } from "@/components";
 import { AuthScreenShell, authScreenStyles } from "../components";
 import { useAuth } from "../hooks";
 import type { AuthStackParamList } from "../types";
+import { createThemedStyleSheet } from "@/shared/theme";
 
 type ResetPasswordScreenProps = NativeStackScreenProps<
   AuthStackParamList,
@@ -68,7 +69,7 @@ export const ResetPasswordScreen = ({ navigation }: ResetPasswordScreenProps) =>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   backLink: {
     marginTop: 20,
     padding: 8,

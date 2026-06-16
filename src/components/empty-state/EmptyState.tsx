@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { skeuo } from "@/shared/theme";
+import { Pressable, Text, View } from "react-native";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export type EmptyStateProps = {
   icon?: keyof typeof Ionicons.glyphMap;
@@ -21,7 +21,7 @@ export const EmptyState = ({
 }: EmptyStateProps) => (
   <View style={styles.container} testID={testID}>
     <View style={styles.iconWrap}>
-      <Ionicons color="#C9C5C1" name={icon} size={28} />
+      <Ionicons color={resolveThemeColor("#C9C5C1")} name={icon} size={28} />
     </View>
     <Text style={styles.title}>{title}</Text>
     <Text style={styles.message}>{message}</Text>
@@ -33,7 +33,7 @@ export const EmptyState = ({
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   actionButton: {
     alignItems: "center",
     backgroundColor: "#FF4A17",

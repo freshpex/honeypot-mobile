@@ -3,7 +3,7 @@ import { CommonActions, useNavigation } from "@react-navigation/native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppearanceStore } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 type AppHeaderProps = {
   canGoBack?: boolean;
@@ -55,7 +55,7 @@ export const AppHeader = ({ canGoBack, title }: AppHeaderProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   actions: {
     alignItems: "center",
     flexDirection: "row",

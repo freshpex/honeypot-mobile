@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { useCustomerStore } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type PaymentMethodsScreenProps = NativeStackScreenProps<ProfileStackParamList, "PaymentMethods">;
@@ -45,13 +45,13 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Pressable onPress={() => navigation.navigate("MyWallet")} style={styles.walletCard}>
           <View style={styles.walletIcon}>
-            <Ionicons color="#FFFFFF" name="wallet-outline" size={20} />
+            <Ionicons color={resolveThemeColor("#FFFFFF")} name="wallet-outline" size={20} />
           </View>
           <View style={styles.walletTextWrap}>
             <Text style={styles.walletTitle}>HoneyPot Wallet</Text>
             <Text style={styles.walletSubtitle}>Fund & pay with your wallet</Text>
           </View>
-          <Ionicons color="#FFFFFF" name="chevron-forward" size={18} />
+          <Ionicons color={resolveThemeColor("#FFFFFF")} name="chevron-forward" size={18} />
         </Pressable>
 
         <Text style={styles.sectionTitle}>Saved Cards</Text>
@@ -60,7 +60,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
           <View style={styles.formCard}>
             <View style={styles.formHeader}>
               <View style={styles.formHeaderLeft}>
-                <Ionicons color="#706A65" name="lock-closed-outline" size={15} />
+                <Ionicons color={resolveThemeColor("#706A65")} name="lock-closed-outline" size={15} />
                 <Text style={styles.formTitle}>Add New Card</Text>
               </View>
               <View style={styles.securePill}>
@@ -122,7 +122,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
                     </Text>
                   </View>
                   <Pressable onPress={() => removeCard(card.id)} hitSlop={10}>
-                    <Ionicons color="#8B8580" name="trash-outline" size={16} />
+                    <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={16} />
                   </Pressable>
                 </View>
               ))}
@@ -165,16 +165,16 @@ const PaymentInput = ({
     <TextInput
       onChangeText={onChangeText}
       placeholder={placeholder}
-      placeholderTextColor="#8B8580"
+      placeholderTextColor={resolveThemeColor("#8B8580")}
       secureTextEntry={secureTextEntry}
-      selectionColor="#C8320D"
+      selectionColor={resolveThemeColor("#C8320D")}
       style={[styles.input, focused && styles.inputFocused]}
       value={value}
     />
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   actions: {
     flexDirection: "row",
     gap: 8,

@@ -1,20 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export const NotificationsScreen = () => {
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <View style={styles.emptyState}>
-        <Ionicons color="#D1CDC9" name="notifications-outline" size={34} />
+        <Ionicons color={resolveThemeColor("#D1CDC9")} name="notifications-outline" size={34} />
         <Text style={styles.emptyText}>No notifications yet</Text>
       </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   backButton: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

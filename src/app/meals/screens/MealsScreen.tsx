@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AppHeader } from "@/components";
+import { resolveThemeColor } from "@/shared/theme";
 import type { MealsStackParamList } from "../types";
 import { CartScreen } from "./CartScreen";
 import { CheckoutScreen } from "./CheckoutScreen";
@@ -12,7 +13,7 @@ export const MealsScreen = () => (
     initialRouteName="Menu"
     screenOptions={{
       animation: "slide_from_right",
-      contentStyle: { backgroundColor: "#FAF9F8" },
+      contentStyle: { backgroundColor: resolveThemeColor("#FAF9F8") },
       header: ({ route }) => (
         <AppHeader
           canGoBack={route.name !== "Menu"}

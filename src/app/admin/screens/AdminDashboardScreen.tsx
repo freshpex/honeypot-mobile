@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useAdminStore, useCustomerStore, useSubscriptionStore } from "@/shared/state";
+import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminCard,
   AdminMetricCard,
@@ -52,7 +53,7 @@ export const AdminDashboardScreen = () => {
       <AdminCard>
         <View style={styles.cardHeader}>
           <View style={styles.iconBubble}>
-            <Ionicons color="#FF4A17" name="speedometer-outline" size={20} />
+            <Ionicons color={resolveThemeColor("#FF4A17")} name="speedometer-outline" size={20} />
           </View>
           <View style={styles.headerText}>
             <Text style={styles.cardTitle}>Operations Health</Text>
@@ -62,7 +63,7 @@ export const AdminDashboardScreen = () => {
         </View>
         {["Subscriptions can pause, resume, and upgrade", "Checkout writes local orders", "Logs export prepares CSV locally"].map((item) => (
           <View key={item} style={styles.checkRow}>
-            <Ionicons color="#08A46B" name="checkmark-circle" size={16} />
+            <Ionicons color={resolveThemeColor("#08A46B")} name="checkmark-circle" size={16} />
             <Text style={styles.checkText}>{item}</Text>
           </View>
         ))}
@@ -71,7 +72,7 @@ export const AdminDashboardScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   cardHeader: {
     alignItems: "center",
     flexDirection: "row",

@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { createThemedStyleSheet, resolveThemeColor, skeuo } from "@/shared/theme";
 
 export type Tone = "orange" | "green" | "blue" | "yellow" | "gray" | "red";
 
@@ -51,8 +51,8 @@ export const AdminMetricCard = ({
   value: string;
 }) => (
   <View style={styles.metricCard}>
-    <View style={[styles.metricIcon, { backgroundColor: toneTint[tone] }]}>
-      <Ionicons color={toneColor[tone]} name={icon} size={19} />
+    <View style={[styles.metricIcon, { backgroundColor: resolveThemeColor(toneTint[tone]) }]}>
+      <Ionicons color={resolveThemeColor(toneColor[tone])} name={icon} size={19} />
     </View>
     <Text style={styles.metricValue}>{value}</Text>
     <Text style={styles.metricLabel}>{label}</Text>
@@ -60,8 +60,16 @@ export const AdminMetricCard = ({
 );
 
 export const AdminPill = ({ label, tone = "orange" }: { label: string; tone?: Tone }) => (
-  <View style={[styles.pill, { backgroundColor: toneTint[tone], borderColor: toneColor[tone] }]}>
-    <Text style={[styles.pillText, { color: toneColor[tone] }]}>{label}</Text>
+  <View
+    style={[
+      styles.pill,
+      {
+        backgroundColor: resolveThemeColor(toneTint[tone]),
+        borderColor: resolveThemeColor(toneColor[tone]),
+      },
+    ]}
+  >
+    <Text style={[styles.pillText, { color: resolveThemeColor(toneColor[tone]) }]}>{label}</Text>
   </View>
 );
 
@@ -82,7 +90,7 @@ export const AdminCard = ({ children }: PropsWithChildren) => (
   <View style={styles.card}>{children}</View>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   actionButton: {
     alignItems: "center",
     backgroundColor: "#FF4A17",

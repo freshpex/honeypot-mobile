@@ -3,7 +3,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type MyWalletScreenProps = NativeStackScreenProps<ProfileStackParamList, "MyWallet">;
@@ -21,7 +21,7 @@ export const MyWalletScreen = (_props: MyWalletScreenProps) => {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.fundCard}>
           <View style={styles.fundHeader}>
-            <Ionicons color="#FFFFFF" name="wallet-outline" size={18} />
+            <Ionicons color={resolveThemeColor("#FFFFFF")} name="wallet-outline" size={18} />
             <Text style={styles.fundTitle}>Fund Your Wallet</Text>
           </View>
           <Text style={styles.fundSubtitle}>
@@ -50,7 +50,7 @@ export const MyWalletScreen = (_props: MyWalletScreenProps) => {
         </View>
 
         <View style={styles.notice}>
-          <Ionicons color="#F59E0B" name="alert-circle-outline" size={16} />
+          <Ionicons color={resolveThemeColor("#F59E0B")} name="alert-circle-outline" size={16} />
           <Text style={styles.noticeText}>
             Transfer any amount to your dedicated account above. Funds reflect within minutes and
             can be used to pay for orders at checkout.
@@ -59,7 +59,7 @@ export const MyWalletScreen = (_props: MyWalletScreenProps) => {
 
         <Text style={styles.sectionTitle}>Wallet Transactions</Text>
         <View style={styles.emptyState}>
-          <Ionicons color="#D1CDC9" name="arrow-up-outline" size={28} />
+          <Ionicons color={resolveThemeColor("#D1CDC9")} name="arrow-up-outline" size={28} />
           <Text style={styles.emptyText}>No wallet transactions yet</Text>
         </View>
       </ScrollView>
@@ -69,11 +69,11 @@ export const MyWalletScreen = (_props: MyWalletScreenProps) => {
 
 const CopyButton = ({ copied, onPress }: { copied: boolean; onPress: () => void }) => (
   <Pressable onPress={onPress} style={styles.copyButton}>
-    <Ionicons color="#FFFFFF" name={copied ? "checkmark" : "copy-outline"} size={17} />
+    <Ionicons color={resolveThemeColor("#FFFFFF")} name={copied ? "checkmark" : "copy-outline"} size={17} />
   </Pressable>
 );
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   accountNumber: {
     color: "#FFFFFF",
     fontSize: 23,

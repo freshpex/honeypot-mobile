@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
-import { skeuo } from "@/shared/theme";
+import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export const OrdersScreen = () => {
   const tabs = useMemo(() => ["Active", "Delivered", "Cancelled"], []);
@@ -77,7 +77,7 @@ export const OrdersScreen = () => {
                     <Text style={styles.orderDate}>{order.date}</Text>
                   </View>
                   <View style={styles.statusPill}>
-                    <Ionicons color="#4E7CFF" name="checkmark-circle-outline" size={10} />
+                    <Ionicons color={resolveThemeColor("#4E7CFF")} name="checkmark-circle-outline" size={10} />
                     <Text style={styles.statusText}>{order.status}</Text>
                   </View>
                 </View>
@@ -99,7 +99,7 @@ export const OrdersScreen = () => {
           </View>
         ) : (
           <View style={styles.emptyState}>
-            <Ionicons color="#C9C5C1" name="cube-outline" size={32} />
+            <Ionicons color={resolveThemeColor("#C9C5C1")} name="cube-outline" size={32} />
             <Text style={styles.emptyText}>No orders yet</Text>
           </View>
         )}
@@ -108,7 +108,7 @@ export const OrdersScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   activeSegmentItem: {
     backgroundColor: "#FFFFFF",
     elevation: 3,

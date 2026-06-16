@@ -1,6 +1,7 @@
 import { PropsWithChildren } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { createThemedStyleSheet } from "@/shared/theme";
 
 export type ScreenProps = {
   scrollable?: boolean;
@@ -25,7 +26,7 @@ export const Screen = ({ children, scrollable = true, testID }: ScreenProps) => 
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   content: {
     flexGrow: 1,
     paddingBottom: 28,

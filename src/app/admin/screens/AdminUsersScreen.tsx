@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { useAdminStore } from "@/shared/state";
+import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminActionButton,
   AdminCard,
@@ -56,7 +57,7 @@ export const AdminUsersScreen = () => {
               {user.status === "Suspended" ? "Reactivate" : "Toggle Status"}
             </AdminActionButton>
             <View style={styles.secondaryAction}>
-              <Ionicons color="#817B75" name="document-text-outline" size={15} />
+              <Ionicons color={resolveThemeColor("#817B75")} name="document-text-outline" size={15} />
               <Text style={styles.secondaryText}>View profile</Text>
             </View>
           </View>
@@ -75,7 +76,7 @@ export const AdminUsersScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet({
   actions: {
     alignItems: "center",
     flexDirection: "row",
