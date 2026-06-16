@@ -3,6 +3,7 @@ import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { skeuo } from "@/shared/theme";
 
 export type TabBarProps = Partial<BottomTabBarProps> & {
   testID?: string;
@@ -78,6 +79,9 @@ export const TabBar = ({ descriptors, navigation, state, testID }: TabBarProps) 
 const styles = StyleSheet.create({
   activeIconWrap: {
     backgroundColor: "#FFE8DF",
+    borderColor: "#FFD0C0",
+    borderWidth: StyleSheet.hairlineWidth,
+    ...skeuo.pressed,
   },
   activeLabel: {
     color: "#FF4A17",
@@ -88,10 +92,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopColor: "#E9E4E0",
     borderTopWidth: StyleSheet.hairlineWidth,
+    elevation: 12,
     flexDirection: "row",
     height: 52,
     justifyContent: "space-around",
     paddingHorizontal: 6,
+    shadowColor: "#201B18",
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
   },
   iconWrap: {
     alignItems: "center",

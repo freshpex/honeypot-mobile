@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { skeuo } from "@/shared/theme";
 
 type GoogleAuthButtonProps = {
   disabled?: boolean;
@@ -53,12 +54,10 @@ const styles = StyleSheet.create({
     borderColor: "#DEDAD6",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     height: 35,
     justifyContent: "center",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 7 },
-    shadowOpacity: 0.035,
-    shadowRadius: 14,
+    ...skeuo.card,
     width: "100%",
   },
   contentRow: {

@@ -8,6 +8,7 @@ import {
   type TextInputProps,
   View,
 } from "react-native";
+import { skeuo } from "@/shared/theme";
 
 export type FormFieldProps = TextInputProps & {
   error?: string;
@@ -86,14 +87,12 @@ const styles = StyleSheet.create({
     borderColor: "#DEDAD6",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
     flexDirection: "row",
     gap: 10,
     height: 35,
     paddingHorizontal: 12,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 18,
+    ...skeuo.pressed,
   },
   fieldError: {
     borderColor: "#FF4A17",

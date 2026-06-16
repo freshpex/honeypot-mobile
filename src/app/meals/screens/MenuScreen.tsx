@@ -20,6 +20,7 @@ import {
   getCartSubtotal,
   useMealCartStore,
 } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 import type { Meal, MealsStackParamList } from "../types";
 
 type MenuScreenProps = NativeStackScreenProps<MealsStackParamList, "Menu">;
@@ -395,6 +396,7 @@ const styles = StyleSheet.create({
     gap: 8,
     height: 38,
     justifyContent: "center",
+    ...skeuo.action,
   },
   addButtonText: {
     color: "#FFFFFF",
@@ -417,6 +419,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 14,
+    elevation: 10,
   },
   cartBarLeft: {
     alignItems: "center",
@@ -453,9 +456,11 @@ const styles = StyleSheet.create({
     borderColor: "#DDD8D3",
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
     height: 27,
     justifyContent: "center",
     paddingHorizontal: 15,
+    ...skeuo.pressed,
   },
   chipRow: {
     gap: 8,
@@ -469,7 +474,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 10,
-    paddingTop: 12,
+    paddingTop: 4,
   },
   detailBody: {
     paddingHorizontal: 14,
@@ -513,7 +518,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAF9F8",
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
+    elevation: 14,
     paddingBottom: 17,
+    ...skeuo.floating,
   },
   detailTag: {
     alignSelf: "flex-start",
@@ -548,8 +555,12 @@ const styles = StyleSheet.create({
   mealCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 7,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 5,
     overflow: "hidden",
     width: "48.5%",
+    ...skeuo.card,
   },
   mealDescription: {
     color: "#817B75",
@@ -598,9 +609,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F5F2EF",
     borderRadius: 7,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 2,
     height: 52,
     justifyContent: "center",
     width: "23%",
+    ...skeuo.pressed,
   },
   nutritionLabel: {
     color: "#817B75",
@@ -635,10 +650,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F1EFED",
     borderRadius: 16,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
     flexDirection: "row",
     height: 32,
     justifyContent: "space-between",
     width: 99,
+    ...skeuo.pressed,
   },
   quantityText: {
     color: "#171513",
@@ -669,11 +687,13 @@ const styles = StyleSheet.create({
     borderColor: "#DDD8D3",
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flexDirection: "row",
     gap: 9,
     height: 33,
     marginTop: 12,
     paddingHorizontal: 13,
+    ...skeuo.card,
   },
   searchInput: {
     color: "#171513",

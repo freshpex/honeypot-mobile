@@ -12,6 +12,7 @@ import {
   getCartSubtotal,
   useMealCartStore,
 } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 import type { MealsStackParamList } from "../types";
 import { CartBar } from "./MenuScreen";
 
@@ -128,10 +129,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FFFFFF",
     borderRadius: 9,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 4,
     flexDirection: "row",
     justifyContent: "space-between",
     minHeight: 55,
     paddingHorizontal: 14,
+    ...skeuo.card,
   },
   cartItemText: {
     flex: 1,
@@ -140,9 +145,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 8,
+    borderColor: "#FF8B68",
+    borderTopWidth: 1,
+    elevation: 6,
     height: 34,
     justifyContent: "center",
     marginTop: 18,
+    ...skeuo.action,
   },
   checkoutText: {
     color: "#FFFFFF",
@@ -200,9 +209,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F1EFED",
     borderRadius: 12,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 1,
     height: 24,
     justifyContent: "center",
     width: 24,
+    ...skeuo.pressed,
   },
   roundButtonText: {
     color: "#817B75",
@@ -224,9 +237,13 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 9,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 4,
     marginTop: 18,
     paddingHorizontal: 14,
     paddingVertical: 13,
+    ...skeuo.card,
   },
   summaryDivider: {
     backgroundColor: "#EEEAE6",

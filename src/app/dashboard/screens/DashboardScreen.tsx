@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSubscriptionStore } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 
 export const DashboardScreen = () => {
   const navigation = useNavigation<any>();
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 24,
     paddingHorizontal: 14,
-    paddingTop: 16,
+    paddingTop: 6,
   },
   emptyDelivery: {
     alignItems: "center",
@@ -234,6 +235,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 3,
     flex: 1,
     height: 58,
     justifyContent: "center",
@@ -288,9 +292,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 9,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 4,
     height: 66,
     justifyContent: "center",
     width: "31%",
+    ...skeuo.card,
   },
   quickCardActive: {
     borderColor: "#C8320D",
@@ -331,8 +337,10 @@ const styles = StyleSheet.create({
     borderColor: "#FFCCBA",
     borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 7,
     marginBottom: 20,
     padding: 14,
+    ...skeuo.deepCard,
   },
   statusTitle: {
     color: "#171513",

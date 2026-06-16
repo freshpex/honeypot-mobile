@@ -6,11 +6,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type PaymentHistoryScreenProps = NativeStackScreenProps<ProfileStackParamList, "PaymentHistory">;
 
-export const PaymentHistoryScreen = ({ navigation }: PaymentHistoryScreenProps) => {
+export const PaymentHistoryScreen = (_props: PaymentHistoryScreenProps) => {
   const orders = useCustomerStore((state) => state.orders);
   const rows = useMemo(
     () =>
@@ -106,8 +107,12 @@ const styles = StyleSheet.create({
   historyCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 10,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 4,
     paddingHorizontal: 13,
     paddingVertical: 12,
+    ...skeuo.card,
   },
   historyDate: {
     color: "#817B75",

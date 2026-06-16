@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 
 export const OrdersScreen = () => {
   const tabs = useMemo(() => ["Active", "Delivered", "Cancelled"], []);
@@ -110,10 +111,8 @@ export const OrdersScreen = () => {
 const styles = StyleSheet.create({
   activeSegmentItem: {
     backgroundColor: "#FFFFFF",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.09,
-    shadowRadius: 5,
+    elevation: 3,
+    ...skeuo.pressed,
   },
   activeSegmentText: {
     color: "#171513",
@@ -122,7 +121,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 27,
-    paddingTop: 31,
+    paddingTop: 10,
   },
   emptyState: {
     alignItems: "center",
@@ -138,7 +137,11 @@ const styles = StyleSheet.create({
   orderCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 9,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 4,
     padding: 13,
+    ...skeuo.card,
   },
   orderDate: {
     color: "#8B8580",
@@ -185,10 +188,14 @@ const styles = StyleSheet.create({
   segment: {
     backgroundColor: "#F1EFED",
     borderRadius: 8,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 2,
     flexDirection: "row",
     height: 22,
     marginTop: 18,
     padding: 1,
+    ...skeuo.pressed,
   },
   segmentItem: {
     alignItems: "center",

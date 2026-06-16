@@ -8,6 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { skeuo } from "@/shared/theme";
 
 export type ButtonProps = PropsWithChildren<
   PressableProps & {
@@ -54,12 +55,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 8,
+    borderColor: "#FF7A52",
+    borderTopWidth: 1,
+    elevation: 6,
     height: 35,
     justifyContent: "center",
-    shadowColor: "#FF4A17",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
+    ...skeuo.action,
   },
   disabled: {
     opacity: 0.7,

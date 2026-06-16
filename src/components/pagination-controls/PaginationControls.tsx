@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { skeuo } from "@/shared/theme";
 
 type PaginationControlsProps = {
   canGoNext: boolean;
@@ -52,9 +53,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 14,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
     height: 28,
     justifyContent: "center",
     width: 28,
+    ...skeuo.pressed,
   },
   buttonDisabled: {
     backgroundColor: "#F2EFED",

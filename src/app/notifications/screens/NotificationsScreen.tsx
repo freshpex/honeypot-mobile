@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { skeuo } from "@/shared/theme";
 
 export const NotificationsScreen = () => {
   return (
@@ -26,9 +27,16 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderRadius: 14,
+    borderTopWidth: 1,
+    elevation: 4,
     flex: 1,
     justifyContent: "center",
+    margin: 20,
     paddingBottom: 170,
+    ...skeuo.card,
   },
   emptyText: {
     color: "#8B8580",

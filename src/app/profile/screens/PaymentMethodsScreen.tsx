@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { useCustomerStore } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type PaymentMethodsScreenProps = NativeStackScreenProps<ProfileStackParamList, "PaymentMethods">;
@@ -186,9 +187,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderStyle: "dashed",
     borderWidth: 1,
+    elevation: 2,
     height: 39,
     justifyContent: "center",
     marginTop: 12,
+    ...skeuo.pressed,
   },
   addCardText: {
     color: "#706A65",
@@ -211,9 +214,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
     flex: 1,
     height: 36,
     justifyContent: "center",
+    ...skeuo.pressed,
   },
   cancelText: {
     color: "#171513",
@@ -233,7 +238,9 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 13,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 5,
     padding: 13,
+    ...skeuo.card,
   },
   formHeader: {
     alignItems: "center",
@@ -261,10 +268,12 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
     color: "#171513",
     fontSize: 13,
     height: 37,
     paddingHorizontal: 10,
+    ...skeuo.pressed,
   },
   inputFocused: {
     borderColor: "#FF4A17",
@@ -303,9 +312,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 11,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 4,
     flexDirection: "row",
     minHeight: 54,
     paddingHorizontal: 11,
+    ...skeuo.card,
   },
   savedCardMeta: {
     color: "#817B75",
@@ -325,9 +336,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FFA083",
     borderRadius: 8,
+    borderColor: "#FFC0AA",
+    borderTopWidth: 1,
+    elevation: 5,
     flex: 1,
     height: 36,
     justifyContent: "center",
+    ...skeuo.action,
   },
   saveButtonDisabled: {
     opacity: 0.8,
@@ -368,11 +383,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 11,
+    borderColor: "#FF8B68",
+    borderTopWidth: 1,
+    elevation: 8,
     flexDirection: "row",
     height: 61,
     marginTop: 17,
     overflow: "hidden",
     paddingHorizontal: 13,
+    ...skeuo.action,
   },
   walletIcon: {
     alignItems: "center",

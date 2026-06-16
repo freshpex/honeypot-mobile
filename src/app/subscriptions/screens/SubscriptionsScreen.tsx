@@ -13,6 +13,7 @@ import {
   type SubscriptionPlan,
   useSubscriptionStore,
 } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 
 export const SubscriptionsScreen = () => {
   const {
@@ -323,9 +324,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#E88700",
     borderRadius: 7,
+    borderColor: "#FFC266",
+    borderTopWidth: 1,
+    elevation: 6,
     height: 33,
     justifyContent: "center",
     marginTop: 12,
+    ...skeuo.action,
   },
   confirmPauseText: {
     color: "#FFFFFF",
@@ -335,7 +340,7 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 28,
     paddingHorizontal: 8,
-    paddingTop: 32,
+    paddingTop: 8,
   },
   optionName: {
     color: "#171513",
@@ -379,11 +384,13 @@ const styles = StyleSheet.create({
     borderColor: "#F3DE98",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flexDirection: "row",
     gap: 12,
     height: 57,
     marginTop: 13,
     paddingHorizontal: 28,
+    ...skeuo.card,
   },
   pausedTitle: {
     color: "#B46F00",
@@ -407,9 +414,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 7,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     height: 55,
     justifyContent: "center",
     paddingHorizontal: 13,
+    ...skeuo.card,
   },
   selectedPauseOption: {
     backgroundColor: "#FFF3EE",
@@ -433,9 +442,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAF9F8",
     borderTopLeftRadius: 13,
     borderTopRightRadius: 13,
+    elevation: 14,
     paddingBottom: 10,
     paddingHorizontal: 13,
     paddingTop: 26,
+    ...skeuo.floating,
   },
   pauseTitleRow: {
     alignItems: "center",
@@ -448,8 +459,10 @@ const styles = StyleSheet.create({
     borderColor: "#FFCCBA",
     borderRadius: 11,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 7,
     marginTop: 20,
     padding: 19,
+    ...skeuo.deepCard,
   },
   planHeader: {
     alignItems: "flex-start",
@@ -473,10 +486,12 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 9,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flexDirection: "row",
     height: 62,
     justifyContent: "space-between",
     paddingHorizontal: 11,
+    ...skeuo.card,
   },
   planOptionLeft: {
     alignItems: "flex-start",
@@ -516,11 +531,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#08A46B",
     borderRadius: 8,
+    borderColor: "#57D9A4",
+    borderTopWidth: 1,
+    elevation: 6,
     flexDirection: "row",
     gap: 7,
     height: 33,
     justifyContent: "center",
     marginTop: 16,
+    ...skeuo.action,
   },
   resumeText: {
     color: "#FFFFFF",
@@ -537,11 +556,13 @@ const styles = StyleSheet.create({
     borderColor: "#E2DDD8",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flexDirection: "row",
     gap: 8,
     height: 31,
     justifyContent: "center",
     marginTop: 9,
+    ...skeuo.card,
   },
   secondaryText: {
     color: "#27231F",
@@ -556,9 +577,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAF9F8",
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
+    elevation: 14,
     paddingBottom: 9,
     paddingHorizontal: 5,
     paddingTop: 26,
+    ...skeuo.floating,
   },
   sheetSubtitle: {
     color: "#817B75",
@@ -574,10 +597,14 @@ const styles = StyleSheet.create({
   statCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 3,
     height: 72,
     justifyContent: "center",
     paddingHorizontal: 13,
     width: "48%",
+    ...skeuo.card,
   },
   statLabel: {
     color: "#817B75",
@@ -600,8 +627,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 7,
+    borderColor: "#FF8B68",
+    borderTopWidth: 1,
+    elevation: 6,
     height: 33,
     justifyContent: "center",
+    ...skeuo.action,
   },
   subscribeBarText: {
     color: "#FFFFFF",

@@ -5,6 +5,7 @@ import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
+import { skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "@/app/profile/types";
 
 type SupportScreenProps = NativeStackScreenProps<ProfileStackParamList, "Support">;
@@ -39,7 +40,7 @@ const faqs = [
   },
 ];
 
-export const SupportScreen = ({ navigation }: SupportScreenProps) => {
+export const SupportScreen = (_props: SupportScreenProps) => {
   const [expandedQuestion, setExpandedQuestion] = useState<string>();
   const faqItems = useMemo(() => faqs, []);
   const faqPagination = usePagination(faqItems);
@@ -127,9 +128,13 @@ const styles = StyleSheet.create({
   contactCard: {
     alignItems: "center",
     borderRadius: 9,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 4,
     flex: 1,
     height: 76,
     justifyContent: "center",
+    ...skeuo.card,
   },
   contactRow: {
     flexDirection: "row",
@@ -166,8 +171,10 @@ const styles = StyleSheet.create({
     borderColor: "#EFEAE6",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     paddingHorizontal: 12,
     paddingVertical: 12,
+    ...skeuo.card,
   },
   faqList: {
     gap: 8,

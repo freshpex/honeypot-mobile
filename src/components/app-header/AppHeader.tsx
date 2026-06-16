@@ -3,6 +3,7 @@ import { CommonActions, useNavigation } from "@react-navigation/native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppearanceStore } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 
 type AppHeaderProps = {
   canGoBack?: boolean;
@@ -72,16 +73,14 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 10,
     flexDirection: "row",
     height: 48,
     justifyContent: "space-between",
     marginHorizontal: 12,
     paddingLeft: 12,
     paddingRight: 10,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
+    ...skeuo.floating,
   },
   headerCardDark: {
     backgroundColor: "#171513",
@@ -93,6 +92,7 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 15,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     height: 30,
     justifyContent: "center",
     width: 30,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     backgroundColor: "#FAF9F8",
-    paddingBottom: 8,
+    paddingBottom: 2,
   },
   title: {
     color: "#171513",

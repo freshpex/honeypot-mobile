@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { skeuo } from "@/shared/theme";
 
 type AuthScreenShellProps = PropsWithChildren<{
   iconName: keyof typeof Ionicons.glyphMap;
@@ -51,12 +52,10 @@ export const authScreenStyles = StyleSheet.create({
     borderColor: "#DEDAD6",
     borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 6,
     paddingHorizontal: 22,
     paddingVertical: 22,
-    shadowColor: "#201B18",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.06,
-    shadowRadius: 24,
+    ...skeuo.deepCard,
     maxWidth: 328,
     minWidth: 299,
     width: "82%",
@@ -91,13 +90,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 10,
+    borderColor: "#FF8B68",
+    borderTopWidth: 1,
+    elevation: 7,
     height: 39,
     justifyContent: "center",
     marginBottom: 12,
-    shadowColor: "#FF4A17",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.16,
-    shadowRadius: 18,
+    ...skeuo.action,
     width: 39,
   },
   keyboard: {

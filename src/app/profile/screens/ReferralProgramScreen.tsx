@@ -3,13 +3,14 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Pressable, Share, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type ReferralProgramScreenProps = NativeStackScreenProps<ProfileStackParamList, "ReferralProgram">;
 
 const REFERRAL_CODE = "HP-O2E62C";
 
-export const ReferralProgramScreen = ({ navigation }: ReferralProgramScreenProps) => {
+export const ReferralProgramScreen = (_props: ReferralProgramScreenProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -76,12 +77,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FFFFFF",
     borderRadius: 9,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 4,
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 15,
     minHeight: 58,
     paddingHorizontal: 13,
     width: "100%",
+    ...skeuo.card,
   },
   codeLabel: {
     color: "#9A948F",
@@ -104,9 +109,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FFE8DF",
     borderRadius: 17,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 2,
     height: 34,
     justifyContent: "center",
     width: 34,
+    ...skeuo.pressed,
   },
   earnCard: {
     alignItems: "center",
@@ -114,9 +123,11 @@ const styles = StyleSheet.create({
     borderColor: "#FFE0D4",
     borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 6,
     marginTop: 17,
     paddingHorizontal: 16,
     paddingVertical: 19,
+    ...skeuo.deepCard,
   },
   earnCopy: {
     color: "#817B75",
@@ -146,9 +157,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flex: 1,
     height: 36,
     justifyContent: "center",
+    ...skeuo.card,
   },
   shareButtonText: {
     color: "#171513",

@@ -25,6 +25,7 @@ import {
   useMealCartStore,
 } from "@/shared/state";
 import type { DeliveryAddress, SavedCard } from "@/shared/state";
+import { skeuo } from "@/shared/theme";
 import type { MealsStackParamList } from "../types";
 import { CartBar } from "./MenuScreen";
 
@@ -450,12 +451,14 @@ const styles = StyleSheet.create({
     borderColor: "#EEEAE6",
     borderRadius: 9,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flexDirection: "row",
     gap: 8,
     height: 38,
     marginBottom: 20,
     marginTop: 10,
     paddingHorizontal: 12,
+    ...skeuo.card,
   },
   addLocationText: {
     color: "#817B75",
@@ -477,9 +480,11 @@ const styles = StyleSheet.create({
     borderColor: "#E8E2DD",
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
     flex: 1,
     height: 34,
     justifyContent: "center",
+    ...skeuo.pressed,
   },
   cancelText: {
     color: "#171513",
@@ -495,9 +500,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 8,
+    borderColor: "#FF8B68",
+    borderTopWidth: 1,
+    elevation: 6,
     height: 34,
     justifyContent: "center",
     marginTop: 18,
+    ...skeuo.action,
   },
   confirmButtonDisabled: {
     opacity: 0.55,
@@ -563,10 +572,12 @@ const styles = StyleSheet.create({
     borderColor: "#EEEAE6",
     borderRadius: 9,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 4,
     flexDirection: "row",
     minHeight: 55,
     marginBottom: 8,
     paddingHorizontal: 12,
+    ...skeuo.card,
   },
   paymentOptionActive: {
     backgroundColor: "#FFF3EE",
@@ -630,19 +641,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAF9F8",
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
+    elevation: 14,
     paddingBottom: 12,
     paddingHorizontal: 14,
     paddingTop: 28,
+    ...skeuo.floating,
   },
   sheetInput: {
     backgroundColor: "#FFFFFF",
     borderColor: "#E8E2DD",
     borderRadius: 7,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
     color: "#171513",
     fontSize: 11,
     height: 30,
     paddingHorizontal: 9,
+    ...skeuo.pressed,
   },
   sheetInputFocused: {
     borderColor: "#FF4A17",
@@ -657,9 +672,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FF4A17",
     borderRadius: 8,
+    borderColor: "#FF8B68",
+    borderTopWidth: 1,
+    elevation: 6,
     flex: 1,
     height: 34,
     justifyContent: "center",
+    ...skeuo.action,
   },
   sheetTitle: {
     color: "#171513",
@@ -680,8 +699,12 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 9,
+    borderColor: "#FFFFFF",
+    borderTopWidth: 1,
+    elevation: 4,
     paddingHorizontal: 14,
     paddingVertical: 13,
+    ...skeuo.card,
   },
   summaryDivider: {
     backgroundColor: "#EEEAE6",

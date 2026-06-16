@@ -3,11 +3,12 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type MyWalletScreenProps = NativeStackScreenProps<ProfileStackParamList, "MyWallet">;
 
-export const MyWalletScreen = ({ navigation }: MyWalletScreenProps) => {
+export const MyWalletScreen = (_props: MyWalletScreenProps) => {
   const [copiedField, setCopiedField] = useState<string | undefined>();
 
   const markCopied = (field: string) => {
@@ -99,6 +100,8 @@ const styles = StyleSheet.create({
   bankPanel: {
     backgroundColor: "rgba(255,255,255,0.16)",
     borderRadius: 10,
+    borderColor: "rgba(255,255,255,0.2)",
+    borderTopWidth: 1,
     marginTop: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -117,6 +120,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.24)",
     borderRadius: 16,
+    borderColor: "rgba(255,255,255,0.32)",
+    borderTopWidth: 1,
     height: 32,
     justifyContent: "center",
     width: 32,
@@ -144,8 +149,12 @@ const styles = StyleSheet.create({
   fundCard: {
     backgroundColor: "#FF4A17",
     borderRadius: 11,
+    borderColor: "#FF8B68",
+    borderTopWidth: 1,
+    elevation: 8,
     marginTop: 17,
     padding: 16,
+    ...skeuo.action,
   },
   fundHeader: {
     alignItems: "center",
@@ -173,10 +182,12 @@ const styles = StyleSheet.create({
     borderColor: "#F8D889",
     borderRadius: 9,
     borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
     flexDirection: "row",
     gap: 9,
     marginTop: 17,
     padding: 12,
+    ...skeuo.card,
   },
   noticeText: {
     color: "#9A6500",
