@@ -64,13 +64,13 @@ export const DashboardScreen = () => {
         color: "#7E48E8",
         onPress: () => navigation.navigate("Orders"),
       },
-    ] satisfies Array<{
+    ] satisfies {
       color: string;
       icon: keyof typeof Ionicons.glyphMap;
       label: string;
       onPress: () => void;
       tint: string;
-    }>,
+    }[],
     [navigation, pause, resume],
   );
 
@@ -79,11 +79,11 @@ export const DashboardScreen = () => {
       { icon: "flame-outline", label: "Meals Left", value: selectedPlan.meals },
       { icon: "time-outline", label: "Days Left", value: String(daysRemaining) },
       { icon: "calendar-outline", label: "Expires", value: expiresDate },
-    ] satisfies Array<{
+    ] satisfies {
       icon: keyof typeof Ionicons.glyphMap;
       label: string;
       value: string;
-    }>,
+    }[],
     [daysRemaining, expiresDate, selectedPlan.meals],
   );
 

@@ -56,11 +56,11 @@ export const SubscriptionsScreen = () => {
         label: "End date",
         value: endDate,
       },
-    ] satisfies Array<{
+    ] satisfies {
       icon: keyof typeof Ionicons.glyphMap;
       label: string;
       value: string;
-    }>,
+    }[],
     [daysRemaining, endDate, selectedPlan.meals, startDate],
   );
 

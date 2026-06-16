@@ -15,7 +15,11 @@
     },
     "ios": {
       "supportsTablet": false,
-      "icon": "./public/icon-20.png"
+      "icon": "./public/icon-20.png",
+      "bundleIdentifier": "com.honeypot.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,6 +30,9 @@
     "extra": {
       "router": {
         "root": "src/routes"
+      },
+      "eas": {
+        "projectId": "05cecb14-4c0a-4ad9-ab1b-da596268b954"
       }
     },
     "plugins": [

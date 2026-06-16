@@ -80,7 +80,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
         {auth.error ? <Text style={authScreenStyles.inlineError}>{auth.error}</Text> : null}
       </View>
       <View style={authScreenStyles.footer}>
-        <Text style={authScreenStyles.footerText}>Don't have an account?</Text>
+        <Text style={authScreenStyles.footerText}>{"Don't have an account?"}</Text>
         <Pressable onPress={() => navigation.navigate("Register")}>
           <Text style={authScreenStyles.footerLink}>Create one</Text>
         </Pressable>
