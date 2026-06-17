@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore, useSubscriptionStore } from "@/shared/state";
@@ -12,6 +12,7 @@ export const DashboardScreen = () => {
   const {
     daysRemaining,
     expiresDate,
+    load,
     pause,
     pauseResumeDate,
     resume,
@@ -21,6 +22,10 @@ export const DashboardScreen = () => {
   const [activeAction, setActiveAction] = useState<string>();
 
   const isPaused = status === "paused";
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const quickActions = useMemo(
     () => [
@@ -50,14 +55,18 @@ export const DashboardScreen = () => {
         label: "Pause Plan",
         tint: "#FFF8DF",
         color: "#F2A300",
-        onPress: pause,
+        onPress: () => {
+          void pause(7);
+        },
       },
       {
         icon: "play-outline",
         label: "Resume Plan",
         tint: "#E8F7FF",
         color: "#1A9BE8",
-        onPress: resume,
+        onPress: () => {
+          void resume();
+        },
       },
       {
         icon: "clipboard-outline",

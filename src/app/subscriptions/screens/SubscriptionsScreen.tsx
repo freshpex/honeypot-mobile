@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -19,6 +19,9 @@ export const SubscriptionsScreen = () => {
   const {
     daysRemaining,
     endDate,
+    error,
+    isLoading,
+    load,
     pause,
     pauseResumeDate,
     plans,
@@ -34,6 +37,10 @@ export const SubscriptionsScreen = () => {
 
   const isPaused = status === "paused";
   const isInactive = status === "inactive";
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const stats = useMemo(
     () => [
@@ -65,8 +72,8 @@ export const SubscriptionsScreen = () => {
     [daysRemaining, endDate, selectedPlan.meals, startDate],
   );
 
-  const handleSubscribe = () => {
-    subscribe(pendingPlan);
+  const handleSubscribe = async () => {
+    await subscribe(pendingPlan);
     setIsPlanSheetOpen(false);
   };
 
@@ -119,14 +126,22 @@ export const SubscriptionsScreen = () => {
           </Pressable>
         )}
 
-        <Pressable onPress={() => setIsPlanSheetOpen(true)} style={styles.secondaryButton}>
+        <Pressable
+          onPress={() => {
+            setPendingPlan(selectedPlan);
+            setIsPlanSheetOpen(true);
+          }}
+          style={styles.secondaryButton}
+        >
           <Ionicons color={resolveThemeColor("#27231F")} name={isInactive ? "grid-outline" : "arrow-up-outline"} size={13} />
           <Text style={styles.secondaryText}>{isInactive ? "View Plans" : "Upgrade Plan"}</Text>
         </Pressable>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </ScrollView>
 
       <ChoosePlanSheet
         activePlan={pendingPlan}
+        isLoading={isLoading}
         onClose={() => setIsPlanSheetOpen(false)}
         onConfirm={handleSubscribe}
         onSelect={setPendingPlan}
@@ -135,8 +150,8 @@ export const SubscriptionsScreen = () => {
       />
       <PauseSubscriptionSheet
         onClose={() => setIsPauseSheetOpen(false)}
-        onConfirm={(resumeDate) => {
-          pause(resumeDate);
+        onConfirm={(durationDays) => {
+          void pause(durationDays);
           setIsPauseSheetOpen(false);
         }}
         visible={isPauseSheetOpen}
@@ -147,8 +162,9 @@ export const SubscriptionsScreen = () => {
 
 type ChoosePlanSheetProps = {
   activePlan: SubscriptionPlan;
+  isLoading?: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   onSelect: (plan: SubscriptionPlan) => void;
   plans: SubscriptionPlan[];
   visible: boolean;
@@ -156,6 +172,7 @@ type ChoosePlanSheetProps = {
 
 const ChoosePlanSheet = ({
   activePlan,
+  isLoading,
   onClose,
   onConfirm,
   onSelect,
@@ -164,6 +181,7 @@ const ChoosePlanSheet = ({
 }: ChoosePlanSheetProps) => (
   <ChoosePlanSheetContent
     activePlan={activePlan}
+    isLoading={isLoading}
     onClose={onClose}
     onConfirm={onConfirm}
     onSelect={onSelect}
@@ -174,6 +192,7 @@ const ChoosePlanSheet = ({
 
 const ChoosePlanSheetContent = ({
   activePlan,
+  isLoading,
   onClose,
   onConfirm,
   onSelect,
@@ -219,8 +238,8 @@ const ChoosePlanSheetContent = ({
             );
           })}
         </View>
-        <Pressable onPress={onConfirm} style={styles.subscribeBar}>
-          <Text style={styles.subscribeBarText}>Subscribe Now</Text>
+        <Pressable disabled={isLoading} onPress={onConfirm} style={styles.subscribeBar}>
+          <Text style={styles.subscribeBarText}>{isLoading ? "Saving..." : "Subscribe Now"}</Text>
         </Pressable>
       </View>
     </View>
@@ -230,7 +249,7 @@ const ChoosePlanSheetContent = ({
 
 type PauseSubscriptionSheetProps = {
   onClose: () => void;
-  onConfirm: (resumeDate: string) => void;
+  onConfirm: (durationDays: number) => void;
   visible: boolean;
 };
 
@@ -244,19 +263,19 @@ const PauseSubscriptionSheet = ({
     () => [
       {
         id: "3-days",
-        resumeDate: "Jun 19, 2026",
+        durationDays: 3,
         title: "3 days",
         subtitle: "Resume on Friday, Jun 19",
       },
       {
         id: "1-week",
-        resumeDate: "Jun 23, 2026",
+        durationDays: 7,
         title: "1 week",
         subtitle: "Resume on Tuesday, Jun 23",
       },
       {
         id: "2-weeks",
-        resumeDate: "Jun 30, 2026",
+        durationDays: 14,
         title: "2 weeks",
         subtitle: "Resume on Tuesday, Jun 30",
       },
@@ -300,7 +319,7 @@ const PauseSubscriptionSheet = ({
             })}
           </View>
           <Pressable
-            onPress={() => onConfirm(selectedOption.resumeDate)}
+            onPress={() => onConfirm(selectedOption.durationDays)}
             style={styles.confirmPauseButton}
           >
             <Text style={styles.confirmPauseText}>Confirm Pause</Text>
@@ -366,6 +385,14 @@ const styles = createThemedStyleSheet({
     paddingBottom: 28,
     paddingHorizontal: 8,
     paddingTop: 8,
+  },
+  errorText: {
+    color: "#C8320D",
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 16,
+    marginTop: 12,
+    textAlign: "center",
   },
   optionName: {
     color: "#171513",
