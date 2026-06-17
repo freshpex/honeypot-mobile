@@ -2,7 +2,6 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Button, FormField } from "@/components";
-import { demoUsers } from "@/shared/state";
 import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 import {
   AuthScreenShell,
@@ -18,10 +17,8 @@ const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
 
 export const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const auth = useAuth();
-  const demoCustomer = demoUsers[0];
-  const demoAdmin = demoUsers[1];
-  const [email, setEmail] = useState(demoCustomer.email);
-  const [password, setPassword] = useState(demoCustomer.password);
+  const [email, setEmail] = useState("enoch@honeypot.app");
+  const [password, setPassword] = useState("Password123");
   const [submitted, setSubmitted] = useState(false);
 
   const errors = useMemo(
@@ -42,9 +39,9 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
 
   const handleAdminDemo = async () => {
     setSubmitted(true);
-    setEmail(demoAdmin.email);
-    setPassword(demoAdmin.password);
-    await auth.login({ email: demoAdmin.email, password: demoAdmin.password });
+    setEmail("admin@honeypot.app");
+    setPassword("Admin12345");
+    await auth.login({ email: "admin@honeypot.app", password: "Admin12345" });
   };
 
   return (

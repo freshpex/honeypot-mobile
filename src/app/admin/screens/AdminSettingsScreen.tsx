@@ -20,6 +20,7 @@ export const AdminSettingsScreen = () => {
   const settings = useAdminStore((state) => state.settings);
   const toggleSetting = useAdminStore((state) => state.toggleSetting);
   const logout = useAuthStore((state) => state.logout);
+  const email = useAuthStore((state) => state.email);
 
   return (
     <AdminScreen>
@@ -50,11 +51,11 @@ export const AdminSettingsScreen = () => {
           </View>
           <View style={styles.adminText}>
             <Text style={styles.settingTitle}>Admin session</Text>
-            <Text style={styles.settingSubtitle}>Logged in with local demo credentials.</Text>
+            <Text style={styles.settingSubtitle}>Logged in as {email ?? "admin@honeypot.app"}.</Text>
           </View>
-          <AdminPill label="Demo" tone="orange" />
+          <AdminPill label="Active" tone="green" />
         </View>
-        <AdminActionButton onPress={logout}>Log Out</AdminActionButton>
+        <AdminActionButton onPress={() => void logout()}>Log Out</AdminActionButton>
       </AdminCard>
     </AdminScreen>
   );

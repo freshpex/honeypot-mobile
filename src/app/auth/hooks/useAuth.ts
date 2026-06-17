@@ -9,7 +9,7 @@ const fallbackMessage =
 export const useAuth = () => {
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
-  const loginDemo = useAuthStore((state) => state.loginDemo);
+  const setSession = useAuthStore((state) => state.setSession);
 
   const run = async <TResult>(action: () => Promise<TResult>) => {
     setError(undefined);
@@ -25,29 +25,21 @@ export const useAuth = () => {
     }
   };
 
+  const authenticate = (action: () => Promise<Awaited<ReturnType<typeof authService.login>>>) =>
+    run(async () => {
+      const response = await action();
+      await setSession(response);
+      return response;
+    });
+
   return {
     error,
     isLoading,
     clearError: () => setError(undefined),
-    continueWithGoogle: () => run(() => authService.continueWithGoogle()),
-    login: async (payload: LoginPayload) => {
-      setError(undefined);
-      setIsLoading(true);
-      const result = loginDemo(payload.email, payload.password);
-      setIsLoading(false);
-      if (!result.ok) {
-        setError(result.message ?? fallbackMessage);
-        return undefined;
-      }
-      return {
-        accessToken: "demo-access-token",
-        customerId: payload.email,
-        message: "Demo login successful",
-      };
-    },
-    register: (payload: RegisterPayload) => run(() => authService.register(payload)),
+    continueWithGoogle: () => authenticate(() => authService.continueWithGoogle()),
+    login: (payload: LoginPayload) => authenticate(() => authService.login(payload)),
+    register: (payload: RegisterPayload) => authenticate(() => authService.register(payload)),
     requestPasswordReset: (payload: ResetPasswordPayload) =>
       run(() => authService.requestPasswordReset(payload)),
   };
 };
-

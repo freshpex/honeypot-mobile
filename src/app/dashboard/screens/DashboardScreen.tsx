@@ -3,11 +3,12 @@ import { useNavigation } from "@react-navigation/native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSubscriptionStore } from "@/shared/state";
+import { useAuthStore, useSubscriptionStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 export const DashboardScreen = () => {
   const navigation = useNavigation<any>();
+  const authName = useAuthStore((state) => state.name);
   const {
     daysRemaining,
     expiresDate,
@@ -94,7 +95,7 @@ export const DashboardScreen = () => {
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.greeting}>Good morning</Text>
-            <Text style={styles.name}>Hello, Enoch</Text>
+            <Text style={styles.name}>Hello, {authName ?? "there"}</Text>
           </View>
         </View>
 

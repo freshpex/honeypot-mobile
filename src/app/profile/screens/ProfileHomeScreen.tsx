@@ -23,6 +23,8 @@ type ProfileHomeScreenProps = NativeStackScreenProps<ProfileStackParamList, "Pro
 
 export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
   const logout = useAuthStore((state) => state.logout);
+  const authName = useAuthStore((state) => state.name);
+  const authEmail = useAuthStore((state) => state.email);
   const [addressSheet, setAddressSheet] = useState<"list" | "form" | undefined>();
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
   const rows = useMemo(
@@ -94,11 +96,11 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>E</Text>
+            <Text style={styles.avatarText}>{(authName ?? "H").slice(0, 1)}</Text>
           </View>
           <View>
-            <Text style={styles.name}>Enoch</Text>
-            <Text style={styles.email}>enoch.megatransact@gmail.com</Text>
+            <Text style={styles.name}>{authName ?? "HoneyPot Customer"}</Text>
+            <Text style={styles.email}>{authEmail ?? "customer@honeypot.app"}</Text>
           </View>
         </View>
 
@@ -117,7 +119,7 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
           ))}
         </View>
 
-        <Pressable onPress={logout} style={styles.logout}>
+        <Pressable onPress={() => void logout()} style={styles.logout}>
           <Ionicons color={resolveThemeColor("#FF4A17")} name="log-out-outline" size={15} />
           <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>

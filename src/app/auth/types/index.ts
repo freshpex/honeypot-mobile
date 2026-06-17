@@ -12,6 +12,7 @@ export type LoginPayload = {
 };
 
 export type RegisterPayload = {
+  name?: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -21,10 +22,29 @@ export type ResetPasswordPayload = {
   email: string;
 };
 
+export type ConfirmResetPasswordPayload = {
+  confirmPassword: string;
+  password: string;
+  token: string;
+};
+
+export type GoogleAuthPayload = {
+  email?: string;
+  idToken?: string;
+  name?: string;
+  provider: "google";
+};
+
 export type AuthResponse = {
-  accessToken?: string;
+  accessToken: string;
   refreshToken?: string;
-  customerId?: string;
+  user: {
+    email: string;
+    id: string;
+    name: string;
+    permissions?: string[];
+    role: "CUSTOMER" | "STAFF" | "ADMIN";
+  };
   message?: string;
 };
 

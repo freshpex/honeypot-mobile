@@ -1,4 +1,5 @@
 import { env } from "@/config";
+import { getAuthSession } from "@/shared/storage";
 
 type RequestOptions<TBody> = {
   body?: TBody;
@@ -19,9 +20,12 @@ const request = async <TResponse, TBody = unknown>(
   method: "GET" | "POST" | "PATCH" | "DELETE",
   options: RequestOptions<TBody> = {},
 ): Promise<TResponse> => {
+  const session = await getAuthSession();
   const response = await fetch(`${env.API_BASE_URL}${path}`, {
+    credentials: "include",
     method,
     headers: {
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
       "Content-Type": "application/json",
       ...options.headers,
     },
