@@ -1,23 +1,23 @@
 import { useMemo } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
-import { useAdminStore, useCustomerStore } from "@/shared/state";
+import { ADMIN_PAGE_SIZE, useAdminStore, useCustomerStore } from "@/shared/state";
 import type { AdminOrder, AdminOrderStatus } from "@/shared/state";
 import { createThemedStyleSheet } from "@/shared/theme";
 import {
-  AdminActionButton,
   AdminCard,
   AdminPill,
   AdminScreen,
   AdminSectionTitle,
 } from "./AdminShared";
 
-const statusFlow: AdminOrderStatus[] = [
+const orderStatuses: AdminOrderStatus[] = [
   "Confirmed",
   "Preparing",
   "Out for Delivery",
   "Delivered",
+  "Cancelled",
 ];
 
 type AdminVisibleOrder = AdminOrder & {
@@ -38,7 +38,7 @@ export const AdminOrdersScreen = () => {
         id: order.id,
         items: order.items.map((item) => `${item.meal.name} x${item.quantity}`).join(", "),
         source: "customer" as const,
-        status: order.status === "Confirmed" ? ("Confirmed" as const) : order.status,
+        status: order.status,
         total: `₦${order.total.toLocaleString()}`,
       })),
       ...adminOrders.map((order) => ({ ...order, source: "admin" as const })),
@@ -46,49 +46,49 @@ export const AdminOrdersScreen = () => {
     [adminOrders, customerOrders],
   );
 
-  const pagination = usePagination(orders);
-
-  const nextStatus = (status: AdminOrderStatus) => {
-    const index = statusFlow.indexOf(status);
-    return statusFlow[Math.min(index + 1, statusFlow.length - 1)];
-  };
+  const pagination = usePagination(orders, ADMIN_PAGE_SIZE);
 
   return (
     <AdminScreen>
       <AdminSectionTitle subtitle="Update meal order progress and inspect checkout totals." title="Manage Orders" />
-      {pagination.pageItems.map((order) => {
-        const isDone = order.status === "Delivered" || order.status === "Cancelled";
-        return (
-          <AdminCard key={order.id}>
-            <View style={styles.topRow}>
-              <View>
-                <Text style={styles.orderId}>{order.id}</Text>
-                <Text style={styles.customer}>{order.customer} · {order.date}</Text>
-              </View>
-              <AdminPill
-                label={order.status}
-                tone={order.status === "Delivered" ? "green" : order.status === "Cancelled" ? "red" : "blue"}
-              />
+      {pagination.pageItems.map((order) => (
+        <AdminCard key={order.id}>
+          <View style={styles.topRow}>
+            <View>
+              <Text style={styles.orderId}>{order.id}</Text>
+              <Text style={styles.customer}>{order.customer} · {order.date}</Text>
             </View>
-            <Text style={styles.items}>{order.items}</Text>
-            <View style={styles.bottomRow}>
-              <Text style={styles.total}>{order.total}</Text>
-              <AdminActionButton
-                onPress={() => {
+            <AdminPill label={order.status} tone={statusTone(order.status)} />
+          </View>
+          <Text style={styles.items}>{order.items}</Text>
+          <View style={styles.statusRow}>
+            {orderStatuses.map((status) => {
+              const active = order.status === status;
+              return (
+                <Pressable
+                  key={status}
+                  onPress={() => {
                   if (order.source === "customer") {
-                    updateCustomerOrderStatus(order.id, "Delivered");
+                      updateCustomerOrderStatus(order.id, status);
                     return;
                   }
-                  updateOrderStatus(order.id, nextStatus(order.status));
+                    updateOrderStatus(order.id, status);
                 }}
-                tone={isDone ? "green" : "orange"}
-              >
-                {isDone ? "Completed" : "Advance Status"}
-              </AdminActionButton>
-            </View>
-          </AdminCard>
-        );
-      })}
+                  style={[styles.statusChip, active && styles.statusChipActive]}
+                >
+                  <Text style={[styles.statusChipText, active && styles.statusChipTextActive]}>
+                    {status}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <View style={styles.bottomRow}>
+            <Text style={styles.total}>{order.total}</Text>
+            <Text style={styles.source}>{order.source === "customer" ? "Customer checkout" : "Admin seed order"}</Text>
+          </View>
+        </AdminCard>
+      ))}
       <PaginationControls
         canGoNext={pagination.canGoNext}
         canGoPrevious={pagination.canGoPrevious}
@@ -99,6 +99,13 @@ export const AdminOrdersScreen = () => {
       />
     </AdminScreen>
   );
+};
+
+const statusTone = (status: AdminOrderStatus) => {
+  if (status === "Delivered") return "green";
+  if (status === "Cancelled") return "red";
+  if (status === "Confirmed") return "orange";
+  return "blue";
 };
 
 const styles = createThemedStyleSheet({
@@ -117,6 +124,39 @@ const styles = createThemedStyleSheet({
     color: "#4F4640",
     fontSize: 12,
     lineHeight: 17,
+    marginTop: 12,
+  },
+  source: {
+    color: "#817B75",
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  statusChip: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8E2DD",
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 29,
+    justifyContent: "center",
+    paddingHorizontal: 10,
+  },
+  statusChipActive: {
+    backgroundColor: "#FFE8DF",
+    borderColor: "#FF4A17",
+  },
+  statusChipText: {
+    color: "#706A65",
+    fontSize: 10,
+    fontWeight: "800",
+  },
+  statusChipTextActive: {
+    color: "#FF4A17",
+  },
+  statusRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
     marginTop: 12,
   },
   orderId: {

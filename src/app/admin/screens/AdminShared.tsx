@@ -135,6 +135,7 @@ const styles = createThemedStyleSheet({
     borderTopWidth: 1,
     elevation: 4,
     flex: 1,
+    minWidth: 96,
     minHeight: 92,
     padding: 10,
     ...skeuo.card,

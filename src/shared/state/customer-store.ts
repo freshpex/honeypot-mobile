@@ -24,7 +24,7 @@ export type CustomerOrder = {
   date: string;
   deliveryAddress: DeliveryAddress;
   paymentCardLast4?: string;
-  status: "Confirmed" | "Delivered" | "Cancelled";
+  status: "Confirmed" | "Preparing" | "Out for Delivery" | "Delivered" | "Cancelled";
   type: "One Off";
   total: number;
   items: CartItem[];

@@ -14,7 +14,9 @@ export const OrdersScreen = () => {
   const visibleOrders = useMemo(
     () =>
       orders.filter((order) => {
-        if (activeTab === "Active") return order.status === "Confirmed";
+        if (activeTab === "Active") {
+          return ["Confirmed", "Preparing", "Out for Delivery"].includes(order.status);
+        }
         if (activeTab === "Delivered") return order.status === "Delivered";
         return order.status === "Cancelled";
       }),

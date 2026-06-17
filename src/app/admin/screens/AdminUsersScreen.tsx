@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
-import { useAdminStore } from "@/shared/state";
+import { ADMIN_PAGE_SIZE, useAdminStore, useCustomerStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminActionButton,
@@ -15,8 +15,10 @@ import {
 
 export const AdminUsersScreen = () => {
   const users = useAdminStore((state) => state.users);
+  const adminOrders = useAdminStore((state) => state.orders);
+  const customerOrders = useCustomerStore((state) => state.orders);
   const toggleUserStatus = useAdminStore((state) => state.toggleUserStatus);
-  const pagination = usePagination(users);
+  const pagination = usePagination(users, ADMIN_PAGE_SIZE);
 
   const summary = useMemo(
     () => ({
@@ -25,6 +27,39 @@ export const AdminUsersScreen = () => {
       suspended: users.filter((user) => user.status === "Suspended").length,
     }),
     [users],
+  );
+
+  const userStats = useMemo(
+    () =>
+      Object.fromEntries(
+        users.map((user) => {
+          const matchingAdminOrders = adminOrders.filter((order) => order.customer === user.name);
+          const matchingCustomerOrders = user.name === "Enoch" ? customerOrders : [];
+          const allOrders = [
+            ...matchingAdminOrders.map((order) => ({
+              status: order.status,
+              total: parseNaira(order.total),
+            })),
+            ...matchingCustomerOrders.map((order) => ({
+              status: order.status,
+              total: order.total,
+            })),
+          ];
+
+          return [
+            user.id,
+            {
+              activeOrders: allOrders.filter((order) =>
+                ["Confirmed", "Preparing", "Out for Delivery"].includes(order.status),
+              ).length,
+              deliveredOrders: allOrders.filter((order) => order.status === "Delivered").length,
+              totalOrders: allOrders.length,
+              totalSpend: allOrders.reduce((sum, order) => sum + order.total, 0),
+            },
+          ];
+        }),
+      ),
+    [adminOrders, customerOrders, users],
   );
 
   return (
@@ -61,6 +96,12 @@ export const AdminUsersScreen = () => {
               <Text style={styles.secondaryText}>View profile</Text>
             </View>
           </View>
+          <View style={styles.statsGrid}>
+            <UserStat label="Orders" value={String(userStats[user.id]?.totalOrders ?? 0)} />
+            <UserStat label="Active" value={String(userStats[user.id]?.activeOrders ?? 0)} />
+            <UserStat label="Delivered" value={String(userStats[user.id]?.deliveredOrders ?? 0)} />
+            <UserStat label="Spend" value={`₦${(userStats[user.id]?.totalSpend ?? 0).toLocaleString()}`} />
+          </View>
         </AdminCard>
       ))}
 
@@ -75,6 +116,15 @@ export const AdminUsersScreen = () => {
     </AdminScreen>
   );
 };
+
+const parseNaira = (value: string) => Number(value.replace(/[^\d]/g, "")) || 0;
+
+const UserStat = ({ label, value }: { label: string; value: string }) => (
+  <View style={styles.statBox}>
+    <Text style={styles.statValue}>{value}</Text>
+    <Text style={styles.statLabel}>{label}</Text>
+  </View>
+);
 
 const styles = createThemedStyleSheet({
   actions: {
@@ -121,6 +171,32 @@ const styles = createThemedStyleSheet({
     color: "#817B75",
     fontSize: 11,
     fontWeight: "800",
+  },
+  statBox: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderRadius: 10,
+    borderTopWidth: 1,
+    elevation: 3,
+    flex: 1,
+    minHeight: 54,
+    paddingHorizontal: 8,
+    paddingVertical: 9,
+  },
+  statLabel: {
+    color: "#817B75",
+    fontSize: 10,
+    marginTop: 3,
+  },
+  statValue: {
+    color: "#171513",
+    fontSize: 13,
+    fontWeight: "900",
+  },
+  statsGrid: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
   },
   summaryRow: {
     flexDirection: "row",

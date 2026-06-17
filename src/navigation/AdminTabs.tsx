@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   AdminDashboardScreen,
   AdminLogsScreen,
+  AdminMealsScreen,
   AdminOrdersScreen,
   AdminSettingsScreen,
   AdminUsersScreen,
@@ -12,6 +13,7 @@ import { AppHeader, TabBar } from "@/components";
 const Tab = createBottomTabNavigator<AdminTabParamList>();
 
 const adminTitles: Record<keyof AdminTabParamList, string> = {
+  AdminMeals: "Manage Meals",
   AdminOrders: "Manage Orders",
   Logs: "Logs",
   Overview: "Admin",
@@ -30,6 +32,11 @@ export const AdminTabs = () => (
   >
     <Tab.Screen component={AdminDashboardScreen} name="Overview" />
     <Tab.Screen component={AdminUsersScreen} name="Users" />
+    <Tab.Screen
+      component={AdminMealsScreen}
+      name="AdminMeals"
+      options={{ title: "Meals" }}
+    />
     <Tab.Screen
       component={AdminOrdersScreen}
       name="AdminOrders"

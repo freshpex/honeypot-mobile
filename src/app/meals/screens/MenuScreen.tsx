@@ -18,6 +18,7 @@ import {
   formatNaira,
   getCartItemCount,
   getCartSubtotal,
+  useAdminStore,
   useMealCartStore,
 } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
@@ -25,75 +26,9 @@ import type { Meal, MealsStackParamList } from "../types";
 
 type MenuScreenProps = NativeStackScreenProps<MealsStackParamList, "Menu">;
 
-const meals: Meal[] = [
-  {
-    id: "avocado-toast-eggs",
-    name: "Avocado Toast & Eggs",
-    category: "Breakfast",
-    description: "Whole grain toast topped with smashed avocado, poached eggs...",
-    detailDescription:
-      "Whole grain toast topped with smashed avocado, poached eggs and chilli flakes",
-    imageUrl:
-      "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80",
-    calories: 380,
-    protein: 18,
-    carbs: 28,
-    fat: 22,
-    price: 2800,
-    tags: ["vegetarian"],
-  },
-  {
-    id: "fresh-fruit-bowl",
-    name: "Fresh Fruit Bowl",
-    category: "Breakfast",
-    description: "Seasonal fresh fruits with granola, yogurt and a drizzle of raw honey",
-    detailDescription:
-      "Seasonal fresh fruits with granola, yogurt and a drizzle of raw honey",
-    imageUrl:
-      "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=900&q=80",
-    calories: 250,
-    protein: 8,
-    carbs: 39,
-    fat: 8,
-    price: 1800,
-    tags: ["vegetarian", "weight loss"],
-  },
-  {
-    id: "green-detox-smoothie",
-    name: "Green Detox Smoothie",
-    category: "Smoothies",
-    description: "Fresh spinach, banana, ginger, apple and lemon blended to perfection",
-    detailDescription:
-      "Fresh spinach, banana, ginger, apple and lemon blended to perfection",
-    imageUrl:
-      "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=900&q=80",
-    calories: 180,
-    protein: 5,
-    carbs: 34,
-    fat: 3,
-    price: 1500,
-    tags: ["vegan", "weight loss"],
-  },
-  {
-    id: "grilled-chicken-vegetables",
-    name: "Grilled Chicken & Vegetables",
-    category: "Lunch",
-    description: "Juicy grilled chicken breast served with seasonal roasted vegetables...",
-    detailDescription:
-      "Juicy grilled chicken breast served with seasonal roasted vegetables and lemon",
-    imageUrl:
-      "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=900&q=80",
-    calories: 420,
-    protein: 34,
-    carbs: 20,
-    fat: 18,
-    price: 3500,
-    tags: ["high protein", "low carb"],
-  },
-];
-
 export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   const addMeal = useMealCartStore((state) => state.addMeal);
+  const meals = useAdminStore((state) => state.meals);
   const cartItems = useMealCartStore((state) => state.items);
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeDiet, setActiveDiet] = useState<string>();
@@ -112,13 +47,16 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   const filteredMeals = useMemo(
     () =>
       meals.filter((meal) => {
+        if (meal.status !== "Available") {
+          return false;
+        }
         const matchesCategory = activeCategory === "All" || meal.category === activeCategory;
         const matchesDiet =
           !activeDiet || meal.tags.includes(activeDiet.toLowerCase() as Meal["tags"][number]);
         const matchesSearch = meal.name.toLowerCase().includes(query.toLowerCase());
         return matchesCategory && matchesDiet && matchesSearch;
       }),
-    [activeCategory, activeDiet, query],
+    [activeCategory, activeDiet, meals, query],
   );
   const cartCount = useMemo(() => getCartItemCount(cartItems), [cartItems]);
   const subtotal = useMemo(() => getCartSubtotal(cartItems), [cartItems]);

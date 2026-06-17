@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
-import { useAdminStore } from "@/shared/state";
+import { ADMIN_PAGE_SIZE, useAdminStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminActionButton,
@@ -18,7 +18,7 @@ export const AdminLogsScreen = () => {
   const downloadLogs = useAdminStore((state) => state.downloadLogs);
   const exportMessage = useAdminStore((state) => state.exportMessage);
   const [csvPreview, setCsvPreview] = useState("");
-  const pagination = usePagination(logs);
+  const pagination = usePagination(logs, ADMIN_PAGE_SIZE);
 
   return (
     <AdminScreen>

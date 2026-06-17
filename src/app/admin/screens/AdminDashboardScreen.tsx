@@ -14,8 +14,37 @@ import {
 export const AdminDashboardScreen = () => {
   const users = useAdminStore((state) => state.users);
   const adminOrders = useAdminStore((state) => state.orders);
+  const meals = useAdminStore((state) => state.meals);
   const customerOrders = useCustomerStore((state) => state.orders);
   const subscriptionStatus = useSubscriptionStore((state) => state.status);
+
+  const allOrders = useMemo(
+    () => [
+      ...adminOrders.map((order) => ({
+        status: order.status,
+        total: parseNaira(order.total),
+      })),
+      ...customerOrders.map((order) => ({
+        status: order.status,
+        total: order.total,
+      })),
+    ],
+    [adminOrders, customerOrders],
+  );
+
+  const overallStats = useMemo(
+    () => ({
+      activeOrders: allOrders.filter((order) =>
+        ["Confirmed", "Preparing", "Out for Delivery"].includes(order.status),
+      ).length,
+      availableMeals: meals.filter((meal) => meal.status === "Available").length,
+      deliveredOrders: allOrders.filter((order) => order.status === "Delivered").length,
+      hiddenMeals: meals.filter((meal) => meal.status !== "Available").length,
+      revenue: allOrders.reduce((sum, order) => sum + order.total, 0),
+      suspendedUsers: users.filter((user) => user.status === "Suspended").length,
+    }),
+    [allOrders, meals, users],
+  );
 
   const metrics = useMemo(
     () => [
@@ -24,7 +53,19 @@ export const AdminDashboardScreen = () => {
         icon: "bag-handle-outline",
         label: "Orders",
         tone: "blue" as const,
-        value: String(adminOrders.length + customerOrders.length),
+        value: String(allOrders.length),
+      },
+      {
+        icon: "cash-outline",
+        label: "Revenue",
+        tone: "green" as const,
+        value: `₦${overallStats.revenue.toLocaleString()}`,
+      },
+      {
+        icon: "restaurant-outline",
+        label: "Meals",
+        tone: "yellow" as const,
+        value: String(meals.length),
       },
       {
         icon: "calendar-outline",
@@ -38,7 +79,7 @@ export const AdminDashboardScreen = () => {
       tone: "orange" | "green" | "blue" | "yellow";
       value: string;
     }[],
-    [adminOrders.length, customerOrders.length, subscriptionStatus, users.length],
+    [allOrders.length, meals.length, overallStats.revenue, subscriptionStatus, users.length],
   );
 
   return (
@@ -61,7 +102,13 @@ export const AdminDashboardScreen = () => {
           </View>
           <AdminPill label="Live UI" tone="green" />
         </View>
-        {["Subscriptions can pause, resume, and upgrade", "Checkout writes local orders", "Logs export prepares CSV locally"].map((item) => (
+        {[
+          `${overallStats.activeOrders} active orders need attention`,
+          `${overallStats.deliveredOrders} delivered orders completed`,
+          `${overallStats.availableMeals} meals available and ${overallStats.hiddenMeals} hidden or sold out`,
+          `${overallStats.suspendedUsers} suspended users`,
+          "Logs export prepares CSV locally",
+        ].map((item) => (
           <View key={item} style={styles.checkRow}>
             <Ionicons color={resolveThemeColor("#08A46B")} name="checkmark-circle" size={16} />
             <Text style={styles.checkText}>{item}</Text>
@@ -71,6 +118,8 @@ export const AdminDashboardScreen = () => {
     </AdminScreen>
   );
 };
+
+const parseNaira = (value: string) => Number(value.replace(/[^\d]/g, "")) || 0;
 
 const styles = createThemedStyleSheet({
   cardHeader: {
@@ -113,6 +162,7 @@ const styles = createThemedStyleSheet({
   },
   metrics: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
 });
