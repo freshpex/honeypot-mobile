@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Image,
   Modal,
@@ -18,18 +18,19 @@ import {
   formatNaira,
   getCartItemCount,
   getCartSubtotal,
-  useAdminStore,
   useMealCartStore,
 } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
+import { mealsService } from "../services";
 import type { Meal, MealsStackParamList } from "../types";
 
 type MenuScreenProps = NativeStackScreenProps<MealsStackParamList, "Menu">;
 
 export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   const addMeal = useMealCartStore((state) => state.addMeal);
-  const meals = useAdminStore((state) => state.meals);
   const cartItems = useMealCartStore((state) => state.items);
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [menuError, setMenuError] = useState<string>();
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeDiet, setActiveDiet] = useState<string>();
   const [selectedMeal, setSelectedMeal] = useState<Meal>();
@@ -44,12 +45,31 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
     () => ["High Protein", "Low Carb", "Weight Loss", "Vegetarian", "Vegan", "Keto"],
     [],
   );
+
+  useEffect(() => {
+    let mounted = true;
+    const loadMeals = async () => {
+      try {
+        const response = await mealsService.getMenu({ limit: 100 });
+        if (mounted) {
+          setMeals(response.meals);
+          setMenuError(undefined);
+        }
+      } catch (error) {
+        if (mounted) {
+          setMenuError(error instanceof Error ? error.message : "Unable to load meals.");
+        }
+      }
+    };
+    void loadMeals();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const filteredMeals = useMemo(
     () =>
       meals.filter((meal) => {
-        if (meal.status !== "Available") {
-          return false;
-        }
         const matchesCategory = activeCategory === "All" || meal.category === activeCategory;
         const matchesDiet =
           !activeDiet || meal.tags.includes(activeDiet.toLowerCase() as Meal["tags"][number]);
@@ -94,6 +114,7 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
           contentContainerStyle={[styles.mealGrid, cartCount > 0 && styles.mealGridWithCart]}
           showsVerticalScrollIndicator={false}
         >
+          {menuError ? <Text style={styles.errorText}>{menuError}</Text> : null}
           {mealPagination.pageItems.map((meal) => (
             <MealCard key={meal.id} meal={meal} onPress={() => openMeal(meal)} />
           ))}
@@ -490,6 +511,13 @@ const styles = createThemedStyleSheet({
     alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  errorText: {
+    color: "#C8320D",
+    fontSize: 11,
+    fontWeight: "800",
+    paddingHorizontal: 6,
+    width: "100%",
   },
   filterBlock: {
     marginTop: 10,

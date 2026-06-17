@@ -34,8 +34,12 @@ export const PaymentHistoryScreen = (_props: PaymentHistoryScreenProps) => {
         : orders.length
           ? orders.map((order) => ({
               amount: formatNaira(order.total),
-              date: order.date,
-              id: order.id,
+              date: new Date(order.date).toLocaleDateString("en-US", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              }),
+              id: `#${order.reference}`,
               method:
                 order.paymentMethod === "Card" && order.paymentCardLast4
                   ? `Card •••• ${order.paymentCardLast4}`

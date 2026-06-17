@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore, useSubscriptionStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
+import { dashboardService, type DashboardHomeResponse } from "../services";
 
 export const DashboardScreen = () => {
   const navigation = useNavigation<any>();
@@ -20,12 +21,33 @@ export const DashboardScreen = () => {
     status,
   } = useSubscriptionStore();
   const [activeAction, setActiveAction] = useState<string>();
+  const [homeData, setHomeData] = useState<DashboardHomeResponse>();
 
   const isPaused = status === "paused";
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadHome = async () => {
+      try {
+        const response = await dashboardService.getHome();
+        if (mounted) {
+          setHomeData(response);
+        }
+      } catch {
+        if (mounted) {
+          setHomeData(undefined);
+        }
+      }
+    };
+    void loadHome();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const quickActions = useMemo(
     () => [
@@ -104,7 +126,7 @@ export const DashboardScreen = () => {
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.greeting}>Good morning</Text>
-            <Text style={styles.name}>Hello, {authName ?? "there"}</Text>
+            <Text style={styles.name}>Hello, {homeData?.greetingName ?? authName ?? "there"}</Text>
           </View>
         </View>
 
@@ -170,8 +192,25 @@ export const DashboardScreen = () => {
 
         <Text style={styles.sectionTitle}>Upcoming Deliveries</Text>
         <View style={styles.emptyDelivery}>
-          <Ionicons color={resolveThemeColor("#C9C5C1")} name="car-outline" size={32} />
-          <Text style={styles.emptyText}>No upcoming deliveries</Text>
+          {homeData?.upcomingDeliveries.length ? (
+            homeData.upcomingDeliveries.slice(0, 3).map((order) => (
+              <View key={order.id} style={styles.deliveryRow}>
+                <Ionicons color={resolveThemeColor("#FF4A17")} name="car-outline" size={18} />
+                <View style={styles.deliveryTextWrap}>
+                  <Text style={styles.deliveryTitle}>#{order.reference}</Text>
+                  <Text style={styles.deliverySubtitle}>
+                    {order.status} · {formatDashboardDate(order.date)}
+                  </Text>
+                </View>
+                <Text style={styles.deliveryAmount}>₦{order.total.toLocaleString("en-NG")}</Text>
+              </View>
+            ))
+          ) : (
+            <>
+              <Ionicons color={resolveThemeColor("#C9C5C1")} name="car-outline" size={32} />
+              <Text style={styles.emptyText}>No upcoming deliveries</Text>
+            </>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -222,13 +261,46 @@ const styles = createThemedStyleSheet({
   },
   emptyDelivery: {
     alignItems: "center",
-    height: 92,
+    minHeight: 92,
     justifyContent: "center",
+    gap: 8,
   },
   emptyText: {
     color: "#8B8580",
     fontSize: 12,
     marginTop: 7,
+  },
+  deliveryAmount: {
+    color: "#FF4A17",
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  deliveryRow: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderRadius: 9,
+    borderTopWidth: 1,
+    elevation: 3,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 48,
+    paddingHorizontal: 12,
+    width: "100%",
+    ...skeuo.card,
+  },
+  deliverySubtitle: {
+    color: "#817B75",
+    fontSize: 9,
+    marginTop: 2,
+  },
+  deliveryTextWrap: {
+    flex: 1,
+  },
+  deliveryTitle: {
+    color: "#171513",
+    fontSize: 11,
+    fontWeight: "900",
   },
   greeting: {
     color: "#8B8580",
@@ -363,3 +435,9 @@ const styles = createThemedStyleSheet({
     justifyContent: "space-between",
   },
 });
+
+const formatDashboardDate = (value: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "short",
+  }).format(new Date(value));

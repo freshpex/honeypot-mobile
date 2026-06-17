@@ -36,7 +36,7 @@ export const AdminOrdersScreen = () => {
         customer: "Enoch",
         date: order.date,
         id: order.id,
-        items: order.items.map((item) => `${item.meal.name} x${item.quantity}`).join(", "),
+        items: order.items.map((item) => `${item.name} x${item.quantity}`).join(", "),
         source: "customer" as const,
         status: order.status,
         total: `₦${order.total.toLocaleString()}`,

@@ -8,7 +8,7 @@ export type PaymentHistoryItem = {
   description: string;
   id: string;
   paymentMethod?: SavedCard | null;
-  paymentMethodId: string;
+  paymentMethodId?: string | null;
   reference: string;
   status: "PAID" | "PENDING" | "FAILED";
 };

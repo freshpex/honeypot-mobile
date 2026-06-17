@@ -36,8 +36,7 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   const clearCart = useMealCartStore((state) => state.clearCart);
   const addresses = useCustomerStore((state) => state.addresses);
   const cards = useCustomerStore((state) => state.cards);
-  const addOrder = useCustomerStore((state) => state.addOrder);
-  const chargeOrder = useCustomerStore((state) => state.chargeOrder);
+  const checkoutOrder = useCustomerStore((state) => state.checkoutOrder);
   const error = useCustomerStore((state) => state.error);
   const isSyncing = useCustomerStore((state) => state.isSyncing);
   const loadAddresses = useCustomerStore((state) => state.loadAddresses);
@@ -83,23 +82,15 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
       return;
     }
     try {
-      await chargeOrder({
+      await checkoutOrder({
+        deliveryAddressId: selectedAddress.id,
         deliveryFee: DELIVERY_FEE,
         items,
         paymentMethodId: selectedCard.id,
-        total,
       });
     } catch {
       return;
     }
-    addOrder({
-      deliveryAddress: selectedAddress,
-      items,
-      paymentCardLast4: selectedCard.last4,
-      paymentMethod: "Card",
-      total,
-      type: "One Off",
-    });
     clearCart();
     navigation.getParent()?.navigate("Orders");
   };

@@ -1,16 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect, useMemo, useState } from "react";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import MapView, { Marker, Polyline, UrlTile } from "react-native-maps";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
+import { ordersService } from "../services";
+import type { TrackingResponse } from "../types";
 
 export const OrdersScreen = () => {
+  const insets = useSafeAreaInsets();
   const tabs = useMemo(() => ["Active", "Delivered", "Cancelled"], []);
   const orders = useCustomerStore((state) => state.orders);
+  const loadOrders = useCustomerStore((state) => state.loadOrders);
   const [activeTab, setActiveTab] = useState("Active");
+  const [tracking, setTracking] = useState<TrackingResponse>();
+  const [trackingError, setTrackingError] = useState<string>();
+  const statusQuery = useMemo(() => activeTab.toLowerCase() as "active" | "delivered" | "cancelled", [activeTab]);
+
+  useEffect(() => {
+    void loadOrders(statusQuery);
+  }, [loadOrders, statusQuery]);
+
   const visibleOrders = useMemo(
     () =>
       orders.filter((order) => {
@@ -24,30 +37,27 @@ export const OrdersScreen = () => {
   );
   const orderRows = useMemo(
     () =>
-      visibleOrders.length
-        ? visibleOrders.map((order) => ({
+      visibleOrders.map((order) => ({
             date: order.date,
-            id: order.id,
-            meal: `${order.items[0]?.meal.name ?? "HoneyPot meal"} x${order.items[0]?.quantity ?? 1}`,
+            id: `#${order.reference}`,
+            meal: `${order.items[0]?.name ?? "HoneyPot meal"} x${order.items[0]?.quantity ?? 1}`,
+            orderId: order.id,
             status: order.status,
             total: formatNaira(order.total),
             type: order.type,
-          }))
-        : activeTab === "Active"
-          ? [
-              {
-                date: "Jun 16, 2026",
-                id: "#HP-MQGX3ZJL",
-                meal: "Avocado Toast & Eggs x1",
-                status: "Confirmed",
-                total: "₦4,300",
-                type: "One Off",
-              },
-            ]
-          : [],
+          })),
     [activeTab, visibleOrders],
   );
   const orderPagination = usePagination(orderRows);
+
+  const openTracking = async (orderId: string) => {
+    setTrackingError(undefined);
+    try {
+      setTracking(await ordersService.getTracking(orderId));
+    } catch (error) {
+      setTrackingError(error instanceof Error ? error.message : "Unable to load tracking.");
+    }
+  };
 
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
@@ -72,7 +82,11 @@ export const OrdersScreen = () => {
         {orderRows.length ? (
           <View style={styles.orderList}>
             {orderPagination.pageItems.map((order) => (
-              <View key={order.id} style={styles.orderCard}>
+              <Pressable
+                key={order.id}
+                onPress={() => void openTracking(order.orderId)}
+                style={styles.orderCard}
+              >
                 <View style={styles.orderHeader}>
                   <View>
                     <Text style={styles.orderId}>{order.id}</Text>
@@ -88,7 +102,7 @@ export const OrdersScreen = () => {
                   <Text style={styles.orderType}>{order.type}</Text>
                   <Text style={styles.orderTotal}>{order.total}</Text>
                 </View>
-              </View>
+              </Pressable>
             ))}
             <PaginationControls
               canGoNext={orderPagination.canGoNext}
@@ -106,7 +120,82 @@ export const OrdersScreen = () => {
           </View>
         )}
       </View>
+      {trackingError ? (
+        <Text style={[styles.errorText, { bottom: Math.max(insets.bottom + 74, 86) }]}>
+          {trackingError}
+        </Text>
+      ) : null}
+      <TrackingSheet
+        onClose={() => setTracking(undefined)}
+        tracking={tracking}
+        bottomInset={insets.bottom}
+      />
     </SafeAreaView>
+  );
+};
+
+const TrackingSheet = ({
+  bottomInset,
+  onClose,
+  tracking,
+}: {
+  bottomInset: number;
+  onClose: () => void;
+  tracking?: TrackingResponse;
+}) => {
+  const route = tracking?.map.route ?? [];
+  const firstPoint = route[0] ?? { latitude: 6.5244, longitude: 3.3792 };
+
+  return (
+    <Modal animationType="slide" transparent visible={Boolean(tracking)} onRequestClose={onClose}>
+      <View style={styles.sheetOverlay}>
+        <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+        {tracking ? (
+          <View style={[styles.trackingSheet, { paddingBottom: Math.max(bottomInset + 14, 26) }]}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.sheetHeader}>
+              <View>
+                <Text style={styles.sheetTitle}>#{tracking.order.reference}</Text>
+                <Text style={styles.sheetSubtitle}>{tracking.order.status}</Text>
+              </View>
+              <Pressable onPress={onClose} hitSlop={10}>
+                <Ionicons color={resolveThemeColor("#817B75")} name="close" size={18} />
+              </Pressable>
+            </View>
+            <MapView
+              initialRegion={{
+                latitude: firstPoint.latitude,
+                latitudeDelta: 0.12,
+                longitude: firstPoint.longitude,
+                longitudeDelta: 0.12,
+              }}
+              mapType="none"
+              style={styles.map}
+            >
+              <UrlTile maximumZ={19} tileSize={256} urlTemplate={tracking.map.tileUrlTemplate} />
+              {route.length ? (
+                <>
+                  <Polyline coordinates={route} strokeColor={resolveThemeColor("#FF4A17")} strokeWidth={4} />
+                  <Marker coordinate={route[0]} title="Kitchen" />
+                  <Marker coordinate={route[route.length - 1]} title="Delivery address" />
+                </>
+              ) : null}
+            </MapView>
+            <ScrollView contentContainerStyle={styles.timeline}>
+              {tracking.events.map((event) => (
+                <View key={event.id} style={styles.timelineRow}>
+                  <View style={styles.timelineDot} />
+                  <View style={styles.timelineText}>
+                    <Text style={styles.timelineTitle}>{event.title}</Text>
+                    <Text style={styles.timelineDescription}>{event.description}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
+      </View>
+    </Modal>
   );
 };
 
@@ -135,6 +224,31 @@ const styles = createThemedStyleSheet({
     color: "#8B8580",
     fontSize: 13,
     marginTop: 9,
+  },
+  errorText: {
+    alignSelf: "center",
+    backgroundColor: "#FFF3EE",
+    borderColor: "#FFB9A4",
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    color: "#C8320D",
+    elevation: 5,
+    fontSize: 11,
+    fontWeight: "800",
+    left: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    position: "absolute",
+    right: 20,
+    textAlign: "center",
+    ...skeuo.card,
+  },
+  map: {
+    borderRadius: 10,
+    height: 170,
+    marginTop: 12,
+    overflow: "hidden",
+    width: "100%",
   },
   orderCard: {
     backgroundColor: "#FFFFFF",
@@ -187,6 +301,34 @@ const styles = createThemedStyleSheet({
     backgroundColor: "#FAF9F8",
     flex: 1,
   },
+  sheetHandle: {
+    alignSelf: "center",
+    backgroundColor: "#D8D3CE",
+    borderRadius: 2,
+    height: 4,
+    marginBottom: 12,
+    width: 44,
+  },
+  sheetHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  sheetOverlay: {
+    backgroundColor: "rgba(0,0,0,0.72)",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  sheetSubtitle: {
+    color: "#817B75",
+    fontSize: 11,
+    marginTop: 3,
+  },
+  sheetTitle: {
+    color: "#171513",
+    fontSize: 16,
+    fontWeight: "900",
+  },
   segment: {
     backgroundColor: "#F1EFED",
     borderRadius: 8,
@@ -223,6 +365,47 @@ const styles = createThemedStyleSheet({
     color: "#4E7CFF",
     fontSize: 8,
     fontWeight: "900",
+  },
+  timeline: {
+    gap: 10,
+    paddingTop: 13,
+  },
+  timelineDescription: {
+    color: "#817B75",
+    fontSize: 10,
+    lineHeight: 14,
+    marginTop: 2,
+  },
+  timelineDot: {
+    backgroundColor: "#FF4A17",
+    borderColor: "#FFD4C7",
+    borderRadius: 7,
+    borderWidth: 3,
+    height: 14,
+    marginTop: 2,
+    width: 14,
+  },
+  timelineRow: {
+    flexDirection: "row",
+    gap: 9,
+  },
+  timelineText: {
+    flex: 1,
+  },
+  timelineTitle: {
+    color: "#171513",
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  trackingSheet: {
+    backgroundColor: "#FAF9F8",
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    elevation: 16,
+    maxHeight: "78%",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    ...skeuo.floating,
   },
   subtitle: {
     color: "#817B75",
