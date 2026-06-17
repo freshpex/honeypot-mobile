@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
@@ -13,19 +13,35 @@ type PaymentHistoryScreenProps = NativeStackScreenProps<ProfileStackParamList, "
 
 export const PaymentHistoryScreen = (_props: PaymentHistoryScreenProps) => {
   const orders = useCustomerStore((state) => state.orders);
+  const loadPaymentHistory = useCustomerStore((state) => state.loadPaymentHistory);
+  const paymentHistory = useCustomerStore((state) => state.paymentHistory);
   const rows = useMemo(
     () =>
-      orders.length
-        ? orders.map((order) => ({
-            amount: formatNaira(order.total),
-            date: order.date,
-            id: order.id,
-            method:
-              order.paymentMethod === "Card" && order.paymentCardLast4
-                ? `Card •••• ${order.paymentCardLast4}`
-                : order.paymentMethod,
-            type: order.type,
+      paymentHistory.length
+        ? paymentHistory.map((transaction) => ({
+            amount: formatNaira(transaction.amount),
+            date: new Date(transaction.createdAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }),
+            id: `#${transaction.reference}`,
+            method: transaction.paymentMethod
+              ? `${transaction.paymentMethod.brand} •••• ${transaction.paymentMethod.last4}`
+              : "Card",
+            type: transaction.description,
           }))
+        : orders.length
+          ? orders.map((order) => ({
+              amount: formatNaira(order.total),
+              date: order.date,
+              id: order.id,
+              method:
+                order.paymentMethod === "Card" && order.paymentCardLast4
+                  ? `Card •••• ${order.paymentCardLast4}`
+                  : order.paymentMethod,
+              type: order.type,
+            }))
         : [
             {
               amount: "₦4,300",
@@ -35,9 +51,13 @@ export const PaymentHistoryScreen = (_props: PaymentHistoryScreenProps) => {
               type: "One Off",
             },
           ],
-    [orders],
+    [orders, paymentHistory],
   );
   const historyPagination = usePagination(rows);
+
+  useEffect(() => {
+    void loadPaymentHistory();
+  }, [loadPaymentHistory]);
 
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>

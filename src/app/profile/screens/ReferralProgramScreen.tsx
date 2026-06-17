@@ -1,26 +1,43 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, Share, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { referralsService, type ReferralChannel } from "@/app/referrals/services";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
 
 type ReferralProgramScreenProps = NativeStackScreenProps<ProfileStackParamList, "ReferralProgram">;
 
-const REFERRAL_CODE = "HP-O2E62C";
-
 export const ReferralProgramScreen = (_props: ReferralProgramScreenProps) => {
   const [copied, setCopied] = useState(false);
+  const [referralCode, setReferralCode] = useState("HP-O2E62C");
+  const [rewardAmount, setRewardAmount] = useState(2000);
+
+  useEffect(() => {
+    let mounted = true;
+    void referralsService
+      .getMine()
+      .then((referral) => {
+        if (!mounted) return;
+        setReferralCode(referral.code);
+        setRewardAmount(referral.rewardAmount);
+      })
+      .catch(() => undefined);
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleCopy = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 1200);
   };
 
-  const handleShare = async (channel: string) => {
+  const handleShare = async (channel: ReferralChannel) => {
+    await referralsService.share(channel);
     await Share.share({
-      message: `Use my HoneyPot code ${REFERRAL_CODE} and get healthy meals delivered.`,
+      message: `Use my HoneyPot code ${referralCode} and get healthy meals delivered.`,
       title: `Share via ${channel}`,
     });
   };
@@ -32,12 +49,12 @@ export const ReferralProgramScreen = (_props: ReferralProgramScreenProps) => {
           <Ionicons color={resolveThemeColor("#FF4A17")} name="share-social-outline" size={34} />
           <Text style={styles.earnTitle}>Share & Earn</Text>
           <Text style={styles.earnCopy}>
-            Invite friends and both of you get ₦2,000 off your next order
+            Invite friends and both of you get ₦{rewardAmount.toLocaleString()} off your next order
           </Text>
           <View style={styles.codeCard}>
             <View>
               <Text style={styles.codeLabel}>YOUR CODE</Text>
-              <Text style={styles.codeText}>{REFERRAL_CODE}</Text>
+              <Text style={styles.codeText}>{referralCode}</Text>
             </View>
             <Pressable onPress={handleCopy} style={styles.copyButton}>
               <Ionicons color={resolveThemeColor("#FF4A17")} name={copied ? "checkmark" : "copy-outline"} size={18} />
@@ -47,10 +64,10 @@ export const ReferralProgramScreen = (_props: ReferralProgramScreenProps) => {
 
         <Text style={styles.shareLabel}>Share via</Text>
         <View style={styles.shareRow}>
-          {["WhatsApp", "SMS", "Email"].map((channel) => (
+          {(["WhatsApp", "SMS", "Email"] satisfies ReferralChannel[]).map((channel) => (
             <Pressable
               key={channel}
-              onPress={() => handleShare(channel)}
+              onPress={() => void handleShare(channel)}
               style={styles.shareButton}
             >
               <Text style={styles.shareButtonText}>{channel}</Text>

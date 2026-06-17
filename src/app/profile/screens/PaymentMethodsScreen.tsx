@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
@@ -13,8 +13,11 @@ type PaymentMethodsScreenProps = NativeStackScreenProps<ProfileStackParamList, "
 
 export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) => {
   const cards = useCustomerStore((state) => state.cards);
-  const addCard = useCustomerStore((state) => state.addCard);
-  const removeCard = useCustomerStore((state) => state.removeCard);
+  const createCard = useCustomerStore((state) => state.createCard);
+  const error = useCustomerStore((state) => state.error);
+  const isSyncing = useCustomerStore((state) => state.isSyncing);
+  const loadCards = useCustomerStore((state) => state.loadCards);
+  const removeCardRemote = useCustomerStore((state) => state.removeCardRemote);
   const [isAdding, setIsAdding] = useState(false);
   const [cardNumber, setCardNumber] = useState("1234 5678 9012 3456");
   const [holderName, setHolderName] = useState("");
@@ -28,11 +31,19 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
     [cardNumber, expiry, holderName],
   );
 
-  const handleSave = () => {
+  useEffect(() => {
+    void loadCards();
+  }, [loadCards]);
+
+  const handleSave = async () => {
     if (!canSave) {
       return;
     }
-    addCard({ expiry, holderName: holderName.trim().toUpperCase(), number: cardNumber });
+    try {
+      await createCard({ expiry, holderName: holderName.trim().toUpperCase(), number: cardNumber });
+    } catch {
+      return;
+    }
     setIsAdding(false);
     setCardNumber("");
     setHolderName("");
@@ -55,6 +66,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
         </Pressable>
 
         <Text style={styles.sectionTitle}>Saved Cards</Text>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         {showForm ? (
           <View style={styles.formCard}>
@@ -100,10 +112,11 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
                 <Text style={styles.cancelText}>Cancel</Text>
               </Pressable>
               <Pressable
-                onPress={handleSave}
-                style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
+                disabled={!canSave || isSyncing}
+                onPress={() => void handleSave()}
+                style={[styles.saveButton, (!canSave || isSyncing) && styles.saveButtonDisabled]}
               >
-                <Text style={styles.saveText}>Save Card</Text>
+                <Text style={styles.saveText}>{isSyncing ? "Saving..." : "Save Card"}</Text>
               </Pressable>
             </View>
           </View>
@@ -121,7 +134,12 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
                       {card.holderName} · Expires {card.expiry}
                     </Text>
                   </View>
-                  <Pressable onPress={() => removeCard(card.id)} hitSlop={10}>
+                  <Pressable
+                    onPress={() => {
+                      void removeCardRemote(card.id).catch(() => undefined);
+                    }}
+                    hitSlop={10}
+                  >
                     <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={16} />
                   </Pressable>
                 </View>
@@ -232,6 +250,12 @@ const styles = createThemedStyleSheet({
     paddingBottom: 100,
     paddingHorizontal: 12,
     paddingTop: 18,
+  },
+  errorText: {
+    color: "#C8320D",
+    fontSize: 11,
+    fontWeight: "700",
+    marginBottom: 10,
   },
   formCard: {
     backgroundColor: "#FFFFFF",

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   KeyboardAvoidingView,
@@ -27,6 +27,7 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
   const authEmail = useAuthStore((state) => state.email);
   const [addressSheet, setAddressSheet] = useState<"list" | "form" | undefined>();
   const [dietSheetOpen, setDietSheetOpen] = useState(false);
+  const loadAddresses = useCustomerStore((state) => state.loadAddresses);
   const rows = useMemo(
     () => [
       {
@@ -91,6 +92,10 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
     [navigation],
   );
 
+  useEffect(() => {
+    void loadAddresses();
+  }, [loadAddresses]);
+
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -145,8 +150,9 @@ const AddressSheet = ({
 }) => {
   const insets = useSafeAreaInsets();
   const addresses = useCustomerStore((state) => state.addresses);
-  const addAddress = useCustomerStore((state) => state.addAddress);
-  const removeAddress = useCustomerStore((state) => state.removeAddress);
+  const createAddress = useCustomerStore((state) => state.createAddress);
+  const isSyncing = useCustomerStore((state) => state.isSyncing);
+  const removeAddressRemote = useCustomerStore((state) => state.removeAddressRemote);
   const addressPagination = usePagination(addresses);
   const [label, setLabel] = useState("Home");
   const [phone, setPhone] = useState("09054531822");
@@ -154,8 +160,12 @@ const AddressSheet = ({
   const [city, setCity] = useState("Ikeja");
   const [stateName, setStateName] = useState("Lagos");
 
-  const save = () => {
-    addAddress({ address, city, isDefault: true, label, phone, state: stateName });
+  const save = async () => {
+    try {
+      await createAddress({ address, city, isDefault: true, label, phone, state: stateName });
+    } catch {
+      return;
+    }
     onClose();
   };
 
@@ -186,8 +196,12 @@ const AddressSheet = ({
                 <Pressable onPress={onClose} style={styles.cancelButton}>
                   <Text style={styles.cancelText}>Cancel</Text>
                 </Pressable>
-                <Pressable onPress={save} style={styles.saveButton}>
-                  <Text style={styles.saveText}>Save</Text>
+                <Pressable
+                  disabled={isSyncing}
+                  onPress={() => void save()}
+                  style={[styles.saveButton, isSyncing && styles.buttonDisabled]}
+                >
+                  <Text style={styles.saveText}>{isSyncing ? "Saving..." : "Save"}</Text>
                 </Pressable>
               </View>
             </>
@@ -205,7 +219,11 @@ const AddressSheet = ({
                           <Text style={styles.addressText}>{item.city}, {item.state}</Text>
                         </View>
                       </View>
-                      <Pressable onPress={() => removeAddress(item.id)}>
+                      <Pressable
+                        onPress={() => {
+                          void removeAddressRemote(item.id).catch(() => undefined);
+                        }}
+                      >
                         <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={15} />
                       </Pressable>
                     </View>
@@ -369,6 +387,7 @@ const styles = createThemedStyleSheet({
   },
   avatar: { alignItems: "center", backgroundColor: "#FFE8DF", borderColor: "#FFFFFF", borderRadius: 20, borderTopWidth: 1, elevation: 3, height: 40, justifyContent: "center", width: 40, ...skeuo.pressed },
   avatarText: { color: "#FF4A17", fontSize: 16, fontWeight: "800" },
+  buttonDisabled: { opacity: 0.55 },
   cancelButton: { alignItems: "center", backgroundColor: "#FFFFFF", borderColor: "#E8E2DD", borderRadius: 8, borderWidth: StyleSheet.hairlineWidth, elevation: 2, flex: 1, height: 31, justifyContent: "center", ...skeuo.pressed },
   cancelText: { color: "#171513", fontSize: 11, fontWeight: "700" },
   closeButton: { position: "absolute", right: 10, top: 10 },

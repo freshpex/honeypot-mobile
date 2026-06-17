@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -37,6 +37,11 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   const addresses = useCustomerStore((state) => state.addresses);
   const cards = useCustomerStore((state) => state.cards);
   const addOrder = useCustomerStore((state) => state.addOrder);
+  const chargeOrder = useCustomerStore((state) => state.chargeOrder);
+  const error = useCustomerStore((state) => state.error);
+  const isSyncing = useCustomerStore((state) => state.isSyncing);
+  const loadAddresses = useCustomerStore((state) => state.loadAddresses);
+  const loadCards = useCustomerStore((state) => state.loadCards);
   const [addressSheetOpen, setAddressSheetOpen] = useState(false);
   const [cardSheetOpen, setCardSheetOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string>();
@@ -68,8 +73,23 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   );
   const canConfirm = Boolean(items.length && selectedAddress && selectedCard);
 
-  const handleConfirmOrder = () => {
+  useEffect(() => {
+    void loadAddresses();
+    void loadCards();
+  }, [loadAddresses, loadCards]);
+
+  const handleConfirmOrder = async () => {
     if (!canConfirm || !selectedAddress || !selectedCard) {
+      return;
+    }
+    try {
+      await chargeOrder({
+        deliveryFee: DELIVERY_FEE,
+        items,
+        paymentMethodId: selectedCard.id,
+        total,
+      });
+    } catch {
       return;
     }
     addOrder({
@@ -192,13 +212,16 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
                   Add a delivery location and select a saved card to place this order.
                 </Text>
               ) : null}
+              {error ? <Text style={styles.validationText}>{error}</Text> : null}
 
               <Pressable
-                disabled={!canConfirm}
-                onPress={handleConfirmOrder}
-                style={[styles.confirmButton, !canConfirm && styles.confirmButtonDisabled]}
+                disabled={!canConfirm || isSyncing}
+                onPress={() => void handleConfirmOrder()}
+                style={[styles.confirmButton, (!canConfirm || isSyncing) && styles.confirmButtonDisabled]}
               >
-                <Text style={styles.confirmText}>Confirm Order — {formatNaira(total)}</Text>
+                <Text style={styles.confirmText}>
+                  {isSyncing ? "Confirming..." : `Confirm Order — ${formatNaira(total)}`}
+                </Text>
               </Pressable>
             </>
           )}
@@ -291,7 +314,8 @@ const AddressSheet = ({
   onSaved: (address: DeliveryAddress) => void;
   visible: boolean;
 }) => {
-  const addAddress = useCustomerStore((state) => state.addAddress);
+  const createAddress = useCustomerStore((state) => state.createAddress);
+  const isSyncing = useCustomerStore((state) => state.isSyncing);
   const [label, setLabel] = useState("Home");
   const [phone, setPhone] = useState("09054531822");
   const [address, setAddress] = useState("12 Ikeja, Lagos");
@@ -299,18 +323,23 @@ const AddressSheet = ({
   const [stateName, setStateName] = useState("Lagos");
   const canSave = Boolean(label.trim() && phone.trim() && address.trim() && city.trim() && stateName.trim());
 
-  const save = () => {
+  const save = async () => {
     if (!canSave) {
       return;
     }
-    const savedAddress = addAddress({
-      address: address.trim(),
-      city: city.trim(),
-      isDefault: true,
-      label: label.trim(),
-      phone: phone.trim(),
-      state: stateName.trim(),
-    });
+    let savedAddress: DeliveryAddress;
+    try {
+      savedAddress = await createAddress({
+        address: address.trim(),
+        city: city.trim(),
+        isDefault: true,
+        label: label.trim(),
+        phone: phone.trim(),
+        state: stateName.trim(),
+      });
+    } catch {
+      return;
+    }
     onSaved(savedAddress);
     onClose();
   };
@@ -331,11 +360,11 @@ const AddressSheet = ({
           <Text style={styles.cancelText}>Cancel</Text>
         </Pressable>
         <Pressable
-          disabled={!canSave}
-          onPress={save}
-          style={[styles.sheetSaveButton, !canSave && styles.confirmButtonDisabled]}
+          disabled={!canSave || isSyncing}
+          onPress={() => void save()}
+          style={[styles.sheetSaveButton, (!canSave || isSyncing) && styles.confirmButtonDisabled]}
         >
-          <Text style={styles.saveText}>Save</Text>
+          <Text style={styles.saveText}>{isSyncing ? "Saving..." : "Save"}</Text>
         </Pressable>
       </View>
     </BottomSheet>
@@ -349,22 +378,28 @@ const InlineCardForm = ({
   onCancel: () => void;
   onSaved: (card: SavedCard) => void;
 }) => {
-  const addCard = useCustomerStore((state) => state.addCard);
+  const createCard = useCustomerStore((state) => state.createCard);
+  const isSyncing = useCustomerStore((state) => state.isSyncing);
   const [cardNumber, setCardNumber] = useState("1234 5678 9012 3456");
   const [holderName, setHolderName] = useState("ENOCH OLUWAKAYODE EPEKIPOLU");
   const [expiry, setExpiry] = useState("11/27");
   const [cvv, setCvv] = useState("");
   const canSave = Boolean(cardNumber.replace(/\s/g, "").length >= 12 && holderName.trim() && expiry.trim());
 
-  const save = () => {
+  const save = async () => {
     if (!canSave) {
       return;
     }
-    const savedCard = addCard({
-      expiry: expiry.trim(),
-      holderName: holderName.trim().toUpperCase(),
-      number: cardNumber,
-    });
+    let savedCard: SavedCard;
+    try {
+      savedCard = await createCard({
+        expiry: expiry.trim(),
+        holderName: holderName.trim().toUpperCase(),
+        number: cardNumber,
+      });
+    } catch {
+      return;
+    }
     onSaved(savedCard);
   };
 
@@ -399,11 +434,11 @@ const InlineCardForm = ({
           <Text style={styles.cancelText}>Cancel</Text>
         </Pressable>
         <Pressable
-          disabled={!canSave}
-          onPress={save}
-          style={[styles.sheetSaveButton, !canSave && styles.confirmButtonDisabled]}
+          disabled={!canSave || isSyncing}
+          onPress={() => void save()}
+          style={[styles.sheetSaveButton, (!canSave || isSyncing) && styles.confirmButtonDisabled]}
         >
-          <Text style={styles.saveText}>Save Card</Text>
+          <Text style={styles.saveText}>{isSyncing ? "Saving..." : "Save Card"}</Text>
         </Pressable>
       </View>
     </View>
