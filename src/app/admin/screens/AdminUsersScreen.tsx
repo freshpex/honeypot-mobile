@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
-import { ADMIN_PAGE_SIZE, useAdminStore, useCustomerStore } from "@/shared/state";
+import { ADMIN_PAGE_SIZE, useAdminStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminActionButton,
@@ -15,10 +15,13 @@ import {
 
 export const AdminUsersScreen = () => {
   const users = useAdminStore((state) => state.users);
-  const adminOrders = useAdminStore((state) => state.orders);
-  const customerOrders = useCustomerStore((state) => state.orders);
   const toggleUserStatus = useAdminStore((state) => state.toggleUserStatus);
+  const loadUsers = useAdminStore((state) => state.loadUsers);
   const pagination = usePagination(users, ADMIN_PAGE_SIZE);
+
+  useEffect(() => {
+    void loadUsers();
+  }, [loadUsers]);
 
   const summary = useMemo(
     () => ({
@@ -29,38 +32,6 @@ export const AdminUsersScreen = () => {
     [users],
   );
 
-  const userStats = useMemo(
-    () =>
-      Object.fromEntries(
-        users.map((user) => {
-          const matchingAdminOrders = adminOrders.filter((order) => order.customer === user.name);
-          const matchingCustomerOrders = user.name === "Enoch" ? customerOrders : [];
-          const allOrders = [
-            ...matchingAdminOrders.map((order) => ({
-              status: order.status,
-              total: parseNaira(order.total),
-            })),
-            ...matchingCustomerOrders.map((order) => ({
-              status: order.status,
-              total: order.total,
-            })),
-          ];
-
-          return [
-            user.id,
-            {
-              activeOrders: allOrders.filter((order) =>
-                ["Confirmed", "Preparing", "Out for Delivery"].includes(order.status),
-              ).length,
-              deliveredOrders: allOrders.filter((order) => order.status === "Delivered").length,
-              totalOrders: allOrders.length,
-              totalSpend: allOrders.reduce((sum, order) => sum + order.total, 0),
-            },
-          ];
-        }),
-      ),
-    [adminOrders, customerOrders, users],
-  );
 
   return (
     <AdminScreen>
@@ -88,7 +59,7 @@ export const AdminUsersScreen = () => {
             />
           </View>
           <View style={styles.actions}>
-            <AdminActionButton onPress={() => toggleUserStatus(user.id)}>
+            <AdminActionButton onPress={() => void toggleUserStatus(user.id)}>
               {user.status === "Suspended" ? "Reactivate" : "Toggle Status"}
             </AdminActionButton>
             <View style={styles.secondaryAction}>
@@ -97,10 +68,10 @@ export const AdminUsersScreen = () => {
             </View>
           </View>
           <View style={styles.statsGrid}>
-            <UserStat label="Orders" value={String(userStats[user.id]?.totalOrders ?? 0)} />
-            <UserStat label="Active" value={String(userStats[user.id]?.activeOrders ?? 0)} />
-            <UserStat label="Delivered" value={String(userStats[user.id]?.deliveredOrders ?? 0)} />
-            <UserStat label="Spend" value={`₦${(userStats[user.id]?.totalSpend ?? 0).toLocaleString()}`} />
+            <UserStat label="Orders" value={String(user.stats.totalOrders)} />
+            <UserStat label="Active" value={String(user.stats.activeOrders)} />
+            <UserStat label="Delivered" value={String(user.stats.deliveredOrders)} />
+            <UserStat label="Spend" value={`₦${user.stats.totalSpend.toLocaleString()}`} />
           </View>
         </AdminCard>
       ))}
@@ -116,8 +87,6 @@ export const AdminUsersScreen = () => {
     </AdminScreen>
   );
 };
-
-const parseNaira = (value: string) => Number(value.replace(/[^\d]/g, "")) || 0;
 
 const UserStat = ({ label, value }: { label: string; value: string }) => (
   <View style={styles.statBox}>

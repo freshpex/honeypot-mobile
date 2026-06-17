@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useAdminStore, useAuthStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
@@ -19,23 +20,28 @@ const settingLabels = {
 export const AdminSettingsScreen = () => {
   const settings = useAdminStore((state) => state.settings);
   const toggleSetting = useAdminStore((state) => state.toggleSetting);
+  const loadSettings = useAdminStore((state) => state.loadSettings);
   const logout = useAuthStore((state) => state.logout);
   const email = useAuthStore((state) => state.email);
 
+  useEffect(() => {
+    void loadSettings();
+  }, [loadSettings]);
+
   return (
     <AdminScreen>
-      <AdminSectionTitle subtitle="Control operational flags before backend rollout." title="Admin Settings" />
+      <AdminSectionTitle subtitle="Control backend operational flags." title="Admin Settings" />
       {Object.entries(settings).map(([key, enabled]) => (
         <AdminCard key={key}>
           <View style={styles.settingRow}>
             <View style={styles.settingText}>
               <Text style={styles.settingTitle}>{settingLabels[key as keyof typeof settingLabels]}</Text>
               <Text style={styles.settingSubtitle}>
-                {enabled ? "Enabled for demo operations" : "Disabled until production setup"}
+                {enabled ? "Enabled for operations" : "Disabled for operations"}
               </Text>
             </View>
             <Pressable
-              onPress={() => toggleSetting(key as keyof typeof settings)}
+              onPress={() => void toggleSetting(key as keyof typeof settings)}
               style={[styles.toggle, enabled && styles.toggleOn]}
             >
               <View style={[styles.knob, enabled && styles.knobOn]} />

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
@@ -85,12 +85,17 @@ export const AdminMealsScreen = () => {
   const addMeal = useAdminStore((state) => state.addMeal);
   const updateMeal = useAdminStore((state) => state.updateMeal);
   const deleteMeal = useAdminStore((state) => state.deleteMeal);
+  const loadMeals = useAdminStore((state) => state.loadMeals);
   const pagination = usePagination(meals, ADMIN_PAGE_SIZE);
   const [editingMealId, setEditingMealId] = useState<string>();
   const [form, setForm] = useState<MealForm>(emptyForm);
 
   const isEditing = Boolean(editingMealId);
   const canSave = Boolean(form.name.trim() && form.description.trim() && form.imageUrl.trim());
+
+  useEffect(() => {
+    void loadMeals();
+  }, [loadMeals]);
 
   const stats = useMemo(
     () => ({
@@ -116,7 +121,7 @@ export const AdminMealsScreen = () => {
     setForm(mealToForm(meal));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!canSave) {
       return;
     }
@@ -137,9 +142,9 @@ export const AdminMealsScreen = () => {
     };
 
     if (editingMealId) {
-      updateMeal(editingMealId, payload);
+      await updateMeal(editingMealId, payload);
     } else {
-      addMeal(payload);
+      await addMeal(payload);
     }
     resetForm();
   };
@@ -208,7 +213,7 @@ export const AdminMealsScreen = () => {
           onChange={(status) => setForm((current) => ({ ...current, status }))}
           value={form.status}
         />
-        <AdminActionButton onPress={handleSave}>
+        <AdminActionButton onPress={() => void handleSave()}>
           {isEditing ? "Update Meal" : "Add Meal"}
         </AdminActionButton>
       </AdminCard>
@@ -233,7 +238,7 @@ export const AdminMealsScreen = () => {
             {mealStatuses.map((status) => (
               <Pressable
                 key={status}
-                onPress={() => updateMeal(meal.id, { status })}
+                onPress={() => void updateMeal(meal.id, { status })}
                 style={[styles.statusChip, meal.status === status && styles.statusChipActive]}
               >
                 <Text style={[styles.statusText, meal.status === status && styles.statusTextActive]}>
@@ -244,7 +249,7 @@ export const AdminMealsScreen = () => {
           </View>
           <View style={styles.actions}>
             <AdminActionButton onPress={() => startEdit(meal)}>Edit</AdminActionButton>
-            <Pressable onPress={() => deleteMeal(meal.id)} style={styles.deleteButton}>
+            <Pressable onPress={() => void deleteMeal(meal.id)} style={styles.deleteButton}>
               <Text style={styles.deleteText}>Delete</Text>
             </Pressable>
           </View>

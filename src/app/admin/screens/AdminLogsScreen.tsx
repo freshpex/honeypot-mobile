@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
@@ -17,12 +17,17 @@ export const AdminLogsScreen = () => {
   const logs = useAdminStore((state) => state.logs);
   const downloadLogs = useAdminStore((state) => state.downloadLogs);
   const exportMessage = useAdminStore((state) => state.exportMessage);
+  const loadLogs = useAdminStore((state) => state.loadLogs);
   const [csvPreview, setCsvPreview] = useState("");
   const pagination = usePagination(logs, ADMIN_PAGE_SIZE);
 
+  useEffect(() => {
+    void loadLogs();
+  }, [loadLogs]);
+
   return (
     <AdminScreen>
-      <AdminSectionTitle subtitle="Audit operational events and prepare local exports." title="Logs" />
+      <AdminSectionTitle subtitle="Audit backend operational events and prepare exports." title="Logs" />
       <AdminCard>
         <View style={styles.exportRow}>
           <View style={styles.exportIcon}>
@@ -30,7 +35,7 @@ export const AdminLogsScreen = () => {
           </View>
           <View style={styles.exportTextWrap}>
             <Text style={styles.exportTitle}>Download all logs</Text>
-            <Text style={styles.exportSubtitle}>Prepares CSV locally until backend storage is connected.</Text>
+            <Text style={styles.exportSubtitle}>Prepares CSV from backend audit records.</Text>
           </View>
         </View>
         <AdminActionButton

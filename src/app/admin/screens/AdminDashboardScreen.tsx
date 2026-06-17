@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Text, View } from "react-native";
-import { useAdminStore, useCustomerStore, useSubscriptionStore } from "@/shared/state";
+import { useAdminStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminCard,
@@ -15,8 +15,12 @@ export const AdminDashboardScreen = () => {
   const users = useAdminStore((state) => state.users);
   const adminOrders = useAdminStore((state) => state.orders);
   const meals = useAdminStore((state) => state.meals);
-  const customerOrders = useCustomerStore((state) => state.orders);
-  const subscriptionStatus = useSubscriptionStore((state) => state.status);
+  const overview = useAdminStore((state) => state.overview);
+  const loadAll = useAdminStore((state) => state.loadAll);
+
+  useEffect(() => {
+    void loadAll();
+  }, [loadAll]);
 
   const allOrders = useMemo(
     () => [
@@ -24,16 +28,12 @@ export const AdminDashboardScreen = () => {
         status: order.status,
         total: parseNaira(order.total),
       })),
-      ...customerOrders.map((order) => ({
-        status: order.status,
-        total: order.total,
-      })),
     ],
-    [adminOrders, customerOrders],
+    [adminOrders],
   );
 
   const overallStats = useMemo(
-    () => ({
+    () => overview?.metrics ?? ({
       activeOrders: allOrders.filter((order) =>
         ["Confirmed", "Preparing", "Out for Delivery"].includes(order.status),
       ).length,
@@ -42,18 +42,21 @@ export const AdminDashboardScreen = () => {
       hiddenMeals: meals.filter((meal) => meal.status !== "Available").length,
       revenue: allOrders.reduce((sum, order) => sum + order.total, 0),
       suspendedUsers: users.filter((user) => user.status === "Suspended").length,
+      totalMeals: meals.length,
+      totalOrders: allOrders.length,
+      totalUsers: users.length,
     }),
-    [allOrders, meals, users],
+    [allOrders, meals, overview?.metrics, users],
   );
 
   const metrics = useMemo(
     () => [
-      { icon: "people-outline", label: "Users", tone: "orange" as const, value: String(users.length) },
+      { icon: "people-outline", label: "Users", tone: "orange" as const, value: String(overallStats.totalUsers) },
       {
         icon: "bag-handle-outline",
         label: "Orders",
         tone: "blue" as const,
-        value: String(allOrders.length),
+        value: String(overallStats.totalOrders),
       },
       {
         icon: "cash-outline",
@@ -65,13 +68,7 @@ export const AdminDashboardScreen = () => {
         icon: "restaurant-outline",
         label: "Meals",
         tone: "yellow" as const,
-        value: String(meals.length),
-      },
-      {
-        icon: "calendar-outline",
-        label: "Plan State",
-        tone: subscriptionStatus === "active" ? ("green" as const) : ("yellow" as const),
-        value: subscriptionStatus,
+        value: String(overallStats.totalMeals),
       },
     ] satisfies {
       icon: keyof typeof Ionicons.glyphMap;
@@ -79,12 +76,12 @@ export const AdminDashboardScreen = () => {
       tone: "orange" | "green" | "blue" | "yellow";
       value: string;
     }[],
-    [allOrders.length, meals.length, overallStats.revenue, subscriptionStatus, users.length],
+    [overallStats.revenue, overallStats.totalMeals, overallStats.totalOrders, overallStats.totalUsers],
   );
 
   return (
     <AdminScreen>
-      <AdminSectionTitle subtitle="Manage HoneyPot operations locally for now." title="Admin Overview" />
+      <AdminSectionTitle subtitle="Manage HoneyPot operations from backend data." title="Admin Overview" />
       <View style={styles.metrics}>
         {metrics.map((metric) => (
           <AdminMetricCard key={metric.label} {...metric} />
@@ -98,7 +95,7 @@ export const AdminDashboardScreen = () => {
           </View>
           <View style={styles.headerText}>
             <Text style={styles.cardTitle}>Operations Health</Text>
-            <Text style={styles.cardSubtitle}>Dummy admin data is ready for API integration.</Text>
+            <Text style={styles.cardSubtitle}>Live admin data is synced with the backend.</Text>
           </View>
           <AdminPill label="Live UI" tone="green" />
         </View>

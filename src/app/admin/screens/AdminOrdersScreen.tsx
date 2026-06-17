@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
-import { ADMIN_PAGE_SIZE, useAdminStore, useCustomerStore } from "@/shared/state";
-import type { AdminOrder, AdminOrderStatus } from "@/shared/state";
+import { ADMIN_PAGE_SIZE, useAdminStore } from "@/shared/state";
+import type { AdminOrderStatus } from "@/shared/state";
 import { createThemedStyleSheet } from "@/shared/theme";
 import {
   AdminCard,
@@ -20,31 +20,14 @@ const orderStatuses: AdminOrderStatus[] = [
   "Cancelled",
 ];
 
-type AdminVisibleOrder = AdminOrder & {
-  source: "admin" | "customer";
-};
-
 export const AdminOrdersScreen = () => {
-  const adminOrders = useAdminStore((state) => state.orders);
+  const orders = useAdminStore((state) => state.orders);
   const updateOrderStatus = useAdminStore((state) => state.updateOrderStatus);
-  const customerOrders = useCustomerStore((state) => state.orders);
-  const updateCustomerOrderStatus = useCustomerStore((state) => state.updateOrderStatus);
+  const loadOrders = useAdminStore((state) => state.loadOrders);
 
-  const orders = useMemo<AdminVisibleOrder[]>(
-    () => [
-      ...customerOrders.map((order) => ({
-        customer: "Enoch",
-        date: order.date,
-        id: order.id,
-        items: order.items.map((item) => `${item.name} x${item.quantity}`).join(", "),
-        source: "customer" as const,
-        status: order.status,
-        total: `₦${order.total.toLocaleString()}`,
-      })),
-      ...adminOrders.map((order) => ({ ...order, source: "admin" as const })),
-    ],
-    [adminOrders, customerOrders],
-  );
+  useEffect(() => {
+    void loadOrders();
+  }, [loadOrders]);
 
   const pagination = usePagination(orders, ADMIN_PAGE_SIZE);
 
@@ -67,13 +50,7 @@ export const AdminOrdersScreen = () => {
               return (
                 <Pressable
                   key={status}
-                  onPress={() => {
-                  if (order.source === "customer") {
-                      updateCustomerOrderStatus(order.id, status);
-                    return;
-                  }
-                    updateOrderStatus(order.id, status);
-                }}
+                  onPress={() => void updateOrderStatus(order.id, status)}
                   style={[styles.statusChip, active && styles.statusChipActive]}
                 >
                   <Text style={[styles.statusChipText, active && styles.statusChipTextActive]}>
@@ -85,7 +62,7 @@ export const AdminOrdersScreen = () => {
           </View>
           <View style={styles.bottomRow}>
             <Text style={styles.total}>{order.total}</Text>
-            <Text style={styles.source}>{order.source === "customer" ? "Customer checkout" : "Admin seed order"}</Text>
+            <Text style={styles.source}>Backend order</Text>
           </View>
         </AdminCard>
       ))}
