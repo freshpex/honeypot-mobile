@@ -21,7 +21,7 @@ import {
   useMealCartStore,
 } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
-import { mealsService } from "../services";
+import { mealsService, type WeeklyMealSelection } from "../services";
 import type { Meal, MealsStackParamList } from "../types";
 
 type MenuScreenProps = NativeStackScreenProps<MealsStackParamList, "Menu">;
@@ -34,7 +34,10 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeDiet, setActiveDiet] = useState<string>();
   const [selectedMeal, setSelectedMeal] = useState<Meal>();
+  const [activeSelection, setActiveSelection] = useState<WeeklyMealSelection>();
+  const [weeklySelections, setWeeklySelections] = useState<WeeklyMealSelection[]>([]);
   const [detailQuantity, setDetailQuantity] = useState(1);
+  const [selectionError, setSelectionError] = useState<string>();
   const [query, setQuery] = useState("");
 
   const categories = useMemo(
@@ -62,6 +65,27 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
       }
     };
     void loadMeals();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadSelections = async () => {
+      try {
+        const response = await mealsService.getWeeklySelections();
+        if (mounted) {
+          setWeeklySelections(response);
+          setSelectionError(undefined);
+        }
+      } catch (error) {
+        if (mounted) {
+          setSelectionError(error instanceof Error ? error.message : "Unable to load weekly plan.");
+        }
+      }
+    };
+    void loadSelections();
     return () => {
       mounted = false;
     };
@@ -109,6 +133,21 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
           primary
         />
         <FilterStrip activeValue={activeDiet} items={diets} onChange={setActiveDiet} />
+        <WeeklyPlanner
+          error={selectionError}
+          onChoose={(selection) => setActiveSelection(selection)}
+          onSkip={async (selection) => {
+            try {
+              const updated = await mealsService.skipMeal(selection.date, "Skipped from weekly menu");
+              setWeeklySelections((current) =>
+                current.map((item) => (item.date === updated.date ? updated : item)),
+              );
+            } catch (error) {
+              setSelectionError(error instanceof Error ? error.message : "Unable to skip day.");
+            }
+          }}
+          selections={weeklySelections}
+        />
 
         <ScrollView
           contentContainerStyle={[styles.mealGrid, cartCount > 0 && styles.mealGridWithCart]}
@@ -144,16 +183,88 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
         meal={selectedMeal}
         onAdd={() => {
           if (selectedMeal) {
-            addMeal(selectedMeal, detailQuantity);
-            setSelectedMeal(undefined);
+            if (activeSelection) {
+              void mealsService
+                .selectMeal(activeSelection.date, selectedMeal.id)
+                .then((updated) => {
+                  setWeeklySelections((current) =>
+                    current.map((item) => (item.date === updated.date ? updated : item)),
+                  );
+                  setActiveSelection(undefined);
+                  setSelectedMeal(undefined);
+                })
+                .catch((error) => {
+                  setSelectionError(error instanceof Error ? error.message : "Unable to select meal.");
+                });
+            } else {
+              addMeal(selectedMeal, detailQuantity);
+              setSelectedMeal(undefined);
+            }
           }
         }}
         onClose={() => setSelectedMeal(undefined)}
         onDecrement={() => setDetailQuantity((value) => Math.max(1, value - 1))}
         onIncrement={() => setDetailQuantity((value) => value + 1)}
         quantity={detailQuantity}
+        selectionLabel={activeSelection ? `Select for ${activeSelection.dayLabel}` : undefined}
       />
     </SafeAreaView>
+  );
+};
+
+const WeeklyPlanner = ({
+  error,
+  onChoose,
+  onSkip,
+  selections,
+}: {
+  error?: string;
+  onChoose: (selection: WeeklyMealSelection) => void;
+  onSkip: (selection: WeeklyMealSelection) => void;
+  selections: WeeklyMealSelection[];
+}) => {
+  if (!selections.length && !error) {
+    return null;
+  }
+
+  return (
+    <View style={styles.weeklyPlanner}>
+      <View style={styles.weeklyHeader}>
+        <Text style={styles.weeklyTitle}>Weekly Meal Selection</Text>
+        <Text style={styles.weeklyHint}>Choose before cutoff</Text>
+      </View>
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.weeklyRow}>
+        {selections.map((selection) => {
+          const hasMeal = Boolean(selection.meal);
+          const isSkipped = selection.status === "Skipped";
+          return (
+            <View key={selection.date} style={[styles.dayCard, selection.locked && styles.dayCardLocked]}>
+              <Text style={styles.dayLabel}>{selection.dayLabel}</Text>
+              <Text numberOfLines={1} style={styles.dayMeal}>
+                {hasMeal ? selection.meal?.name : isSkipped ? "Skipped" : "No meal"}
+              </Text>
+              <View style={styles.dayActions}>
+                <Pressable
+                  disabled={selection.locked}
+                  onPress={() => onChoose(selection)}
+                  style={[styles.dayActionButton, selection.locked && styles.dayActionDisabled]}
+                >
+                  <Text style={styles.dayActionText}>{hasMeal ? "Change" : "Choose"}</Text>
+                </Pressable>
+                <Pressable
+                  disabled={selection.locked}
+                  onPress={() => onSkip(selection)}
+                  style={[styles.daySkipButton, selection.locked && styles.dayActionDisabled]}
+                >
+                  <Text style={styles.daySkipText}>Skip</Text>
+                </Pressable>
+              </View>
+            </View>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -233,6 +344,7 @@ type MealDetailSheetProps = {
   onDecrement: () => void;
   onIncrement: () => void;
   quantity: number;
+  selectionLabel?: string;
 };
 
 const MealDetailSheet = ({
@@ -242,6 +354,7 @@ const MealDetailSheet = ({
   onDecrement,
   onIncrement,
   quantity,
+  selectionLabel,
 }: MealDetailSheetProps) => {
   const insets = useSafeAreaInsets();
 
@@ -281,7 +394,7 @@ const MealDetailSheet = ({
               <Pressable onPress={onAdd} style={styles.addButton}>
                 <Ionicons color={resolveThemeColor("#FFFFFF")} name="cart-outline" size={14} />
                 <Text style={styles.addButtonText}>
-                  Add to Cart — {formatNaira(meal.price * quantity)}
+                  {selectionLabel ?? `Add to Cart — ${formatNaira(meal.price * quantity)}`}
                 </Text>
               </Pressable>
             </View>
@@ -442,6 +555,66 @@ const styles = createThemedStyleSheet({
     paddingHorizontal: 10,
     paddingTop: 4,
   },
+  dayActionButton: {
+    alignItems: "center",
+    backgroundColor: "#FF4A17",
+    borderRadius: 10,
+    flex: 1,
+    height: 24,
+    justifyContent: "center",
+  },
+  dayActionDisabled: {
+    opacity: 0.45,
+  },
+  dayActions: {
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 10,
+  },
+  dayActionText: {
+    color: "#FFFFFF",
+    fontSize: 9,
+    fontWeight: "900",
+  },
+  dayCard: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8E2DD",
+    borderRadius: 13,
+    borderWidth: StyleSheet.hairlineWidth,
+    minHeight: 92,
+    padding: 10,
+    width: 132,
+    ...skeuo.card,
+  },
+  dayCardLocked: {
+    backgroundColor: "#F2EFED",
+  },
+  dayLabel: {
+    color: "#FF4A17",
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  dayMeal: {
+    color: "#171513",
+    fontSize: 11,
+    fontWeight: "800",
+    marginTop: 7,
+  },
+  daySkipButton: {
+    alignItems: "center",
+    backgroundColor: "#FFF3EE",
+    borderColor: "#FFD1C1",
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    height: 24,
+    justifyContent: "center",
+    width: 42,
+  },
+  daySkipText: {
+    color: "#C8320D",
+    fontSize: 9,
+    fontWeight: "900",
+  },
   detailBody: {
     paddingHorizontal: 14,
     paddingTop: 12,
@@ -521,6 +694,30 @@ const styles = createThemedStyleSheet({
   },
   filterBlock: {
     marginTop: 10,
+  },
+  weeklyHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 9,
+  },
+  weeklyHint: {
+    color: "#817B75",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  weeklyPlanner: {
+    marginBottom: 12,
+    marginTop: 5,
+  },
+  weeklyRow: {
+    gap: 8,
+    paddingRight: 18,
+  },
+  weeklyTitle: {
+    color: "#171513",
+    fontSize: 13,
+    fontWeight: "900",
   },
   mealBody: {
     padding: 10,

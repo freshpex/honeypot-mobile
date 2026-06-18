@@ -19,6 +19,15 @@ export type MealsMenuParams = {
   tag?: string;
 };
 
+export type WeeklyMealSelection = {
+  date: string;
+  dayLabel: string;
+  status: "Selected" | "Skipped" | "Auto Assigned" | "Locked" | "Unselected";
+  cutoffAt: string;
+  locked: boolean;
+  meal?: Meal;
+};
+
 export const mealsService = {
   module: "meals",
   getMenu: (params: MealsMenuParams = {}) => {
@@ -31,5 +40,19 @@ export const mealsService = {
     const query = search.toString();
     return apiClient.get<MealsMenuResponse>(`/meals/menu${query ? `?${query}` : ""}`);
   },
+  getWeeklySelections: (weekStart?: string) =>
+    apiClient.get<WeeklyMealSelection[]>(
+      `/meals/selections/week${weekStart ? `?weekStart=${encodeURIComponent(weekStart)}` : ""}`,
+    ),
+  selectMeal: (deliveryDate: string, mealId: string) =>
+    apiClient.put<WeeklyMealSelection, { deliveryDate: string; mealId: string }>(
+      "/meals/selections",
+      { deliveryDate, mealId },
+    ),
+  skipMeal: (deliveryDate: string, reason?: string) =>
+    apiClient.post<WeeklyMealSelection, { deliveryDate: string; reason?: string }>(
+      "/meals/selections/skip",
+      { deliveryDate, reason },
+    ),
 };
 

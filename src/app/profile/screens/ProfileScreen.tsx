@@ -1,4 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { CommunityScreen } from "@/app/community";
+import { LoyaltyScreen } from "@/app/loyalty";
+import { PersonalizationScreen } from "@/app/personalization";
 import { SupportScreen } from "@/app/support";
 import { AppHeader } from "@/components";
 import { resolveThemeColor } from "@/shared/theme";
@@ -30,6 +33,9 @@ export const ProfileScreen = () => (
     <Stack.Screen component={PaymentMethodsScreen} name="PaymentMethods" />
     <Stack.Screen component={MyWalletScreen} name="MyWallet" />
     <Stack.Screen component={PaymentHistoryScreen} name="PaymentHistory" />
+    <Stack.Screen component={LoyaltyScreen} name="Loyalty" />
+    <Stack.Screen component={CommunityScreen} name="Community" />
+    <Stack.Screen component={PersonalizationScreen} name="Personalization" />
     <Stack.Screen component={ReferralProgramScreen} name="ReferralProgram" />
     <Stack.Screen component={SupportScreen} name="Support" />
   </Stack.Navigator>
@@ -37,8 +43,11 @@ export const ProfileScreen = () => (
 
 const profileTitles: Record<keyof ProfileStackParamList, string> = {
   MyWallet: "My Wallet",
+  Community: "Community",
+  Loyalty: "Loyalty",
   PaymentHistory: "Payment History",
   PaymentMethods: "Payment Methods",
+  Personalization: "Personalization",
   ProfileHome: "Profile",
   ReferralProgram: "Referral Program",
   Support: "Support",

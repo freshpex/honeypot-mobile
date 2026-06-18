@@ -1,5 +1,7 @@
 import { apiClient } from "@/shared/api/client";
 import type {
+  GiftSubscriptionDto,
+  GiftSubscriptionInput,
   SubscriptionOverviewDto,
   SubscriptionPlanDto,
   UserSubscriptionDto,
@@ -20,5 +22,7 @@ export const subscriptionsService = {
       { durationDays, reason },
     ),
   resume: () => apiClient.post<UserSubscriptionDto, Record<string, never>>("/subscriptions/resume", {}),
+  gift: (input: GiftSubscriptionInput) =>
+    apiClient.post<GiftSubscriptionDto, GiftSubscriptionInput>("/subscriptions/gift", input),
 };
 

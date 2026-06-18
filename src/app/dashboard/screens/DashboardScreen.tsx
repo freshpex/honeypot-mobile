@@ -91,11 +91,11 @@ export const DashboardScreen = () => {
         },
       },
       {
-        icon: "clipboard-outline",
-        label: "View Orders",
+        icon: "gift-outline",
+        label: "Gift Plan",
         tint: "#F0EAFE",
         color: "#7E48E8",
-        onPress: () => navigation.navigate("Orders"),
+        onPress: () => navigation.navigate("Plan"),
       },
     ] satisfies {
       color: string;

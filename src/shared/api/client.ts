@@ -17,7 +17,7 @@ export class ApiClientError extends Error {
 
 const request = async <TResponse, TBody = unknown>(
   path: string,
-  method: "GET" | "POST" | "PATCH" | "DELETE",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   options: RequestOptions<TBody> = {},
 ): Promise<TResponse> => {
   const session = await getAuthSession();
@@ -46,6 +46,8 @@ export const apiClient = {
   get: <TResponse>(path: string) => request<TResponse>(path, "GET"),
   post: <TResponse, TBody = unknown>(path: string, body: TBody) =>
     request<TResponse, TBody>(path, "POST", { body }),
+  put: <TResponse, TBody = unknown>(path: string, body: TBody) =>
+    request<TResponse, TBody>(path, "PUT", { body }),
   patch: <TResponse, TBody = unknown>(path: string, body: TBody) =>
     request<TResponse, TBody>(path, "PATCH", { body }),
   delete: <TResponse>(path: string) => request<TResponse>(path, "DELETE"),

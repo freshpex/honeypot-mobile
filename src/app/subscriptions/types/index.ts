@@ -29,3 +29,25 @@ export type SubscriptionOverviewDto = {
   plans: SubscriptionPlanDto[];
 };
 
+export type GiftSubscriptionDto = {
+  code: string;
+  design?: string;
+  expiresAt: string;
+  id: string;
+  message?: string;
+  plan: SubscriptionPlanDto;
+  recipientEmail: string;
+  recipientName: string;
+  sendAt?: string;
+  status: "scheduled" | "sent" | "redeemed" | "expired";
+};
+
+export type GiftSubscriptionInput = {
+  planId: string;
+  recipientName: string;
+  recipientEmail: string;
+  message?: string;
+  design?: string;
+  sendAt?: string;
+};
+
