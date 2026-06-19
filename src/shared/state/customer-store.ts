@@ -35,13 +35,12 @@ type CustomerState = {
   isSyncing: boolean;
   orders: CustomerOrder[];
   paymentHistory: PaymentHistoryItem[];
-  addAddress: (address: Omit<DeliveryAddress, "id">) => DeliveryAddress;
-  addCard: (card: Omit<SavedCard, "id" | "brand" | "last4"> & { number: string }) => SavedCard;
   checkoutOrder: (input: {
     deliveryAddressId: string;
     deliveryFee: number;
     items: CartItem[];
     paymentMethodId: string;
+    paymentReference: string;
   }) => Promise<CustomerOrder>;
   createAddress: (address: Omit<DeliveryAddress, "id">) => Promise<DeliveryAddress>;
   createCard: (card: Omit<SavedCard, "id" | "brand" | "last4"> & { number: string }) => Promise<SavedCard>;
@@ -60,44 +59,13 @@ type CustomerState = {
 export const useCustomerStore = create<CustomerState>((set) => ({
   addresses: [],
   allergies: "",
-  cards: [
-    {
-      brand: "Mastercard",
-      expiry: "11/27",
-      holderName: "ENOCH OLUWAKAYODE EPEKIPOLU",
-      id: "card-mastercard-5380",
-      last4: "5380",
-    },
-  ],
-  dietaryPreferences: ["High Protein"],
+  cards: [],
+  dietaryPreferences: [],
   error: undefined,
   isSyncing: false,
   orders: [],
   paymentHistory: [],
-  addAddress: (address) => {
-    const newAddress = { ...address, id: `addr-${Date.now()}` };
-    set((state) => ({
-      addresses: [
-        ...state.addresses.map((item) => ({ ...item, isDefault: false })),
-        newAddress,
-      ],
-    }));
-    return newAddress;
-  },
-  addCard: (card) => {
-    const newCard: SavedCard = {
-      brand: "Mastercard",
-      expiry: card.expiry,
-      holderName: card.holderName,
-      id: `card-${Date.now()}`,
-      last4: card.number.replace(/\s/g, "").slice(-4),
-    };
-    set((state) => ({
-      cards: [...state.cards, newCard],
-    }));
-    return newCard;
-  },
-  checkoutOrder: async ({ deliveryAddressId, deliveryFee, items, paymentMethodId }) => {
+  checkoutOrder: async ({ deliveryAddressId, deliveryFee, items, paymentMethodId, paymentReference }) => {
     set({ error: undefined, isSyncing: true });
     try {
       const order = await ordersService.checkout({
@@ -105,6 +73,7 @@ export const useCustomerStore = create<CustomerState>((set) => ({
         deliveryFee,
         items: items.map((item) => ({ mealId: item.meal.id, quantity: item.quantity })),
         paymentMethodId,
+        paymentReference,
       });
       set((state) => ({
         isSyncing: false,

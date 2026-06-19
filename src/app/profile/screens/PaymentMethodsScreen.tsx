@@ -19,7 +19,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
   const loadCards = useCustomerStore((state) => state.loadCards);
   const removeCardRemote = useCustomerStore((state) => state.removeCardRemote);
   const [isAdding, setIsAdding] = useState(false);
-  const [cardNumber, setCardNumber] = useState("1234 5678 9012 3456");
+  const [cardNumber, setCardNumber] = useState("");
   const [holderName, setHolderName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
@@ -126,7 +126,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
               {cardPagination.pageItems.map((card) => (
                 <View key={card.id} style={styles.savedCard}>
                   <View style={styles.mastercardBadge}>
-                    <Text style={styles.mastercardText}>Mastercard</Text>
+                    <Text style={styles.mastercardText}>{card.brand}</Text>
                   </View>
                   <View style={styles.savedCardTextWrap}>
                     <Text style={styles.savedCardNumber}>•••• •••• •••• {card.last4}</Text>

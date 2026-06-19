@@ -29,6 +29,7 @@ type MenuScreenProps = NativeStackScreenProps<MealsStackParamList, "Menu">;
 export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   const addMeal = useMealCartStore((state) => state.addMeal);
   const cartItems = useMealCartStore((state) => state.items);
+  const loadCart = useMealCartStore((state) => state.loadCart);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [menuError, setMenuError] = useState<string>();
   const [activeCategory, setActiveCategory] = useState("All");
@@ -48,6 +49,10 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
     () => ["High Protein", "Low Carb", "Weight Loss", "Vegetarian", "Vegan", "Keto"],
     [],
   );
+
+  useEffect(() => {
+    void loadCart();
+  }, [loadCart]);
 
   useEffect(() => {
     let mounted = true;
@@ -197,7 +202,7 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
                   setSelectionError(error instanceof Error ? error.message : "Unable to select meal.");
                 });
             } else {
-              addMeal(selectedMeal, detailQuantity);
+              void addMeal(selectedMeal, detailQuantity);
               setSelectedMeal(undefined);
             }
           }

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -27,13 +28,14 @@ import {
 import type { DeliveryAddress, SavedCard } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { MealsStackParamList } from "../types";
+import { paymentsService } from "@/app/payments/services";
 import { CartBar } from "./MenuScreen";
 
 type CheckoutScreenProps = NativeStackScreenProps<MealsStackParamList, "Checkout">;
 
 export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   const items = useMealCartStore((state) => state.items);
-  const clearCart = useMealCartStore((state) => state.clearCart);
+  const loadCart = useMealCartStore((state) => state.loadCart);
   const addresses = useCustomerStore((state) => state.addresses);
   const cards = useCustomerStore((state) => state.cards);
   const checkoutOrder = useCustomerStore((state) => state.checkoutOrder);
@@ -73,9 +75,10 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   const canConfirm = Boolean(items.length && selectedAddress && selectedCard);
 
   useEffect(() => {
+    void loadCart();
     void loadAddresses();
     void loadCards();
-  }, [loadAddresses, loadCards]);
+  }, [loadAddresses, loadCards, loadCart]);
 
   const handleConfirmOrder = async () => {
     if (!canConfirm || !selectedAddress || !selectedCard) {
@@ -87,11 +90,17 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
         deliveryFee: DELIVERY_FEE,
         items,
         paymentMethodId: selectedCard.id,
+        paymentReference: await collectPaymentReference({
+          deliveryFee: DELIVERY_FEE,
+          itemCount,
+          paymentMethodId: selectedCard.id,
+          total,
+        }),
       });
     } catch {
       return;
     }
-    clearCart();
+    await loadCart();
     navigation.getParent()?.navigate("Orders");
   };
 
@@ -237,6 +246,33 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   );
 };
 
+const collectPaymentReference = async ({
+  deliveryFee,
+  itemCount,
+  paymentMethodId,
+  total,
+}: {
+  deliveryFee: number;
+  itemCount: number;
+  paymentMethodId: string;
+  total: number;
+}) => {
+  const initialized = await paymentsService.initialize({
+    amount: total,
+    deliveryFee,
+    description: "One Off",
+    metadata: { itemCount },
+    paymentMethodId,
+  });
+
+  await WebBrowser.openBrowserAsync(initialized.authorizationUrl);
+  const verified = await paymentsService.verify(initialized.reference);
+  if (verified.status !== "PAID") {
+    throw new Error("Payment was not completed.");
+  }
+  return verified.reference;
+};
+
 const SectionLabel = ({
   icon,
   title,
@@ -307,11 +343,11 @@ const AddressSheet = ({
 }) => {
   const createAddress = useCustomerStore((state) => state.createAddress);
   const isSyncing = useCustomerStore((state) => state.isSyncing);
-  const [label, setLabel] = useState("Home");
-  const [phone, setPhone] = useState("09054531822");
-  const [address, setAddress] = useState("12 Ikeja, Lagos");
-  const [city, setCity] = useState("Ikeja");
-  const [stateName, setStateName] = useState("Lagos");
+  const [label, setLabel] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [stateName, setStateName] = useState("");
   const canSave = Boolean(label.trim() && phone.trim() && address.trim() && city.trim() && stateName.trim());
 
   const save = async () => {
@@ -338,13 +374,13 @@ const AddressSheet = ({
   return (
     <BottomSheet onClose={onClose} title="Delivery Location" visible={visible}>
       <View style={styles.twoCol}>
-        <SheetInput label="Label" onChangeText={setLabel} value={label} />
-        <SheetInput label="Phone" onChangeText={setPhone} value={phone} />
+        <SheetInput label="Label" onChangeText={setLabel} placeholder="Home, Office" value={label} />
+        <SheetInput label="Phone" onChangeText={setPhone} placeholder="Phone number" value={phone} />
       </View>
-      <SheetInput label="Address" onChangeText={setAddress} value={address} />
+      <SheetInput label="Address" onChangeText={setAddress} placeholder="Street address" value={address} />
       <View style={styles.twoCol}>
-        <SheetInput focused label="City" onChangeText={setCity} value={city} />
-        <SheetInput label="State" onChangeText={setStateName} value={stateName} />
+        <SheetInput focused label="City" onChangeText={setCity} placeholder="City" value={city} />
+        <SheetInput label="State" onChangeText={setStateName} placeholder="State" value={stateName} />
       </View>
       <View style={styles.formActions}>
         <Pressable onPress={onClose} style={styles.cancelButton}>
@@ -371,9 +407,9 @@ const InlineCardForm = ({
 }) => {
   const createCard = useCustomerStore((state) => state.createCard);
   const isSyncing = useCustomerStore((state) => state.isSyncing);
-  const [cardNumber, setCardNumber] = useState("1234 5678 9012 3456");
-  const [holderName, setHolderName] = useState("ENOCH OLUWAKAYODE EPEKIPOLU");
-  const [expiry, setExpiry] = useState("11/27");
+  const [cardNumber, setCardNumber] = useState("");
+  const [holderName, setHolderName] = useState("");
+  const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const canSave = Boolean(cardNumber.replace(/\s/g, "").length >= 12 && holderName.trim() && expiry.trim());
 
@@ -409,16 +445,18 @@ const InlineCardForm = ({
         focused
         label="Card Number"
         onChangeText={setCardNumber}
+        placeholder="1234 5678 9012 3456"
         value={cardNumber}
       />
       <SheetInput
         label="Cardholder Name"
         onChangeText={setHolderName}
+        placeholder="Name on card"
         value={holderName}
       />
       <View style={styles.twoCol}>
-        <SheetInput label="Expiry Date" onChangeText={setExpiry} value={expiry} />
-        <SheetInput label="CVV" onChangeText={setCvv} secureTextEntry value={cvv} />
+        <SheetInput label="Expiry Date" onChangeText={setExpiry} placeholder="MM/YY" value={expiry} />
+        <SheetInput label="CVV" onChangeText={setCvv} placeholder="•••" secureTextEntry value={cvv} />
       </View>
       <View style={styles.formActions}>
         <Pressable onPress={onCancel} style={styles.cancelButton}>
@@ -490,12 +528,14 @@ const SheetInput = ({
   focused,
   label,
   onChangeText,
+  placeholder,
   secureTextEntry,
   value,
 }: {
   focused?: boolean;
   label: string;
   onChangeText: (value: string) => void;
+  placeholder?: string;
   secureTextEntry?: boolean;
   value: string;
 }) => (
@@ -503,6 +543,8 @@ const SheetInput = ({
     <Text style={styles.inputLabel}>{label}</Text>
     <TextInput
       onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor={resolveThemeColor("#A49D97")}
       secureTextEntry={secureTextEntry}
       selectionColor={resolveThemeColor("#C8320D")}
       style={[styles.sheetInput, focused && styles.sheetInputFocused]}

@@ -27,6 +27,14 @@ export type ChargePaymentPayload = {
   paymentMethodId: string;
 };
 
+export type InitializePaymentResponse = {
+  amount: number;
+  authorizationUrl: string;
+  provider: "paystack" | "flutterwave";
+  reference: string;
+  status: "PENDING" | "PAID" | "FAILED";
+};
+
 export const paymentsService = {
   module: "payments",
   listMethods: () => apiClient.get<SavedCard[]>("/payments/methods"),
@@ -35,7 +43,9 @@ export const paymentsService = {
   deleteMethod: (methodId: string) =>
     apiClient.delete<{ message: string }>(`/payments/methods/${methodId}`),
   listHistory: () => apiClient.get<PaymentHistoryItem[]>("/payments/history"),
-  charge: (payload: ChargePaymentPayload) =>
-    apiClient.post<PaymentHistoryItem, ChargePaymentPayload>("/payments/charge", payload),
+  initialize: (payload: ChargePaymentPayload) =>
+    apiClient.post<InitializePaymentResponse, ChargePaymentPayload>("/payments/initialize", payload),
+  verify: (reference: string) =>
+    apiClient.post<PaymentHistoryItem, { reference: string }>("/payments/verify", { reference }),
 };
 

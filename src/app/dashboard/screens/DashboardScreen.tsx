@@ -24,6 +24,7 @@ export const DashboardScreen = () => {
   const [homeData, setHomeData] = useState<DashboardHomeResponse>();
 
   const isPaused = status === "paused";
+  const isInactive = status === "inactive" || !selectedPlan;
 
   useEffect(() => {
     void load();
@@ -109,7 +110,7 @@ export const DashboardScreen = () => {
 
   const statusCards = useMemo(
     () => [
-      { icon: "flame-outline", label: "Meals Left", value: selectedPlan.meals },
+      { icon: "flame-outline", label: "Meals Left", value: selectedPlan?.meals ?? "0" },
       { icon: "time-outline", label: "Days Left", value: String(daysRemaining) },
       { icon: "calendar-outline", label: "Expires", value: expiresDate },
     ] satisfies {
@@ -117,7 +118,7 @@ export const DashboardScreen = () => {
       label: string;
       value: string;
     }[],
-    [daysRemaining, expiresDate, selectedPlan.meals],
+    [daysRemaining, expiresDate, selectedPlan?.meals],
   );
 
   return (
@@ -140,10 +141,12 @@ export const DashboardScreen = () => {
                     isPaused ? styles.pausedBadgeText : styles.activeBadgeText,
                   ]}
                 >
-                  {isPaused ? "Paused" : "Active"}
+                  {isInactive ? "Inactive" : isPaused ? "Paused" : "Active"}
                 </Text>
               </View>
-              <Text style={styles.statusTitle}>{selectedPlan.name} Plan</Text>
+              <Text style={styles.statusTitle}>
+                {selectedPlan ? `${selectedPlan.name} Plan` : "No Active Plan"}
+              </Text>
             </View>
             <View style={styles.arrowBubble}>
               <Ionicons color={resolveThemeColor("#FF4A17")} name="chevron-forward" size={18} />

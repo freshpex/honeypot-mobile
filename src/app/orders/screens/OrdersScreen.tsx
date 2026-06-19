@@ -143,8 +143,15 @@ const TrackingSheet = ({
   onClose: () => void;
   tracking?: TrackingResponse;
 }) => {
-  const route = tracking?.map.route ?? [];
+  const route = useMemo(
+    () =>
+      (tracking?.map.route ?? []).filter(
+        (point) => Number.isFinite(point.latitude) && Number.isFinite(point.longitude),
+      ),
+    [tracking?.map.route],
+  );
   const firstPoint = route[0] ?? { latitude: 6.5244, longitude: 3.3792 };
+  const riderLocation = tracking?.rider?.currentLocation;
 
   return (
     <Modal animationType="slide" transparent visible={Boolean(tracking)} onRequestClose={onClose}>
@@ -178,9 +185,25 @@ const TrackingSheet = ({
                   <Polyline coordinates={route} strokeColor={resolveThemeColor("#FF4A17")} strokeWidth={4} />
                   <Marker coordinate={route[0]} title="Kitchen" />
                   <Marker coordinate={route[route.length - 1]} title="Delivery address" />
+                  {riderLocation ? (
+                    <Marker
+                      coordinate={riderLocation}
+                      description={tracking.rider?.phone}
+                      title={tracking.rider?.name ?? "Rider"}
+                    />
+                  ) : null}
                 </>
               ) : null}
             </MapView>
+            {tracking.rider ? (
+              <View style={styles.riderCard}>
+                <Ionicons color={resolveThemeColor("#FF4A17")} name="bicycle-outline" size={17} />
+                <View style={styles.riderTextWrap}>
+                  <Text style={styles.riderName}>{tracking.rider.name}</Text>
+                  <Text style={styles.riderMeta}>Current location is shown on the map</Text>
+                </View>
+              </View>
+            ) : null}
             <ScrollView contentContainerStyle={styles.timeline}>
               {tracking.events.map((event) => (
                 <View key={event.id} style={styles.timelineRow}>
@@ -299,6 +322,32 @@ const styles = createThemedStyleSheet({
   },
   safeArea: {
     backgroundColor: "#FAF9F8",
+    flex: 1,
+  },
+  riderCard: {
+    alignItems: "center",
+    backgroundColor: "#FFF3EE",
+    borderColor: "#FFD1C1",
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    ...skeuo.card,
+  },
+  riderMeta: {
+    color: "#817B75",
+    fontSize: 10,
+    marginTop: 2,
+  },
+  riderName: {
+    color: "#171513",
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  riderTextWrap: {
     flex: 1,
   },
   sheetHandle: {

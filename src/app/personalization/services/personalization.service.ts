@@ -22,7 +22,7 @@ export type RecommendedMeal = {
 };
 
 export type PersonalizationProfile = {
-  healthGoal: HealthGoal;
+  healthGoal: HealthGoal | null;
   recommendations: RecommendedMeal[];
 };
 

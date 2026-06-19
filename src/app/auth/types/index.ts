@@ -29,9 +29,7 @@ export type ConfirmResetPasswordPayload = {
 };
 
 export type GoogleAuthPayload = {
-  email?: string;
-  idToken?: string;
-  name?: string;
+  idToken: string;
   provider: "google";
 };
 

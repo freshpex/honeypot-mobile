@@ -33,7 +33,7 @@ export const SubscriptionsScreen = () => {
   } = useSubscriptionStore();
   const [isPlanSheetOpen, setIsPlanSheetOpen] = useState(false);
   const [isPauseSheetOpen, setIsPauseSheetOpen] = useState(false);
-  const [pendingPlan, setPendingPlan] = useState(selectedPlan);
+  const [pendingPlan, setPendingPlan] = useState<SubscriptionPlan | undefined>(selectedPlan);
 
   const isPaused = status === "paused";
   const isInactive = status === "inactive";
@@ -42,12 +42,16 @@ export const SubscriptionsScreen = () => {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    setPendingPlan(selectedPlan ?? plans[0]);
+  }, [plans, selectedPlan]);
+
   const stats = useMemo(
     () => [
       {
         icon: "flame-outline",
         label: "Meals remaining",
-        value: selectedPlan.meals,
+        value: selectedPlan?.meals ?? "0",
       },
       {
         icon: "time-outline",
@@ -69,10 +73,11 @@ export const SubscriptionsScreen = () => {
       label: string;
       value: string;
     }[],
-    [daysRemaining, endDate, selectedPlan.meals, startDate],
+    [daysRemaining, endDate, selectedPlan?.meals, startDate],
   );
 
   const handleSubscribe = async () => {
+    if (!pendingPlan) return;
     await subscribe(pendingPlan);
     setIsPlanSheetOpen(false);
   };
@@ -85,12 +90,14 @@ export const SubscriptionsScreen = () => {
             <View>
               <View style={[styles.badge, isPaused ? styles.pausedBadge : styles.activeBadge]}>
                 <Text style={[styles.badgeText, isPaused ? styles.pausedBadgeText : styles.activeBadgeText]}>
-                  {isPaused ? "Paused" : "Active"}
+                  {isInactive ? "Inactive" : isPaused ? "Paused" : "Active"}
                 </Text>
               </View>
-              <Text style={styles.planName}>{selectedPlan.name} Plan</Text>
+              <Text style={styles.planName}>
+                {selectedPlan ? `${selectedPlan.name} Plan` : "No Active Subscription"}
+              </Text>
             </View>
-            <Text style={styles.price}>{selectedPlan.price}</Text>
+            <Text style={styles.price}>{selectedPlan?.price ?? ""}</Text>
           </View>
 
           <View style={styles.statsGrid}>
@@ -119,7 +126,7 @@ export const SubscriptionsScreen = () => {
             <Ionicons color={resolveThemeColor("#FFFFFF")} name="play-outline" size={14} />
             <Text style={styles.resumeText}>Resume Subscription</Text>
           </Pressable>
-        ) : (
+        ) : isInactive ? null : (
           <Pressable onPress={() => setIsPauseSheetOpen(true)} style={styles.secondaryButton}>
             <Ionicons color={resolveThemeColor("#27231F")} name="pause-outline" size={13} />
             <Text style={styles.secondaryText}>Pause Subscription</Text>
@@ -128,7 +135,7 @@ export const SubscriptionsScreen = () => {
 
         <Pressable
           onPress={() => {
-            setPendingPlan(selectedPlan);
+            setPendingPlan(selectedPlan ?? plans[0]);
             setIsPlanSheetOpen(true);
           }}
           style={styles.secondaryButton}
@@ -161,7 +168,7 @@ export const SubscriptionsScreen = () => {
 };
 
 type ChoosePlanSheetProps = {
-  activePlan: SubscriptionPlan;
+  activePlan?: SubscriptionPlan;
   isLoading?: boolean;
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
@@ -213,7 +220,7 @@ const ChoosePlanSheetContent = ({
         <Text style={styles.sheetSubtitle}>Healthy meals. Delivered your way.</Text>
         <View style={styles.planList}>
           {plans.map((plan) => {
-            const isSelected = activePlan.id === plan.id;
+            const isSelected = activePlan?.id === plan.id;
             return (
               <Pressable
                 key={plan.id}
@@ -238,7 +245,7 @@ const ChoosePlanSheetContent = ({
             );
           })}
         </View>
-        <Pressable disabled={isLoading} onPress={onConfirm} style={styles.subscribeBar}>
+        <Pressable disabled={isLoading || !activePlan} onPress={onConfirm} style={styles.subscribeBar}>
           <Text style={styles.subscribeBarText}>{isLoading ? "Saving..." : "Subscribe Now"}</Text>
         </Pressable>
       </View>

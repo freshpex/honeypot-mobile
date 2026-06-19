@@ -36,6 +36,10 @@ export type AdminPaginated<T> = {
 };
 
 export type AdminMealPayload = Omit<AdminMeal, "id" | "slug">;
+export type MealImageUploadResponse = {
+  publicId: string;
+  url: string;
+};
 
 const mealStatusCode: Record<AdminMealStatus, string> = {
   Available: "AVAILABLE",
@@ -74,6 +78,8 @@ export const adminService = {
       `/admin/meals/${mealId}`,
       mealPayload(payload),
     ),
+  uploadMealImage: (payload: { base64: string; fileName?: string; mimeType: string }) =>
+    apiClient.post<MealImageUploadResponse, typeof payload>("/admin/meals/upload-image", payload),
   deleteMeal: (mealId: string) => apiClient.delete<AdminMeal>(`/admin/meals/${mealId}`),
   orders: (page = 1, limit = 100) =>
     apiClient.get<AdminPaginated<AdminOrder>>(`/admin/orders?page=${page}&limit=${limit}`),

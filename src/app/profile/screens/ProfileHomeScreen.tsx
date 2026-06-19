@@ -178,11 +178,11 @@ const AddressSheet = ({
   const isSyncing = useCustomerStore((state) => state.isSyncing);
   const removeAddressRemote = useCustomerStore((state) => state.removeAddressRemote);
   const addressPagination = usePagination(addresses);
-  const [label, setLabel] = useState("Home");
-  const [phone, setPhone] = useState("09054531822");
-  const [address, setAddress] = useState("12 Ikeja, Lagos");
-  const [city, setCity] = useState("Ikeja");
-  const [stateName, setStateName] = useState("Lagos");
+  const [label, setLabel] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [stateName, setStateName] = useState("");
 
   const save = async () => {
     try {
@@ -208,13 +208,13 @@ const AddressSheet = ({
           {mode === "form" ? (
             <>
               <View style={styles.twoCol}>
-                <LabeledInput label="Label" onChangeText={setLabel} value={label} />
-                <LabeledInput label="Phone" onChangeText={setPhone} value={phone} />
+                <LabeledInput label="Label" onChangeText={setLabel} placeholder="Home, Office" value={label} />
+                <LabeledInput label="Phone" onChangeText={setPhone} placeholder="Phone number" value={phone} />
               </View>
-              <LabeledInput label="Address" onChangeText={setAddress} value={address} />
+              <LabeledInput label="Address" onChangeText={setAddress} placeholder="Street address" value={address} />
               <View style={styles.twoCol}>
-                <LabeledInput focused label="City" onChangeText={setCity} value={city} />
-                <LabeledInput label="State" onChangeText={setStateName} value={stateName} />
+                <LabeledInput focused label="City" onChangeText={setCity} placeholder="City" value={city} />
+                <LabeledInput label="State" onChangeText={setStateName} placeholder="State" value={stateName} />
               </View>
               <View style={styles.formActions}>
                 <Pressable onPress={onClose} style={styles.cancelButton}>
@@ -348,17 +348,21 @@ const LabeledInput = ({
   focused,
   label,
   onChangeText,
+  placeholder,
   value,
 }: {
   focused?: boolean;
   label: string;
   onChangeText: (value: string) => void;
+  placeholder?: string;
   value: string;
 }) => (
   <View style={styles.inputWrap}>
     <Text style={styles.inputLabel}>{label}</Text>
     <TextInput
       onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor={resolveThemeColor("#A49D97")}
       selectionColor={resolveThemeColor("#C8320D")}
       style={[styles.sheetInput, focused && styles.sheetInputFocused]}
       value={value}

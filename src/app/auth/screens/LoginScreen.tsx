@@ -2,7 +2,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Button, FormField } from "@/components";
-import { createThemedStyleSheet, skeuo } from "@/shared/theme";
+import { createThemedStyleSheet } from "@/shared/theme";
 import {
   AuthScreenShell,
   GoogleAuthButton,
@@ -17,8 +17,8 @@ const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
 
 export const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const auth = useAuth();
-  const [email, setEmail] = useState("enoch@honeypot.app");
-  const [password, setPassword] = useState("Password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const errors = useMemo(
@@ -35,13 +35,6 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
       return;
     }
     await auth.login({ email, password });
-  };
-
-  const handleAdminDemo = async () => {
-    setSubmitted(true);
-    setEmail("admin@honeypot.app");
-    setPassword("Admin12345");
-    await auth.login({ email: "admin@honeypot.app", password: "Admin12345" });
   };
 
   return (
@@ -85,12 +78,6 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
         <Button isLoading={auth.isLoading} onPress={handleLogin} style={styles.submitButton}>
           Log in
         </Button>
-        <Pressable
-          onPress={handleAdminDemo}
-          style={styles.adminDemoButton}
-        >
-          <Text style={styles.adminDemoText}>Use admin demo</Text>
-        </Pressable>
         {auth.error ? <Text style={authScreenStyles.inlineError}>{auth.error}</Text> : null}
       </View>
       <View style={authScreenStyles.footer}>
@@ -116,23 +103,6 @@ const styles = createThemedStyleSheet({
     backgroundColor: "#E6E2DE",
     flex: 1,
     height: StyleSheet.hairlineWidth,
-  },
-  adminDemoButton: {
-    alignItems: "center",
-    backgroundColor: "#FFF3EE",
-    borderColor: "#FFD1C1",
-    borderRadius: 9,
-    borderWidth: StyleSheet.hairlineWidth,
-    height: 38,
-    justifyContent: "center",
-    marginTop: 10,
-    width: "100%",
-    ...skeuo.pressed,
-  },
-  adminDemoText: {
-    color: "#C8320D",
-    fontSize: 12,
-    fontWeight: "900",
   },
   dividerRow: {
     alignItems: "center",

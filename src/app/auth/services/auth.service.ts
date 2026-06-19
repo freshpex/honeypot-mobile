@@ -24,7 +24,7 @@ export const authService = {
     apiClient.post<{ message: string }, { refreshToken?: string }>("/auth/logout", {
       refreshToken,
     }),
-  continueWithGoogle: (payload?: Partial<GoogleAuthPayload>) =>
+  continueWithGoogle: (payload: Pick<GoogleAuthPayload, "idToken">) =>
     apiClient.post<AuthResponse, GoogleAuthPayload>("/auth/social", {
       ...payload,
       provider: "google",

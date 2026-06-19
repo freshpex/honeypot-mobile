@@ -33,7 +33,7 @@ npm run start
 Set `EXPO_PUBLIC_API_BASE_URL` to the backend API prefix:
 
 ```text
-EXPO_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
+EXPO_PUBLIC_API_BASE_URL=https://honeypot-backend.fly.dev/api/v1
 ```
 
-For Android emulator local development, use `http://10.0.2.2:4000/api/v1`. Auth screens now call the backend for sign up, login, Google login, password reset request, and logout. Sessions are stored with Expo SecureStore.
+For local backend development, use `http://localhost:4000/api/v1` on iOS simulator or `http://10.0.2.2:4000/api/v1` on Android emulator. Auth screens call the backend for sign up, login, Google login, password reset request, and logout. Sessions are stored with Expo SecureStore.

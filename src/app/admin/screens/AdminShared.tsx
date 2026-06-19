@@ -75,12 +75,14 @@ export const AdminPill = ({ label, tone = "orange" }: { label: string; tone?: To
 
 export const AdminActionButton = ({
   children,
+  disabled,
   onPress,
   tone = "orange",
-}: PropsWithChildren<{ onPress?: () => void; tone?: Tone }>) => (
+}: PropsWithChildren<{ disabled?: boolean; onPress?: () => void; tone?: Tone }>) => (
   <Pressable
+    disabled={disabled}
     onPress={onPress}
-    style={[styles.actionButton, tone === "green" && styles.greenButton]}
+    style={[styles.actionButton, tone === "green" && styles.greenButton, disabled && styles.disabledButton]}
   >
     <Text style={styles.actionText}>{children}</Text>
   </Pressable>
@@ -126,6 +128,9 @@ const styles = createThemedStyleSheet({
   greenButton: {
     backgroundColor: "#08A46B",
     borderColor: "#45D49D",
+  },
+  disabledButton: {
+    opacity: 0.55,
   },
   metricCard: {
     alignItems: "center",

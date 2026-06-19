@@ -84,168 +84,16 @@ type AdminState = {
 
 export const ADMIN_PAGE_SIZE = 100;
 
-const meals: AdminMeal[] = [
-  {
-    id: "avocado-toast-eggs",
-    name: "Avocado Toast & Eggs",
-    category: "Breakfast",
-    description: "Whole grain toast topped with smashed avocado, poached eggs...",
-    detailDescription:
-      "Whole grain toast topped with smashed avocado, poached eggs and chilli flakes",
-    imageUrl:
-      "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80",
-    calories: 380,
-    protein: 18,
-    carbs: 28,
-    fat: 22,
-    price: 2800,
-    status: "Available",
-    tags: ["vegetarian"],
-  },
-  {
-    id: "fresh-fruit-bowl",
-    name: "Fresh Fruit Bowl",
-    category: "Breakfast",
-    description: "Seasonal fresh fruits with granola, yogurt and a drizzle of raw honey",
-    detailDescription:
-      "Seasonal fresh fruits with granola, yogurt and a drizzle of raw honey",
-    imageUrl:
-      "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=900&q=80",
-    calories: 250,
-    protein: 8,
-    carbs: 39,
-    fat: 8,
-    price: 1800,
-    status: "Available",
-    tags: ["vegetarian", "weight loss"],
-  },
-  {
-    id: "green-detox-smoothie",
-    name: "Green Detox Smoothie",
-    category: "Smoothies",
-    description: "Fresh spinach, banana, ginger, apple and lemon blended to perfection",
-    detailDescription:
-      "Fresh spinach, banana, ginger, apple and lemon blended to perfection",
-    imageUrl:
-      "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=900&q=80",
-    calories: 180,
-    protein: 5,
-    carbs: 34,
-    fat: 3,
-    price: 1500,
-    status: "Available",
-    tags: ["vegan", "weight loss"],
-  },
-  {
-    id: "grilled-chicken-vegetables",
-    name: "Grilled Chicken & Vegetables",
-    category: "Lunch",
-    description: "Juicy grilled chicken breast served with seasonal roasted vegetables...",
-    detailDescription:
-      "Juicy grilled chicken breast served with seasonal roasted vegetables and lemon",
-    imageUrl:
-      "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=900&q=80",
-    calories: 420,
-    protein: 34,
-    carbs: 20,
-    fat: 18,
-    price: 3500,
-    status: "Available",
-    tags: ["high protein", "low carb"],
-  },
-];
-
-const users: AdminUser[] = [
-  {
-    email: "enoch.megatransact@gmail.com",
-    id: "usr-enoch",
-    name: "Enoch",
-    plan: "Basic",
-    stats: { activeOrders: 1, deliveredOrders: 0, totalOrders: 1, totalSpend: 4300 },
-    status: "Active",
-  },
-  {
-    email: "ada@honeypot.app",
-    id: "usr-ada",
-    name: "Ada Okafor",
-    plan: "Standard",
-    stats: { activeOrders: 1, deliveredOrders: 0, totalOrders: 1, totalSpend: 3600 },
-    status: "Paused",
-  },
-  {
-    email: "wale@honeypot.app",
-    id: "usr-wale",
-    name: "Wale Bello",
-    plan: "Premium",
-    stats: { activeOrders: 0, deliveredOrders: 1, totalOrders: 1, totalSpend: 25000 },
-    status: "Active",
-  },
-];
-
-const orders: AdminOrder[] = [
-  {
-    customer: "Enoch",
-    date: "Jun 16, 2026",
-    id: "#HP-MQGX3ZJL",
-    items: "Avocado Toast & Eggs x1",
-    status: "Confirmed",
-    total: "₦4,300",
-  },
-  {
-    customer: "Ada Okafor",
-    date: "Jun 16, 2026",
-    id: "#HP-DEL-4182",
-    items: "Fresh Fruit Bowl x2",
-    status: "Preparing",
-    total: "₦3,600",
-  },
-  {
-    customer: "Wale Bello",
-    date: "Jun 15, 2026",
-    id: "#HP-SUB-7001",
-    items: "Basic plan renewal",
-    status: "Delivered",
-    total: "₦25,000",
-  },
-];
-
-const logs: AdminLog[] = [
-  {
-    actor: "system",
-    event: "Subscription renewal reminder queued",
-    id: "log-001",
-    level: "Info",
-    time: "09:12 AM",
-  },
-  {
-    actor: "admin@honeypot.app",
-    event: "Changed order #HP-DEL-4182 to Preparing",
-    id: "log-002",
-    level: "Warning",
-    time: "09:18 AM",
-  },
-  {
-    actor: "payments",
-    event: "Wallet funding is disabled until backend launch",
-    id: "log-003",
-    level: "Info",
-    time: "09:25 AM",
-  },
-];
+const meals: AdminMeal[] = [];
+const users: AdminUser[] = [];
+const orders: AdminOrder[] = [];
+const logs: AdminLog[] = [];
 
 const nextUserStatus: Record<AdminUserStatus, AdminUserStatus> = {
   Active: "Suspended",
   Paused: "Active",
   Suspended: "Active",
 };
-
-const createLog = (event: string, level: AdminLogLevel = "Info"): AdminLog => ({
-  actor: "admin@honeypot.app",
-  event,
-  id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-  level,
-  time: "Now",
-});
 
 export const useAdminStore = create<AdminState>((set, get) => ({
   error: undefined,
@@ -254,8 +102,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   meals,
   orders,
   settings: {
-    autoRenewals: true,
-    deliveryAlerts: true,
+    autoRenewals: false,
+    deliveryAlerts: false,
     walletFunding: false,
   },
   users,
@@ -265,7 +113,6 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const newMeal = await adminService.createMeal(meal);
       set((state) => ({
         isLoading: false,
-        logs: [createLog(`Added meal ${newMeal.name}`), ...state.logs],
         meals: [newMeal, ...state.meals.filter((item) => item.id !== newMeal.id)],
       }));
       void get().loadLogs();
@@ -282,7 +129,6 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const hiddenMeal = await adminService.deleteMeal(mealId);
       set((state) => ({
         isLoading: false,
-        logs: [createLog(`Deleted meal ${hiddenMeal.name}`, "Warning"), ...state.logs],
         meals: state.meals.map((item) => (item.id === mealId ? hiddenMeal : item)),
       }));
       void get().loadLogs();
@@ -404,7 +250,6 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const updated = await adminService.updateMeal(mealId, meal);
       set((state) => ({
-        logs: [createLog(`Updated meal ${updated.name}`), ...state.logs],
         meals: state.meals.map((item) => (item.id === mealId ? updated : item)),
       }));
       void get().loadLogs();
@@ -427,7 +272,6 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       const updated = await adminService.updateOrderStatus(orderId, status);
       set((state) => ({
-        logs: [createLog(`Changed order ${updated.reference} to ${status}`, "Warning"), ...state.logs],
         orders: state.orders.map((order) => (order.id === orderId ? updated : order)),
       }));
       void get().loadLogs();

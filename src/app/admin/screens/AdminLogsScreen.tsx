@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { ADMIN_PAGE_SIZE, useAdminStore } from "@/shared/state";
@@ -18,7 +20,7 @@ export const AdminLogsScreen = () => {
   const downloadLogs = useAdminStore((state) => state.downloadLogs);
   const exportMessage = useAdminStore((state) => state.exportMessage);
   const loadLogs = useAdminStore((state) => state.loadLogs);
-  const [csvPreview, setCsvPreview] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
   const pagination = usePagination(logs, ADMIN_PAGE_SIZE);
 
   useEffect(() => {
@@ -39,15 +41,36 @@ export const AdminLogsScreen = () => {
           </View>
         </View>
         <AdminActionButton
-          onPress={() => {
+          disabled={isExporting}
+          onPress={() => void (async () => {
+            setIsExporting(true);
             const csv = downloadLogs();
-            setCsvPreview(csv.split("\n").slice(0, 3).join("\n"));
-          }}
+            const fileUri = `${FileSystem.cacheDirectory ?? ""}honeypot-admin-logs-${Date.now()}.csv`;
+            try {
+              await FileSystem.writeAsStringAsync(fileUri, csv, {
+                encoding: FileSystem.EncodingType.UTF8,
+              });
+              if (await Sharing.isAvailableAsync()) {
+                await Sharing.shareAsync(fileUri, {
+                  mimeType: "text/csv",
+                  UTI: "public.comma-separated-values-text",
+                });
+              } else {
+                Alert.alert("Export ready", fileUri);
+              }
+            } catch (error) {
+              Alert.alert(
+                "Export failed",
+                error instanceof Error ? error.message : "Unable to export logs.",
+              );
+            } finally {
+              setIsExporting(false);
+            }
+          })()}
         >
-          Download Logs
+          {isExporting ? "Preparing..." : "Download Logs"}
         </AdminActionButton>
         {exportMessage ? <Text style={styles.exportMessage}>{exportMessage}</Text> : null}
-        {csvPreview ? <Text style={styles.csvPreview}>{csvPreview}</Text> : null}
       </AdminCard>
 
       {pagination.pageItems.map((log) => (
@@ -82,15 +105,6 @@ const styles = createThemedStyleSheet({
     color: "#817B75",
     fontSize: 11,
     marginTop: 4,
-  },
-  csvPreview: {
-    backgroundColor: "#F8F6F4",
-    borderRadius: 8,
-    color: "#4F4640",
-    fontSize: 10,
-    lineHeight: 15,
-    marginTop: 10,
-    padding: 10,
   },
   event: {
     color: "#171513",

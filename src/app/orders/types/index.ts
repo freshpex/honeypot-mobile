@@ -19,6 +19,24 @@ export type OrderItem = {
   lineTotal: number;
 };
 
+export type CartMeal = {
+  id: string;
+  imageUrl: string;
+  name: string;
+  price: number;
+};
+
+export type CartResponse = {
+  itemCount: number;
+  items: Array<{
+    id: string;
+    lineTotal: number;
+    meal: CartMeal;
+    quantity: number;
+  }>;
+  subtotal: number;
+};
+
 export type CustomerOrder = {
   id: string;
   reference: string;
@@ -50,6 +68,7 @@ export type CheckoutPayload = {
   deliveryFee: number;
   items: Array<{ mealId: string; quantity: number }>;
   paymentMethodId: string;
+  paymentReference: string;
 };
 
 export type TrackingResponse = {
@@ -58,6 +77,11 @@ export type TrackingResponse = {
     provider: "openstreetmap";
     tileUrlTemplate: string;
     route: Array<{ latitude: number; longitude: number }>;
+  };
+  rider?: {
+    name: string;
+    phone?: string;
+    currentLocation: { latitude: number; longitude: number };
   };
   events: Array<{
     id: string;

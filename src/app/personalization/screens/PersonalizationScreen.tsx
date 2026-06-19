@@ -29,7 +29,9 @@ export const PersonalizationScreen = () => {
     try {
       const response = await personalizationService.getProfile();
       setProfile(response);
-      setGoal(response.healthGoal);
+      if (response.healthGoal) {
+        setGoal(response.healthGoal);
+      }
       setError(undefined);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to load preferences.");
@@ -48,7 +50,9 @@ export const PersonalizationScreen = () => {
     try {
       const response = await personalizationService.updateHealthGoal(goal);
       setProfile(response);
-      setGoal(response.healthGoal);
+      if (response.healthGoal) {
+        setGoal(response.healthGoal);
+      }
       setError(undefined);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to save preferences.");

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useEffect, useMemo, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/shared/state";
 import { createThemedStyleSheet, resolveThemeColor, skeuo } from "@/shared/theme";
 import type { MealTag } from "@/app/meals/types";
+import { adminService } from "../services";
 import {
   AdminActionButton,
   AdminCard,
@@ -36,6 +38,7 @@ type MealForm = {
 
 const mealStatuses: AdminMealStatus[] = ["Available", "Hidden", "Sold Out"];
 const validTags: MealTag[] = ["vegetarian", "weight loss", "vegan", "high protein", "low carb"];
+const validUploadMimeTypes = ["image/jpeg", "image/png", "image/webp"] as const;
 
 const emptyForm: MealForm = {
   calories: "350",
@@ -89,6 +92,7 @@ export const AdminMealsScreen = () => {
   const pagination = usePagination(meals, ADMIN_PAGE_SIZE);
   const [editingMealId, setEditingMealId] = useState<string>();
   const [form, setForm] = useState<MealForm>(emptyForm);
+  const [isUploading, setIsUploading] = useState(false);
 
   const isEditing = Boolean(editingMealId);
   const canSave = Boolean(form.name.trim() && form.description.trim() && form.imageUrl.trim());
@@ -119,6 +123,54 @@ export const AdminMealsScreen = () => {
   const startEdit = (meal: AdminMeal) => {
     setEditingMealId(meal.id);
     setForm(mealToForm(meal));
+  };
+
+  const handlePickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission needed", "Allow photo access to upload meal images.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      base64: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.72,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const asset = result.assets[0];
+    const base64 = asset?.base64;
+    if (!asset || !base64) {
+      return;
+    }
+
+    const assetMimeType = asset.mimeType ?? "";
+    const mimeType = validUploadMimeTypes.includes(assetMimeType as (typeof validUploadMimeTypes)[number])
+      ? assetMimeType
+      : "image/jpeg";
+    setForm((current) => ({ ...current, imageUrl: asset.uri }));
+    setIsUploading(true);
+    try {
+      const uploaded = await adminService.uploadMealImage({
+        base64,
+        fileName: asset.fileName ?? `meal-${Date.now()}.jpg`,
+        mimeType,
+      });
+      setForm((current) => ({ ...current, imageUrl: uploaded.url }));
+    } catch (error) {
+      Alert.alert(
+        "Upload failed",
+        error instanceof Error ? error.message : "Unable to upload this meal image.",
+      );
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -183,6 +235,11 @@ export const AdminMealsScreen = () => {
           )}
         </View>
 
+        <Pressable disabled={isUploading} onPress={() => void handlePickImage()} style={styles.uploadButton}>
+          <Ionicons color={resolveThemeColor("#FF4A17")} name="cloud-upload-outline" size={15} />
+          <Text style={styles.uploadText}>{isUploading ? "Uploading image..." : "Upload Meal Image"}</Text>
+        </Pressable>
+
         <MealInput label="Meal Name" onChangeText={(value) => updateForm("name", value)} value={form.name} />
         <MealInput label="Image URL" onChangeText={(value) => updateForm("imageUrl", value)} value={form.imageUrl} />
         <View style={styles.twoCol}>
@@ -213,7 +270,7 @@ export const AdminMealsScreen = () => {
           onChange={(status) => setForm((current) => ({ ...current, status }))}
           value={form.status}
         />
-        <AdminActionButton onPress={() => void handleSave()}>
+        <AdminActionButton disabled={!canSave || isUploading} onPress={() => void handleSave()}>
           {isEditing ? "Update Meal" : "Add Meal"}
         </AdminActionButton>
       </AdminCard>
@@ -481,5 +538,24 @@ const styles = createThemedStyleSheet({
   twoCol: {
     flexDirection: "row",
     gap: 8,
+  },
+  uploadButton: {
+    alignItems: "center",
+    backgroundColor: "#FFF3EE",
+    borderColor: "#FFD1C1",
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
+    flexDirection: "row",
+    gap: 8,
+    height: 38,
+    justifyContent: "center",
+    marginBottom: 12,
+    ...skeuo.pressed,
+  },
+  uploadText: {
+    color: "#FF4A17",
+    fontSize: 11,
+    fontWeight: "900",
   },
 });

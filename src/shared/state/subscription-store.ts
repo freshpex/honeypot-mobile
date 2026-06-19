@@ -21,54 +21,6 @@ export type SubscriptionPlan = {
   summary: string;
 };
 
-const fallbackPlans: SubscriptionPlan[] = [
-  {
-    cadence: "21 meals · 3/day",
-    durationDays: 7,
-    id: "basic",
-    meals: "21",
-    mealsPerDay: 3,
-    name: "Basic",
-    price: "₦25,000",
-    priceAmount: 25000,
-    summary: "1 week of meals",
-  },
-  {
-    badge: "POPULAR",
-    cadence: "60 meals · 2/day",
-    durationDays: 30,
-    id: "standard",
-    meals: "60",
-    mealsPerDay: 2,
-    name: "Standard",
-    price: "₦65,000",
-    priceAmount: 65000,
-    summary: "1 month, 2 meals/day",
-  },
-  {
-    cadence: "90 meals · 3/day",
-    durationDays: 30,
-    id: "premium",
-    meals: "90",
-    mealsPerDay: 3,
-    name: "Premium",
-    price: "₦90,000",
-    priceAmount: 90000,
-    summary: "1 month, 3 meals/day",
-  },
-  {
-    cadence: "180 meals · 6/day",
-    durationDays: 30,
-    id: "family",
-    meals: "180",
-    mealsPerDay: 6,
-    name: "Family",
-    price: "₦160,000",
-    priceAmount: 160000,
-    summary: "1 month, family of 2",
-  },
-];
-
 type SubscriptionState = {
   daysRemaining: number;
   endDate: string;
@@ -77,7 +29,7 @@ type SubscriptionState = {
   isLoading: boolean;
   pauseResumeDate: string;
   plans: SubscriptionPlan[];
-  selectedPlan: SubscriptionPlan;
+  selectedPlan?: SubscriptionPlan;
   startDate: string;
   status: SubscriptionStatus;
   load: () => Promise<void>;
@@ -94,8 +46,8 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   expiresDate: "",
   isLoading: false,
   pauseResumeDate: "",
-  plans: fallbackPlans,
-  selectedPlan: fallbackPlans[0],
+  plans: [],
+  selectedPlan: undefined,
   startDate: "",
   status: "inactive",
   load: async () => {
@@ -155,7 +107,7 @@ const applyOverview = (
       expiresDate: "",
       pauseResumeDate: "",
       plans,
-      selectedPlan: plans[0] ?? fallbackPlans[0],
+      selectedPlan: undefined,
       startDate: "",
       status: "inactive",
     });
@@ -175,7 +127,7 @@ const applySubscription = (
     endDate: formatDate(subscription.endDate),
     expiresDate: formatDate(subscription.expiresDate),
     pauseResumeDate: subscription.pauseResumeDate ? formatDate(subscription.pauseResumeDate) : "",
-    plans: plans.length ? plans : fallbackPlans,
+    plans,
     selectedPlan,
     startDate: formatDate(subscription.startDate),
     status: subscription.status,

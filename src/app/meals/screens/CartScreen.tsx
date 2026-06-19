@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EmptyState, PaginationControls } from "@/components";
@@ -22,11 +22,16 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
   const items = useMealCartStore((state) => state.items);
   const decrementMeal = useMealCartStore((state) => state.decrementMeal);
   const incrementMeal = useMealCartStore((state) => state.incrementMeal);
+  const loadCart = useMealCartStore((state) => state.loadCart);
   const removeMeal = useMealCartStore((state) => state.removeMeal);
   const itemCount = useMemo(() => getCartItemCount(items), [items]);
   const subtotal = useMemo(() => getCartSubtotal(items), [items]);
   const total = subtotal + DELIVERY_FEE;
   const cartPagination = usePagination(items);
+
+  useEffect(() => {
+    void loadCart();
+  }, [loadCart]);
 
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
@@ -52,19 +57,19 @@ export const CartScreen = ({ navigation }: CartScreenProps) => {
                     </View>
                     <View style={styles.itemActions}>
                       <Pressable
-                        onPress={() => decrementMeal(item.meal.id)}
+                        onPress={() => void decrementMeal(item.meal.id)}
                         style={styles.roundButton}
                       >
                         <Text style={styles.roundButtonText}>−</Text>
                       </Pressable>
                       <Text style={styles.quantity}>{item.quantity}</Text>
                       <Pressable
-                        onPress={() => incrementMeal(item.meal.id)}
+                        onPress={() => void incrementMeal(item.meal.id)}
                         style={styles.roundButton}
                       >
                         <Text style={styles.roundButtonText}>+</Text>
                       </Pressable>
-                      <Pressable onPress={() => removeMeal(item.meal.id)} style={styles.deleteButton}>
+                      <Pressable onPress={() => void removeMeal(item.meal.id)} style={styles.deleteButton}>
                         <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={15} />
                       </Pressable>
                     </View>
