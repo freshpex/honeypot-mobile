@@ -19,6 +19,34 @@ const defaultGoal: HealthGoal = {
   proteinGoal: 120,
 };
 
+const goalPresets: Record<string, HealthGoal> = {
+  "Weight Loss": defaultGoal,
+  "Muscle Gain": {
+    calorieTarget: 2600,
+    macroCarbs: 45,
+    macroFat: 25,
+    macroProtein: 30,
+    primaryGoal: "Muscle Gain",
+    proteinGoal: 170,
+  },
+  Balanced: {
+    calorieTarget: 2100,
+    macroCarbs: 45,
+    macroFat: 25,
+    macroProtein: 30,
+    primaryGoal: "Balanced",
+    proteinGoal: 120,
+  },
+  "Heart Health": {
+    calorieTarget: 1900,
+    macroCarbs: 50,
+    macroFat: 20,
+    macroProtein: 30,
+    primaryGoal: "Heart Health",
+    proteinGoal: 110,
+  },
+};
+
 export const PersonalizationScreen = () => {
   const [profile, setProfile] = useState<PersonalizationProfile>();
   const [goal, setGoal] = useState(defaultGoal);
@@ -42,7 +70,7 @@ export const PersonalizationScreen = () => {
     void load();
   }, []);
 
-  const goals = useMemo(() => ["Weight Loss", "Muscle Gain", "Balanced", "Heart Health"], []);
+  const goals = useMemo(() => Object.keys(goalPresets), []);
   const recommendations = useMemo(() => profile?.recommendations ?? [], [profile?.recommendations]);
 
   const save = async () => {
@@ -80,7 +108,7 @@ export const PersonalizationScreen = () => {
             return (
               <Pressable
                 key={item}
-                onPress={() => setGoal((current) => ({ ...current, primaryGoal: item }))}
+                onPress={() => setGoal(goalPresets[item])}
                 style={[styles.goalChip, active && styles.goalChipActive]}
               >
                 <Text style={[styles.goalChipText, active && styles.goalChipTextActive]}>{item}</Text>

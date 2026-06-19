@@ -205,73 +205,79 @@ const AddressSheet = ({
             <Ionicons color={resolveThemeColor("#FF4A17")} name="close" size={14} />
           </Pressable>
           <Text style={styles.sheetTitle}>Delivery Addresses</Text>
-          {mode === "form" ? (
-            <>
-              <View style={styles.twoCol}>
-                <LabeledInput label="Label" onChangeText={setLabel} placeholder="Home, Office" value={label} />
-                <LabeledInput label="Phone" onChangeText={setPhone} placeholder="Phone number" value={phone} />
-              </View>
-              <LabeledInput label="Address" onChangeText={setAddress} placeholder="Street address" value={address} />
-              <View style={styles.twoCol}>
-                <LabeledInput focused label="City" onChangeText={setCity} placeholder="City" value={city} />
-                <LabeledInput label="State" onChangeText={setStateName} placeholder="State" value={stateName} />
-              </View>
-              <View style={styles.formActions}>
-                <Pressable onPress={onClose} style={styles.cancelButton}>
-                  <Text style={styles.cancelText}>Cancel</Text>
-                </Pressable>
-                <Pressable
-                  disabled={isSyncing}
-                  onPress={() => void save()}
-                  style={[styles.saveButton, isSyncing && styles.buttonDisabled]}
-                >
-                  <Text style={styles.saveText}>{isSyncing ? "Saving..." : "Save"}</Text>
-                </Pressable>
-              </View>
-            </>
-          ) : (
-            <>
-              {addresses.length ? (
-                <View style={styles.addressList}>
-                  {addressPagination.pageItems.map((item) => (
-                    <View key={item.id} style={styles.addressCard}>
-                      <View style={styles.addressLeft}>
-                        <Ionicons color={resolveThemeColor("#FF4A17")} name="location-outline" size={17} />
-                        <View>
-                          <Text style={styles.addressTitle}>{item.label} ★</Text>
-                          <Text style={styles.addressText}>{item.address}</Text>
-                          <Text style={styles.addressText}>{item.city}, {item.state}</Text>
+          <ScrollView
+            contentContainerStyle={styles.sheetScrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {mode === "form" ? (
+              <>
+                <View style={styles.twoCol}>
+                  <LabeledInput label="Label" onChangeText={setLabel} placeholder="Home, Office" value={label} />
+                  <LabeledInput label="Phone" onChangeText={setPhone} placeholder="Phone number" value={phone} />
+                </View>
+                <LabeledInput label="Address" onChangeText={setAddress} placeholder="Street address" value={address} />
+                <View style={styles.twoCol}>
+                  <LabeledInput focused label="City" onChangeText={setCity} placeholder="City" value={city} />
+                  <LabeledInput label="State" onChangeText={setStateName} placeholder="State" value={stateName} />
+                </View>
+                <View style={styles.formActions}>
+                  <Pressable onPress={onClose} style={styles.cancelButton}>
+                    <Text style={styles.cancelText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    disabled={isSyncing}
+                    onPress={() => void save()}
+                    style={[styles.saveButton, isSyncing && styles.buttonDisabled]}
+                  >
+                    <Text style={styles.saveText}>{isSyncing ? "Saving..." : "Save"}</Text>
+                  </Pressable>
+                </View>
+              </>
+            ) : (
+              <>
+                {addresses.length ? (
+                  <View style={styles.addressList}>
+                    {addressPagination.pageItems.map((item) => (
+                      <View key={item.id} style={styles.addressCard}>
+                        <View style={styles.addressLeft}>
+                          <Ionicons color={resolveThemeColor("#FF4A17")} name="location-outline" size={17} />
+                          <View>
+                            <Text style={styles.addressTitle}>{item.label} ★</Text>
+                            <Text style={styles.addressText}>{item.address}</Text>
+                            <Text style={styles.addressText}>{item.city}, {item.state}</Text>
+                          </View>
                         </View>
+                        <Pressable
+                          onPress={() => {
+                            void removeAddressRemote(item.id).catch(() => undefined);
+                          }}
+                        >
+                          <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={15} />
+                        </Pressable>
                       </View>
-                      <Pressable
-                        onPress={() => {
-                          void removeAddressRemote(item.id).catch(() => undefined);
-                        }}
-                      >
-                        <Ionicons color={resolveThemeColor("#8B8580")} name="trash-outline" size={15} />
-                      </Pressable>
-                    </View>
-                  ))}
-                  <PaginationControls
-                    canGoNext={addressPagination.canGoNext}
-                    canGoPrevious={addressPagination.canGoPrevious}
-                    onNext={addressPagination.goNext}
-                    onPrevious={addressPagination.goPrevious}
-                    page={addressPagination.page}
-                    totalPages={addressPagination.totalPages}
-                  />
-                </View>
-              ) : (
-                <View style={styles.emptyAddress}>
-                  <Ionicons color={resolveThemeColor("#D1CDC9")} name="location-outline" size={31} />
-                  <Text style={styles.emptySheetText}>No addresses saved yet</Text>
-                </View>
-              )}
-              <Pressable onPress={onCreate} style={styles.addSheetButton}>
-                <Text style={styles.addSheetButtonText}>＋ Add New Address</Text>
-              </Pressable>
-            </>
-          )}
+                    ))}
+                    <PaginationControls
+                      canGoNext={addressPagination.canGoNext}
+                      canGoPrevious={addressPagination.canGoPrevious}
+                      onNext={addressPagination.goNext}
+                      onPrevious={addressPagination.goPrevious}
+                      page={addressPagination.page}
+                      totalPages={addressPagination.totalPages}
+                    />
+                  </View>
+                ) : (
+                  <View style={styles.emptyAddress}>
+                    <Ionicons color={resolveThemeColor("#D1CDC9")} name="location-outline" size={31} />
+                    <Text style={styles.emptySheetText}>No addresses saved yet</Text>
+                  </View>
+                )}
+                <Pressable onPress={onCreate} style={styles.addSheetButton}>
+                  <Text style={styles.addSheetButtonText}>＋ Add New Address</Text>
+                </Pressable>
+              </>
+            )}
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -308,36 +314,43 @@ const DietarySheet = ({ onClose, visible }: { onClose: () => void; visible: bool
             <Ionicons color={resolveThemeColor("#837D77")} name="close" size={14} />
           </Pressable>
           <Text style={styles.sheetTitle}>Dietary Preferences</Text>
-          <Text style={styles.sheetSubtitle}>Help us personalize your meal suggestions</Text>
-          <Text style={styles.fieldLabel}>Diet Type</Text>
-          <View style={styles.preferenceChips}>
-            {chips.map((chip) => {
-              const active = selected.includes(chip);
-              return (
-                <Pressable key={chip} onPress={() => toggle(chip)} style={[styles.preferenceChip, active && styles.preferenceChipActive]}>
-                  <Text style={[styles.preferenceChipText, active && styles.preferenceChipTextActive]}>{chip}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          <Text style={styles.fieldLabel}>Allergies</Text>
-          <TextInput
-            multiline
-            onChangeText={setAllergies}
-            placeholder="List any food allergies (e.g. nuts, dairy, shellfish...)"
-            placeholderTextColor={resolveThemeColor("#817B75")}
-            style={styles.allergyInput}
-            value={allergies}
-          />
-          <Pressable
-            onPress={() => {
-              saveDietaryPreferences(selected, allergies);
-              onClose();
-            }}
-            style={styles.fullSaveButton}
+          <ScrollView
+            contentContainerStyle={styles.sheetScrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.saveText}>Save Preferences</Text>
-          </Pressable>
+            <Text style={styles.sheetSubtitle}>Help us personalize your meal suggestions</Text>
+            <Text style={styles.fieldLabel}>Diet Type</Text>
+            <View style={styles.preferenceChips}>
+              {chips.map((chip) => {
+                const active = selected.includes(chip);
+                return (
+                  <Pressable key={chip} onPress={() => toggle(chip)} style={[styles.preferenceChip, active && styles.preferenceChipActive]}>
+                    <Text style={[styles.preferenceChipText, active && styles.preferenceChipTextActive]}>{chip}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text style={styles.fieldLabel}>Allergies</Text>
+            <TextInput
+              multiline
+              onChangeText={setAllergies}
+              placeholder="List any food allergies (e.g. nuts, dairy, shellfish...)"
+              placeholderTextColor={resolveThemeColor("#817B75")}
+              scrollEnabled={false}
+              style={styles.allergyInput}
+              value={allergies}
+            />
+            <Pressable
+              onPress={() => {
+                saveDietaryPreferences(selected, allergies);
+                onClose();
+              }}
+              style={styles.fullSaveButton}
+            >
+              <Text style={styles.saveText}>Save Preferences</Text>
+            </Pressable>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -408,7 +421,7 @@ const styles = createThemedStyleSheet({
     elevation: 2,
     color: "#171513",
     fontSize: 11,
-    height: 76,
+    minHeight: 104,
     padding: 10,
     textAlignVertical: "top",
     ...skeuo.pressed,
@@ -446,10 +459,11 @@ const styles = createThemedStyleSheet({
   safeArea: { backgroundColor: "#FAF9F8", flex: 1 },
   saveButton: { alignItems: "center", backgroundColor: "#FF4A17", borderColor: "#FF8B68", borderRadius: 8, borderTopWidth: 1, elevation: 6, flex: 1, height: 31, justifyContent: "center", ...skeuo.action },
   saveText: { color: "#FFFFFF", fontSize: 11, fontWeight: "900" },
-  sheet: { backgroundColor: "#FAF9F8", borderTopLeftRadius: 10, borderTopRightRadius: 10, elevation: 14, paddingBottom: 12, paddingHorizontal: 14, paddingTop: 28, ...skeuo.floating },
-  sheetInput: { backgroundColor: "#FFFFFF", borderColor: "#E8E2DD", borderRadius: 7, borderWidth: StyleSheet.hairlineWidth, color: "#171513", elevation: 2, fontSize: 11, height: 30, paddingHorizontal: 9, ...skeuo.pressed },
+  sheet: { backgroundColor: "#FAF9F8", borderTopLeftRadius: 10, borderTopRightRadius: 10, elevation: 14, maxHeight: "82%", paddingBottom: 12, paddingHorizontal: 14, paddingTop: 28, ...skeuo.floating },
+  sheetInput: { backgroundColor: "#FFFFFF", borderColor: "#E8E2DD", borderRadius: 8, borderWidth: StyleSheet.hairlineWidth, color: "#171513", elevation: 2, fontSize: 12, minHeight: 42, paddingHorizontal: 11, ...skeuo.pressed },
   sheetInputFocused: { borderColor: "#FF4A17", borderWidth: 1 },
   sheetOverlay: { backgroundColor: "rgba(0,0,0,0.76)", flex: 1, justifyContent: "flex-end" },
+  sheetScrollContent: { paddingBottom: 8 },
   sheetSubtitle: { color: "#817B75", fontSize: 10, marginTop: 5 },
   sheetTitle: { color: "#171513", fontSize: 15, fontWeight: "900" },
   twoCol: { flexDirection: "row", gap: 8 },

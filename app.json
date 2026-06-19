@@ -46,7 +46,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#FAF9F8"
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin"
     ]
   }
 }

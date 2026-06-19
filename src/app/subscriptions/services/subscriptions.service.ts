@@ -12,10 +12,16 @@ export const subscriptionsService = {
   getPlans: () => apiClient.get<SubscriptionPlanDto[]>("/subscriptions/plans"),
   getOverview: () => apiClient.get<SubscriptionOverviewDto>("/subscriptions"),
   getCurrentSubscription: () => apiClient.get<UserSubscriptionDto | undefined>("/subscriptions/current"),
-  subscribe: (planId: string) =>
-    apiClient.post<UserSubscriptionDto, { planId: string }>("/subscriptions/subscribe", { planId }),
-  upgrade: (planId: string) =>
-    apiClient.patch<UserSubscriptionDto, { planId: string }>("/subscriptions/upgrade", { planId }),
+  subscribe: (planId: string, paymentReference: string) =>
+    apiClient.post<UserSubscriptionDto, { paymentReference: string; planId: string }>(
+      "/subscriptions/subscribe",
+      { paymentReference, planId },
+    ),
+  upgrade: (planId: string, paymentReference: string) =>
+    apiClient.patch<UserSubscriptionDto, { paymentReference: string; planId: string }>(
+      "/subscriptions/upgrade",
+      { paymentReference, planId },
+    ),
   pause: (durationDays: number, reason?: string) =>
     apiClient.post<UserSubscriptionDto, { durationDays: number; reason?: string }>(
       "/subscriptions/pause",

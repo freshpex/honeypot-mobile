@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -257,15 +258,20 @@ const collectPaymentReference = async ({
   paymentMethodId: string;
   total: number;
 }) => {
+  const callbackUrl = Linking.createURL("payment-complete");
   const initialized = await paymentsService.initialize({
     amount: total,
+    callbackUrl,
     deliveryFee,
     description: "One Off",
     metadata: { itemCount },
     paymentMethodId,
   });
 
-  await WebBrowser.openBrowserAsync(initialized.authorizationUrl);
+  const result = await WebBrowser.openAuthSessionAsync(initialized.authorizationUrl, callbackUrl);
+  if (result.type === "cancel" || result.type === "dismiss") {
+    throw new Error("Payment was cancelled before completion.");
+  }
   const verified = await paymentsService.verify(initialized.reference);
   if (verified.status !== "PAID") {
     throw new Error("Payment was not completed.");
@@ -455,7 +461,13 @@ const InlineCardForm = ({
         value={holderName}
       />
       <View style={styles.twoCol}>
-        <SheetInput label="Expiry Date" onChangeText={setExpiry} placeholder="MM/YY" value={expiry} />
+        <SheetInput
+          keyboardType="number-pad"
+          label="Expiry Date"
+          onChangeText={(value) => setExpiry(formatExpiry(value))}
+          placeholder="MM/YY"
+          value={expiry}
+        />
         <SheetInput label="CVV" onChangeText={setCvv} placeholder="•••" secureTextEntry value={cvv} />
       </View>
       <View style={styles.formActions}>
@@ -515,7 +527,11 @@ const BottomSheetContent = ({
           <Ionicons color={resolveThemeColor("#837D77")} name="close" size={14} />
         </Pressable>
         <Text style={styles.sheetTitle}>{title}</Text>
-        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.sheetScrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           {children}
         </ScrollView>
       </View>
@@ -526,6 +542,7 @@ const BottomSheetContent = ({
 
 const SheetInput = ({
   focused,
+  keyboardType = "default",
   label,
   onChangeText,
   placeholder,
@@ -533,6 +550,7 @@ const SheetInput = ({
   value,
 }: {
   focused?: boolean;
+  keyboardType?: "default" | "number-pad";
   label: string;
   onChangeText: (value: string) => void;
   placeholder?: string;
@@ -543,6 +561,7 @@ const SheetInput = ({
     <Text style={styles.inputLabel}>{label}</Text>
     <TextInput
       onChangeText={onChangeText}
+      keyboardType={keyboardType}
       placeholder={placeholder}
       placeholderTextColor={resolveThemeColor("#A49D97")}
       secureTextEntry={secureTextEntry}
@@ -552,6 +571,14 @@ const SheetInput = ({
     />
   </View>
 );
+
+const formatExpiry = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (!digits) return "";
+  const month = Number(digits.slice(0, 2));
+  const safeMonth = digits.length >= 2 ? String(Math.min(Math.max(month, 1), 12)).padStart(2, "0") : digits;
+  return digits.length <= 2 ? safeMonth : `${safeMonth}/${digits.slice(2)}`;
+};
 
 const SummaryRow = ({
   bold,
@@ -793,6 +820,7 @@ const styles = createThemedStyleSheet({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     elevation: 14,
+    maxHeight: "82%",
     paddingBottom: 12,
     paddingHorizontal: 14,
     paddingTop: 28,
@@ -805,9 +833,9 @@ const styles = createThemedStyleSheet({
     borderWidth: StyleSheet.hairlineWidth,
     elevation: 2,
     color: "#171513",
-    fontSize: 11,
-    height: 30,
-    paddingHorizontal: 9,
+    fontSize: 12,
+    minHeight: 42,
+    paddingHorizontal: 11,
     ...skeuo.pressed,
   },
   sheetInputFocused: {
@@ -818,6 +846,9 @@ const styles = createThemedStyleSheet({
     backgroundColor: "rgba(0,0,0,0.76)",
     flex: 1,
     justifyContent: "flex-end",
+  },
+  sheetScrollContent: {
+    paddingBottom: 8,
   },
   sheetSaveButton: {
     alignItems: "center",

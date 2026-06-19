@@ -43,6 +43,8 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   const [menuPagination, setMenuPagination] = useState({ page: 1, totalPages: 1 });
   const [sort, setSort] = useState<MealsMenuParams["sort"]>("name_asc");
   const [reviewError, setReviewError] = useState<string>();
+  const [selectionActionDate, setSelectionActionDate] = useState<string>();
+  const [detailActionLoading, setDetailActionLoading] = useState(false);
 
   const [categories, setCategories] = useState(["All"]);
   const [diets, setDiets] = useState<string[]>([]);
@@ -191,8 +193,10 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
         />
         <WeeklyPlanner
           error={selectionError}
+          loadingDate={selectionActionDate}
           onChoose={(selection) => setActiveSelection(selection)}
           onSkip={async (selection) => {
+            setSelectionActionDate(selection.date);
             try {
               const updated = await mealsService.skipMeal(selection.date, "Skipped from weekly menu");
               setWeeklySelections((current) =>
@@ -200,6 +204,8 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
               );
             } catch (error) {
               setSelectionError(error instanceof Error ? error.message : "Unable to skip day.");
+            } finally {
+              setSelectionActionDate(undefined);
             }
           }}
           selections={weeklySelections}
@@ -236,25 +242,31 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
       </View>
 
       <MealDetailSheet
+        isSubmitting={detailActionLoading}
         meal={selectedMeal}
-        onAdd={() => {
+        onAdd={async () => {
           if (selectedMeal) {
+            setDetailActionLoading(true);
             if (activeSelection) {
-              void mealsService
-                .selectMeal(activeSelection.date, selectedMeal.id)
-                .then((updated) => {
-                  setWeeklySelections((current) =>
-                    current.map((item) => (item.date === updated.date ? updated : item)),
-                  );
-                  setActiveSelection(undefined);
-                  setSelectedMeal(undefined);
-                })
-                .catch((error) => {
-                  setSelectionError(error instanceof Error ? error.message : "Unable to select meal.");
-                });
+              try {
+                const updated = await mealsService.selectMeal(activeSelection.date, selectedMeal.id);
+                setWeeklySelections((current) =>
+                  current.map((item) => (item.date === updated.date ? updated : item)),
+                );
+                setActiveSelection(undefined);
+                setSelectedMeal(undefined);
+              } catch (error) {
+                setSelectionError(error instanceof Error ? error.message : "Unable to select meal.");
+              } finally {
+                setDetailActionLoading(false);
+              }
             } else {
-              void addMeal(selectedMeal, detailQuantity);
-              setSelectedMeal(undefined);
+              try {
+                await addMeal(selectedMeal, detailQuantity);
+                setSelectedMeal(undefined);
+              } finally {
+                setDetailActionLoading(false);
+              }
             }
           }
         }}
@@ -283,11 +295,13 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
 
 const WeeklyPlanner = ({
   error,
+  loadingDate,
   onChoose,
   onSkip,
   selections,
 }: {
   error?: string;
+  loadingDate?: string;
   onChoose: (selection: WeeklyMealSelection) => void;
   onSkip: (selection: WeeklyMealSelection) => void;
   selections: WeeklyMealSelection[];
@@ -307,6 +321,7 @@ const WeeklyPlanner = ({
         {selections.map((selection) => {
           const hasMeal = Boolean(selection.meal);
           const isSkipped = selection.status === "Skipped";
+          const isLoading = loadingDate === selection.date;
           return (
             <View key={selection.date} style={[styles.dayCard, selection.locked && styles.dayCardLocked]}>
               <Text style={styles.dayLabel}>{selection.dayLabel}</Text>
@@ -315,18 +330,18 @@ const WeeklyPlanner = ({
               </Text>
               <View style={styles.dayActions}>
                 <Pressable
-                  disabled={selection.locked}
+                  disabled={selection.locked || isLoading}
                   onPress={() => onChoose(selection)}
-                  style={[styles.dayActionButton, selection.locked && styles.dayActionDisabled]}
+                  style={[styles.dayActionButton, (selection.locked || isLoading) && styles.dayActionDisabled]}
                 >
-                  <Text style={styles.dayActionText}>{hasMeal ? "Change" : "Choose"}</Text>
+                  <Text style={styles.dayActionText}>{isLoading ? "..." : hasMeal ? "Change" : "Choose"}</Text>
                 </Pressable>
                 <Pressable
-                  disabled={selection.locked}
+                  disabled={selection.locked || isLoading}
                   onPress={() => onSkip(selection)}
-                  style={[styles.daySkipButton, selection.locked && styles.dayActionDisabled]}
+                  style={[styles.daySkipButton, (selection.locked || isLoading) && styles.dayActionDisabled]}
                 >
-                  <Text style={styles.daySkipText}>Skip</Text>
+                  <Text style={styles.daySkipText}>{isLoading ? "..." : "Skip"}</Text>
                 </Pressable>
               </View>
             </View>
@@ -432,8 +447,9 @@ const MealCard = ({ meal, onPress }: { meal: Meal; onPress: () => void }) => (
 );
 
 type MealDetailSheetProps = {
+  isSubmitting?: boolean;
   meal?: MealDetail;
-  onAdd: () => void;
+  onAdd: () => void | Promise<void>;
   onClose: () => void;
   onDecrement: () => void;
   onIncrement: () => void;
@@ -444,6 +460,7 @@ type MealDetailSheetProps = {
 };
 
 const MealDetailSheet = ({
+  isSubmitting,
   meal,
   onAdd,
   onClose,
@@ -559,10 +576,14 @@ const MealDetailSheet = ({
                   <Text style={styles.quantityButtonText}>+</Text>
                 </Pressable>
               </View>
-              <Pressable onPress={onAdd} style={styles.addButton}>
+              <Pressable
+                disabled={isSubmitting}
+                onPress={() => void onAdd()}
+                style={[styles.addButton, isSubmitting && styles.reviewButtonDisabled]}
+              >
                 <Ionicons color={resolveThemeColor("#FFFFFF")} name="cart-outline" size={14} />
                 <Text style={styles.addButtonText}>
-                  {selectionLabel ?? `Add to Cart — ${formatNaira(meal.price * quantity)}`}
+                  {isSubmitting ? "Saving..." : selectionLabel ?? `Add to Cart — ${formatNaira(meal.price * quantity)}`}
                 </Text>
               </Pressable>
             </View>

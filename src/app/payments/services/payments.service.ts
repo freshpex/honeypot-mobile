@@ -21,6 +21,7 @@ export type AddPaymentMethodPayload = {
 
 export type ChargePaymentPayload = {
   amount: number;
+  callbackUrl?: string;
   deliveryFee: number;
   description: string;
   metadata?: Record<string, unknown>;

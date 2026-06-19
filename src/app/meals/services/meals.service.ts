@@ -75,14 +75,14 @@ export const mealsService = {
       `/meals/selections/week${weekStart ? `?weekStart=${encodeURIComponent(weekStart)}` : ""}`,
     ),
   selectMeal: (deliveryDate: string, mealId: string) =>
-    apiClient.put<WeeklyMealSelection, { deliveryDate: string; mealId: string }>(
+    apiClient.put<WeeklyMealSelection, { date: string; mealId: string }>(
       "/meals/selections",
-      { deliveryDate, mealId },
+      { date: deliveryDate, mealId },
     ),
   skipMeal: (deliveryDate: string, reason?: string) =>
-    apiClient.post<WeeklyMealSelection, { deliveryDate: string; reason?: string }>(
+    apiClient.post<WeeklyMealSelection, { date: string; reason?: string }>(
       "/meals/selections/skip",
-      { deliveryDate, reason },
+      { date: deliveryDate, reason },
     ),
 };
 

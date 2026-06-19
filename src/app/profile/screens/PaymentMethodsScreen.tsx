@@ -1,7 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
@@ -27,7 +36,7 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
 
   const showForm = isAdding || !cards.length;
   const canSave = useMemo(
-    () => cardNumber.replace(/\s/g, "").length >= 12 && holderName.trim() && expiry.trim(),
+    () => cardNumber.replace(/\s/g, "").length >= 12 && holderName.trim() && isValidExpiry(expiry),
     [cardNumber, expiry, holderName],
   );
 
@@ -53,17 +62,27 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
 
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Pressable onPress={() => navigation.navigate("MyWallet")} style={styles.walletCard}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.keyboardAvoider}
+      >
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.walletCard}>
           <View style={styles.walletIcon}>
             <Ionicons color={resolveThemeColor("#FFFFFF")} name="wallet-outline" size={20} />
           </View>
           <View style={styles.walletTextWrap}>
             <Text style={styles.walletTitle}>HoneyPot Wallet</Text>
-            <Text style={styles.walletSubtitle}>Fund & pay with your wallet</Text>
+            <Text style={styles.walletSubtitle}>Coming soon · funding disabled</Text>
           </View>
-          <Ionicons color={resolveThemeColor("#FFFFFF")} name="chevron-forward" size={18} />
-        </Pressable>
+          <View style={styles.comingSoonPill}>
+            <Text style={styles.comingSoonText}>Coming Soon</Text>
+          </View>
+        </View>
 
         <Text style={styles.sectionTitle}>Saved Cards</Text>
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -95,8 +114,9 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
             <View style={styles.twoCol}>
               <PaymentInput
                 label="Expiry Date"
-                onChangeText={setExpiry}
+                onChangeText={(value) => setExpiry(formatExpiry(value))}
                 placeholder="MM/YY"
+                keyboardType="number-pad"
                 value={expiry}
               />
               <PaymentInput
@@ -159,12 +179,14 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
           </>
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const PaymentInput = ({
   focused,
+  keyboardType = "default",
   label,
   onChangeText,
   placeholder,
@@ -175,12 +197,14 @@ const PaymentInput = ({
   label: string;
   onChangeText: (value: string) => void;
   placeholder: string;
+  keyboardType?: "default" | "number-pad";
   secureTextEntry?: boolean;
   value: string;
 }) => (
   <View style={styles.inputWrap}>
     <Text style={styles.inputLabel}>{label}</Text>
     <TextInput
+      keyboardType={keyboardType}
       onChangeText={onChangeText}
       placeholder={placeholder}
       placeholderTextColor={resolveThemeColor("#8B8580")}
@@ -243,6 +267,19 @@ const styles = createThemedStyleSheet({
     fontSize: 12,
     fontWeight: "800",
   },
+  comingSoonPill: {
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderColor: "rgba(255,255,255,0.32)",
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  comingSoonText: {
+    color: "#FFFFFF",
+    fontSize: 9,
+    fontWeight: "900",
+  },
   cardList: {
     gap: 8,
   },
@@ -295,7 +332,7 @@ const styles = createThemedStyleSheet({
     elevation: 2,
     color: "#171513",
     fontSize: 13,
-    height: 37,
+    minHeight: 42,
     paddingHorizontal: 10,
     ...skeuo.pressed,
   },
@@ -312,6 +349,9 @@ const styles = createThemedStyleSheet({
   inputWrap: {
     flex: 1,
     marginBottom: 12,
+  },
+  keyboardAvoider: {
+    flex: 1,
   },
   mastercardBadge: {
     alignItems: "center",
@@ -441,3 +481,13 @@ const styles = createThemedStyleSheet({
     fontWeight: "900",
   },
 });
+
+const formatExpiry = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (!digits) return "";
+  const month = Number(digits.slice(0, 2));
+  const safeMonth = digits.length >= 2 ? String(Math.min(Math.max(month, 1), 12)).padStart(2, "0") : digits;
+  return digits.length <= 2 ? safeMonth : `${safeMonth}/${digits.slice(2)}`;
+};
+
+const isValidExpiry = (value: string) => /^(0[1-9]|1[0-2])\/\d{2}$/.test(value);

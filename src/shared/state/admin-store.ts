@@ -144,7 +144,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       ...get().logs.map((log) => `${log.id},${log.time},${log.level},${log.actor},${log.event}`),
     ].join("\n");
 
-    set({ exportMessage: "Log export prepared from backend audit records." });
+    set({ exportMessage: "Log export prepared from your audit records." });
     return csv;
   },
   loadAll: async () => {

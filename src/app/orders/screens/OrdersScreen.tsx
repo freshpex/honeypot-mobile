@@ -145,13 +145,20 @@ const TrackingSheet = ({
 }) => {
   const route = useMemo(
     () =>
-      (tracking?.map.route ?? []).filter(
+      (tracking?.map?.route ?? []).filter(
         (point) => Number.isFinite(point.latitude) && Number.isFinite(point.longitude),
       ),
-    [tracking?.map.route],
+    [tracking?.map?.route],
   );
   const firstPoint = route[0] ?? { latitude: 6.5244, longitude: 3.3792 };
-  const riderLocation = tracking?.rider?.currentLocation;
+  const riderLocation =
+    tracking?.rider?.currentLocation &&
+    Number.isFinite(tracking.rider.currentLocation.latitude) &&
+    Number.isFinite(tracking.rider.currentLocation.longitude)
+      ? tracking.rider.currentLocation
+      : undefined;
+  const tileUrlTemplate = tracking?.map?.tileUrlTemplate;
+  const canRenderMap = Boolean(route.length && tileUrlTemplate);
 
   return (
     <Modal animationType="slide" transparent visible={Boolean(tracking)} onRequestClose={onClose}>
@@ -169,32 +176,35 @@ const TrackingSheet = ({
                 <Ionicons color={resolveThemeColor("#817B75")} name="close" size={18} />
               </Pressable>
             </View>
-            <MapView
-              initialRegion={{
-                latitude: firstPoint.latitude,
-                latitudeDelta: 0.12,
-                longitude: firstPoint.longitude,
-                longitudeDelta: 0.12,
-              }}
-              mapType="none"
-              style={styles.map}
-            >
-              <UrlTile maximumZ={19} tileSize={256} urlTemplate={tracking.map.tileUrlTemplate} />
-              {route.length ? (
-                <>
-                  <Polyline coordinates={route} strokeColor={resolveThemeColor("#FF4A17")} strokeWidth={4} />
-                  <Marker coordinate={route[0]} title="Kitchen" />
-                  <Marker coordinate={route[route.length - 1]} title="Delivery address" />
-                  {riderLocation ? (
-                    <Marker
-                      coordinate={riderLocation}
-                      description={tracking.rider?.phone}
-                      title={tracking.rider?.name ?? "Rider"}
-                    />
-                  ) : null}
-                </>
-              ) : null}
-            </MapView>
+            {canRenderMap ? (
+              <MapView
+                initialRegion={{
+                  latitude: firstPoint.latitude,
+                  latitudeDelta: 0.12,
+                  longitude: firstPoint.longitude,
+                  longitudeDelta: 0.12,
+                }}
+                mapType="none"
+                style={styles.map}
+              >
+                <UrlTile maximumZ={19} tileSize={256} urlTemplate={tileUrlTemplate ?? ""} />
+                <Polyline coordinates={route} strokeColor={resolveThemeColor("#FF4A17")} strokeWidth={4} />
+                <Marker coordinate={route[0]} title="Kitchen" />
+                <Marker coordinate={route[route.length - 1]} title="Delivery address" />
+                {riderLocation ? (
+                  <Marker
+                    coordinate={riderLocation}
+                    description={tracking.rider?.phone}
+                    title={tracking.rider?.name ?? "Rider"}
+                  />
+                ) : null}
+              </MapView>
+            ) : (
+              <View style={styles.mapFallback}>
+                <Ionicons color={resolveThemeColor("#C9C5C1")} name="map-outline" size={30} />
+                <Text style={styles.mapFallbackText}>Map tracking is not available for this order yet.</Text>
+              </View>
+            )}
             {tracking.rider ? (
               <View style={styles.riderCard}>
                 <Ionicons color={resolveThemeColor("#FF4A17")} name="bicycle-outline" size={17} />
@@ -272,6 +282,26 @@ const styles = createThemedStyleSheet({
     marginTop: 12,
     overflow: "hidden",
     width: "100%",
+  },
+  mapFallback: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderRadius: 10,
+    borderTopWidth: 1,
+    elevation: 3,
+    height: 150,
+    justifyContent: "center",
+    marginTop: 12,
+    paddingHorizontal: 18,
+    ...skeuo.card,
+  },
+  mapFallbackText: {
+    color: "#817B75",
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 8,
+    textAlign: "center",
   },
   orderCard: {
     backgroundColor: "#FFFFFF",

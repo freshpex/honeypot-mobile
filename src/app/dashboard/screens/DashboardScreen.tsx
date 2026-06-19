@@ -131,45 +131,54 @@ export const DashboardScreen = () => {
           </View>
         </View>
 
-        <Pressable onPress={() => navigation.navigate("Plan")} style={styles.statusCard}>
-          <View style={styles.statusTop}>
-            <View>
-              <View style={[styles.badge, isPaused ? styles.pausedBadge : styles.activeBadge]}>
-                <Text
-                  style={[
-                    styles.badgeText,
-                    isPaused ? styles.pausedBadgeText : styles.activeBadgeText,
-                  ]}
-                >
-                  {isInactive ? "Inactive" : isPaused ? "Paused" : "Active"}
-                </Text>
-              </View>
-              <Text style={styles.statusTitle}>
-                {selectedPlan ? `${selectedPlan.name} Plan` : "No Active Plan"}
-              </Text>
-            </View>
-            <View style={styles.arrowBubble}>
-              <Ionicons color={resolveThemeColor("#FF4A17")} name="chevron-forward" size={18} />
-            </View>
+        {isInactive ? (
+          <View style={styles.emptyPlanCard}>
+            <Ionicons color={resolveThemeColor("#C9C5C1")} name="calendar-outline" size={32} />
+            <Text style={styles.emptyPlanTitle}>No active plan</Text>
+            <Text style={styles.emptyPlanCopy}>Subscribe to start enjoying healthy meals delivered to your door.</Text>
+            <Pressable onPress={() => navigation.navigate("Plan")} style={styles.viewPlansButton}>
+              <Text style={styles.viewPlansText}>View Plans</Text>
+            </Pressable>
           </View>
-
-          {isPaused ? (
-            <View style={styles.pausedBanner}>
-              <Ionicons color={resolveThemeColor("#F0A000")} name="pause-outline" size={15} />
-              <Text style={styles.pausedBannerText}>Paused until {pauseResumeDate}</Text>
-            </View>
-          ) : null}
-
-          <View style={styles.homeStats}>
-            {statusCards.map((card) => (
-              <View key={card.label} style={styles.homeStatCard}>
-                <Ionicons color={resolveThemeColor("#FF4A17")} name={card.icon} size={15} />
-                <Text style={styles.homeStatValue}>{card.value}</Text>
-                <Text style={styles.homeStatLabel}>{card.label}</Text>
+        ) : (
+          <Pressable onPress={() => navigation.navigate("Plan")} style={styles.statusCard}>
+            <View style={styles.statusTop}>
+              <View>
+                <View style={[styles.badge, isPaused ? styles.pausedBadge : styles.activeBadge]}>
+                  <Text
+                    style={[
+                      styles.badgeText,
+                      isPaused ? styles.pausedBadgeText : styles.activeBadgeText,
+                    ]}
+                  >
+                    {isPaused ? "Paused" : "Active"}
+                  </Text>
+                </View>
+                <Text style={styles.statusTitle}>{selectedPlan ? `${selectedPlan.name} Plan` : "Plan"}</Text>
               </View>
-            ))}
-          </View>
-        </Pressable>
+              <View style={styles.arrowBubble}>
+                <Ionicons color={resolveThemeColor("#FF4A17")} name="chevron-forward" size={18} />
+              </View>
+            </View>
+
+            {isPaused ? (
+              <View style={styles.pausedBanner}>
+                <Ionicons color={resolveThemeColor("#F0A000")} name="pause-outline" size={15} />
+                <Text style={styles.pausedBannerText}>Paused until {pauseResumeDate}</Text>
+              </View>
+            ) : null}
+
+            <View style={styles.homeStats}>
+              {statusCards.map((card) => (
+                <View key={card.label} style={styles.homeStatCard}>
+                  <Ionicons color={resolveThemeColor("#FF4A17")} name={card.icon} size={15} />
+                  <Text style={styles.homeStatValue}>{card.value}</Text>
+                  <Text style={styles.homeStatLabel}>{card.label}</Text>
+                </View>
+              ))}
+            </View>
+          </Pressable>
+        )}
 
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.quickGrid}>
@@ -267,6 +276,32 @@ const styles = createThemedStyleSheet({
     minHeight: 92,
     justifyContent: "center",
     gap: 8,
+  },
+  emptyPlanCard: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderRadius: 10,
+    borderTopWidth: 1,
+    elevation: 5,
+    justifyContent: "center",
+    marginBottom: 20,
+    minHeight: 142,
+    paddingHorizontal: 18,
+    ...skeuo.card,
+  },
+  emptyPlanCopy: {
+    color: "#817B75",
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 5,
+    textAlign: "center",
+  },
+  emptyPlanTitle: {
+    color: "#171513",
+    fontSize: 16,
+    fontWeight: "900",
+    marginTop: 9,
   },
   emptyText: {
     color: "#8B8580",
@@ -436,6 +471,24 @@ const styles = createThemedStyleSheet({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  viewPlansButton: {
+    alignItems: "center",
+    backgroundColor: "#FF4A17",
+    borderColor: "#FF8B68",
+    borderRadius: 8,
+    borderTopWidth: 1,
+    elevation: 6,
+    height: 32,
+    justifyContent: "center",
+    marginTop: 14,
+    minWidth: 130,
+    ...skeuo.action,
+  },
+  viewPlansText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "900",
   },
 });
 

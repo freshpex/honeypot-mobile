@@ -35,7 +35,7 @@ type SubscriptionState = {
   load: () => Promise<void>;
   pause: (durationDays?: number) => Promise<void>;
   resume: () => Promise<void>;
-  subscribe: (plan: SubscriptionPlan) => Promise<void>;
+  subscribe: (plan: SubscriptionPlan, paymentReference: string) => Promise<void>;
 };
 
 type SubscriptionSet = (partial: Partial<SubscriptionState>) => void;
@@ -80,12 +80,12 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  subscribe: async (plan) => {
+  subscribe: async (plan, paymentReference) => {
     set({ error: undefined, isLoading: true });
     try {
       const current = get().status === "inactive"
-        ? await subscriptionsService.subscribe(plan.id)
-        : await subscriptionsService.upgrade(plan.id);
+        ? await subscriptionsService.subscribe(plan.id, paymentReference)
+        : await subscriptionsService.upgrade(plan.id, paymentReference);
       applySubscription(current, set, get().plans);
     } catch (error) {
       set({ error: messageFromError(error) });

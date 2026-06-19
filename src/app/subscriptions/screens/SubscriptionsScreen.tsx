@@ -1,4 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import { useEffect, useMemo, useState } from "react";
 import {
   Modal,
@@ -10,10 +12,13 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
+  type SavedCard,
   type SubscriptionPlan,
+  useCustomerStore,
   useSubscriptionStore,
 } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
+import { paymentsService } from "@/app/payments/services";
 
 export const SubscriptionsScreen = () => {
   const {
@@ -31,9 +36,14 @@ export const SubscriptionsScreen = () => {
     status,
     subscribe,
   } = useSubscriptionStore();
+  const cards = useCustomerStore((state) => state.cards);
+  const loadCards = useCustomerStore((state) => state.loadCards);
   const [isPlanSheetOpen, setIsPlanSheetOpen] = useState(false);
   const [isPauseSheetOpen, setIsPauseSheetOpen] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [pendingPlan, setPendingPlan] = useState<SubscriptionPlan | undefined>(selectedPlan);
+  const [paymentError, setPaymentError] = useState<string>();
+  const [selectedCardId, setSelectedCardId] = useState<string>();
 
   const isPaused = status === "paused";
   const isInactive = status === "inactive";
@@ -43,8 +53,23 @@ export const SubscriptionsScreen = () => {
   }, [load]);
 
   useEffect(() => {
+    void loadCards();
+  }, [loadCards]);
+
+  useEffect(() => {
     setPendingPlan(selectedPlan ?? plans[0]);
   }, [plans, selectedPlan]);
+
+  useEffect(() => {
+    setSelectedCardId((current) =>
+      current && cards.some((card) => card.id === current) ? current : cards[0]?.id,
+    );
+  }, [cards]);
+
+  const selectedCard = useMemo(
+    () => cards.find((card) => card.id === selectedCardId),
+    [cards, selectedCardId],
+  );
 
   const stats = useMemo(
     () => [
@@ -77,49 +102,95 @@ export const SubscriptionsScreen = () => {
   );
 
   const handleSubscribe = async () => {
-    if (!pendingPlan) return;
-    await subscribe(pendingPlan);
+    if (!pendingPlan || !selectedCard) {
+      setPaymentError("Add or select a payment card before subscribing.");
+      return;
+    }
+    setPaymentError(undefined);
+    setIsPaymentProcessing(true);
+    try {
+      const callbackUrl = Linking.createURL("payment-complete");
+      const initialized = await paymentsService.initialize({
+        amount: pendingPlan.priceAmount ?? 0,
+        callbackUrl,
+        deliveryFee: 0,
+        description: `${pendingPlan.name} Plan`,
+        metadata: { kind: "subscription", planId: pendingPlan.id },
+        paymentMethodId: selectedCard.id,
+      });
+      const paymentResult = await WebBrowser.openAuthSessionAsync(initialized.authorizationUrl, callbackUrl);
+      if (paymentResult.type === "cancel" || paymentResult.type === "dismiss") {
+        setPaymentError("Payment was cancelled before completion.");
+        return;
+      }
+      const verified = await paymentsService.verify(initialized.reference);
+      if (verified.status !== "PAID") {
+        setPaymentError("Payment was not completed. Please retry or choose another card.");
+        return;
+      }
+      await subscribe(pendingPlan, verified.reference);
+    } catch (caughtError) {
+      setPaymentError(caughtError instanceof Error ? caughtError.message : "Unable to complete payment.");
+      return;
+    } finally {
+      setIsPaymentProcessing(false);
+    }
     setIsPlanSheetOpen(false);
   };
 
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.planCard}>
-          <View style={styles.planHeader}>
-            <View>
-              <View style={[styles.badge, isPaused ? styles.pausedBadge : styles.activeBadge]}>
-                <Text style={[styles.badgeText, isPaused ? styles.pausedBadgeText : styles.activeBadgeText]}>
-                  {isInactive ? "Inactive" : isPaused ? "Paused" : "Active"}
-                </Text>
-              </View>
-              <Text style={styles.planName}>
-                {selectedPlan ? `${selectedPlan.name} Plan` : "No Active Subscription"}
-              </Text>
-            </View>
-            <Text style={styles.price}>{selectedPlan?.price ?? ""}</Text>
+        {isInactive ? (
+          <View style={styles.emptyPlanCard}>
+            <Ionicons color={resolveThemeColor("#C9C5C1")} name="calendar-outline" size={34} />
+            <Text style={styles.emptyPlanTitle}>No active plan</Text>
+            <Text style={styles.emptyPlanCopy}>Choose a meal plan to start healthy deliveries.</Text>
+            <Pressable
+              onPress={() => {
+                setPendingPlan(plans[0]);
+                setIsPlanSheetOpen(true);
+              }}
+              style={styles.viewPlansButton}
+            >
+              <Text style={styles.viewPlansText}>View Plans</Text>
+            </Pressable>
           </View>
-
-          <View style={styles.statsGrid}>
-            {stats.map((stat) => (
-              <View key={stat.label} style={styles.statCard}>
-                <Ionicons color={resolveThemeColor("#FF4A17")} name={stat.icon} size={18} />
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
-            ))}
-          </View>
-
-          {isPaused ? (
-            <View style={styles.pausedNotice}>
-              <Ionicons color={resolveThemeColor("#F0A000")} name="pause-outline" size={17} />
+        ) : (
+          <View style={styles.planCard}>
+            <View style={styles.planHeader}>
               <View>
-                <Text style={styles.pausedTitle}>Subscription Paused</Text>
-                <Text style={styles.pausedCopy}>Resumes on {pauseResumeDate}</Text>
+                <View style={[styles.badge, isPaused ? styles.pausedBadge : styles.activeBadge]}>
+                  <Text style={[styles.badgeText, isPaused ? styles.pausedBadgeText : styles.activeBadgeText]}>
+                    {isPaused ? "Paused" : "Active"}
+                  </Text>
+                </View>
+                <Text style={styles.planName}>{selectedPlan ? `${selectedPlan.name} Plan` : "Plan"}</Text>
               </View>
+              <Text style={styles.price}>{selectedPlan?.price ?? ""}</Text>
             </View>
-          ) : null}
-        </View>
+
+            <View style={styles.statsGrid}>
+              {stats.map((stat) => (
+                <View key={stat.label} style={styles.statCard}>
+                  <Ionicons color={resolveThemeColor("#FF4A17")} name={stat.icon} size={18} />
+                  <Text style={styles.statValue}>{stat.value}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                </View>
+              ))}
+            </View>
+
+            {isPaused ? (
+              <View style={styles.pausedNotice}>
+                <Ionicons color={resolveThemeColor("#F0A000")} name="pause-outline" size={17} />
+                <View>
+                  <Text style={styles.pausedTitle}>Subscription Paused</Text>
+                  <Text style={styles.pausedCopy}>Resumes on {pauseResumeDate}</Text>
+                </View>
+              </View>
+            ) : null}
+          </View>
+        )}
 
         {isPaused ? (
           <Pressable onPress={resume} style={styles.resumeButton}>
@@ -133,25 +204,31 @@ export const SubscriptionsScreen = () => {
           </Pressable>
         )}
 
-        <Pressable
-          onPress={() => {
-            setPendingPlan(selectedPlan ?? plans[0]);
-            setIsPlanSheetOpen(true);
-          }}
-          style={styles.secondaryButton}
-        >
-          <Ionicons color={resolveThemeColor("#27231F")} name={isInactive ? "grid-outline" : "arrow-up-outline"} size={13} />
-          <Text style={styles.secondaryText}>{isInactive ? "View Plans" : "Upgrade Plan"}</Text>
-        </Pressable>
+        {!isInactive ? (
+          <Pressable
+            onPress={() => {
+              setPendingPlan(selectedPlan ?? plans[0]);
+              setIsPlanSheetOpen(true);
+            }}
+            style={styles.secondaryButton}
+          >
+            <Ionicons color={resolveThemeColor("#27231F")} name="arrow-up-outline" size={13} />
+            <Text style={styles.secondaryText}>Upgrade Plan</Text>
+          </Pressable>
+        ) : null}
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </ScrollView>
 
       <ChoosePlanSheet
         activePlan={pendingPlan}
-        isLoading={isLoading}
+        activeCardId={selectedCardId}
+        cards={cards}
+        isLoading={isLoading || isPaymentProcessing}
         onClose={() => setIsPlanSheetOpen(false)}
         onConfirm={handleSubscribe}
+        onSelectCard={setSelectedCardId}
         onSelect={setPendingPlan}
+        paymentError={paymentError}
         plans={plans}
         visible={isPlanSheetOpen}
       />
@@ -169,29 +246,41 @@ export const SubscriptionsScreen = () => {
 
 type ChoosePlanSheetProps = {
   activePlan?: SubscriptionPlan;
+  activeCardId?: string;
+  cards: SavedCard[];
   isLoading?: boolean;
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
+  onSelectCard: (cardId: string) => void;
   onSelect: (plan: SubscriptionPlan) => void;
+  paymentError?: string;
   plans: SubscriptionPlan[];
   visible: boolean;
 };
 
 const ChoosePlanSheet = ({
   activePlan,
+  activeCardId,
+  cards,
   isLoading,
   onClose,
   onConfirm,
+  onSelectCard,
   onSelect,
+  paymentError,
   plans,
   visible,
 }: ChoosePlanSheetProps) => (
   <ChoosePlanSheetContent
     activePlan={activePlan}
+    activeCardId={activeCardId}
+    cards={cards}
     isLoading={isLoading}
     onClose={onClose}
     onConfirm={onConfirm}
+    onSelectCard={onSelectCard}
     onSelect={onSelect}
+    paymentError={paymentError}
     plans={plans}
     visible={visible}
   />
@@ -199,10 +288,14 @@ const ChoosePlanSheet = ({
 
 const ChoosePlanSheetContent = ({
   activePlan,
+  activeCardId,
+  cards,
   isLoading,
   onClose,
   onConfirm,
+  onSelectCard,
   onSelect,
+  paymentError,
   plans,
   visible,
 }: ChoosePlanSheetProps) => {
@@ -245,8 +338,41 @@ const ChoosePlanSheetContent = ({
             );
           })}
         </View>
-        <Pressable disabled={isLoading || !activePlan} onPress={onConfirm} style={styles.subscribeBar}>
-          <Text style={styles.subscribeBarText}>{isLoading ? "Saving..." : "Subscribe Now"}</Text>
+        <Text style={styles.paymentSelectTitle}>Pay with</Text>
+        <View style={styles.cardList}>
+          {cards.length ? (
+            cards.map((card) => {
+              const isSelected = activeCardId === card.id;
+              return (
+                <Pressable
+                  key={card.id}
+                  onPress={() => onSelectCard(card.id)}
+                  style={[styles.cardOption, isSelected && styles.selectedPlanOption]}
+                >
+                  <Ionicons color={resolveThemeColor("#34A8F4")} name="card-outline" size={16} />
+                  <View style={styles.cardOptionTextWrap}>
+                    <Text style={styles.cardOptionTitle}>{card.brand} •••• {card.last4}</Text>
+                    <Text style={styles.cardOptionSubtitle}>Expires {card.expiry}</Text>
+                  </View>
+                  <View style={[styles.radio, isSelected && styles.radioSelected]}>
+                    {isSelected ? <Ionicons color={resolveThemeColor("#FFFFFF")} name="checkmark" size={11} /> : null}
+                  </View>
+                </Pressable>
+              );
+            })
+          ) : (
+            <View style={styles.noCardNotice}>
+              <Text style={styles.noCardText}>Add a payment card in Profile before subscribing.</Text>
+            </View>
+          )}
+        </View>
+        {paymentError ? <Text style={styles.errorText}>{paymentError}</Text> : null}
+        <Pressable
+          disabled={isLoading || !activePlan || !activeCardId}
+          onPress={onConfirm}
+          style={[styles.subscribeBar, (isLoading || !activePlan || !activeCardId) && styles.disabledButton]}
+        >
+          <Text style={styles.subscribeBarText}>{isLoading ? "Processing payment..." : "Subscribe Now"}</Text>
         </Pressable>
       </View>
     </View>
@@ -388,10 +514,69 @@ const styles = createThemedStyleSheet({
     fontSize: 11,
     fontWeight: "800",
   },
+  cardList: {
+    gap: 7,
+    marginBottom: 10,
+  },
+  cardOption: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8E2DD",
+    borderRadius: 9,
+    borderWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
+    flexDirection: "row",
+    minHeight: 48,
+    paddingHorizontal: 11,
+    ...skeuo.card,
+  },
+  cardOptionSubtitle: {
+    color: "#817B75",
+    fontSize: 9,
+    marginTop: 2,
+  },
+  cardOptionTextWrap: {
+    flex: 1,
+    marginLeft: 9,
+  },
+  cardOptionTitle: {
+    color: "#171513",
+    fontSize: 11,
+    fontWeight: "900",
+  },
   content: {
     paddingBottom: 28,
     paddingHorizontal: 8,
     paddingTop: 8,
+  },
+  disabledButton: {
+    opacity: 0.55,
+  },
+  emptyPlanCard: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderRadius: 11,
+    borderTopWidth: 1,
+    elevation: 5,
+    justifyContent: "center",
+    marginTop: 20,
+    minHeight: 155,
+    paddingHorizontal: 18,
+    ...skeuo.card,
+  },
+  emptyPlanCopy: {
+    color: "#817B75",
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 5,
+    textAlign: "center",
+  },
+  emptyPlanTitle: {
+    color: "#171513",
+    fontSize: 16,
+    fontWeight: "900",
+    marginTop: 10,
   },
   errorText: {
     color: "#C8320D",
@@ -455,6 +640,28 @@ const styles = createThemedStyleSheet({
     color: "#B46F00",
     fontSize: 12,
     fontWeight: "800",
+  },
+  noCardNotice: {
+    backgroundColor: "#FFF8DD",
+    borderColor: "#F3DE98",
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+  },
+  noCardText: {
+    color: "#9A6A00",
+    fontSize: 10,
+    fontWeight: "700",
+    lineHeight: 14,
+  },
+  paymentSelectTitle: {
+    color: "#171513",
+    fontSize: 12,
+    fontWeight: "900",
+    marginBottom: 7,
+    marginTop: 5,
+    paddingHorizontal: 7,
   },
   pauseCloseButton: {
     position: "absolute",
@@ -706,6 +913,24 @@ const styles = createThemedStyleSheet({
   title: {
     color: "#171513",
     fontSize: 21,
+    fontWeight: "900",
+  },
+  viewPlansButton: {
+    alignItems: "center",
+    backgroundColor: "#FF4A17",
+    borderColor: "#FF8B68",
+    borderRadius: 8,
+    borderTopWidth: 1,
+    elevation: 6,
+    height: 34,
+    justifyContent: "center",
+    marginTop: 15,
+    minWidth: 150,
+    ...skeuo.action,
+  },
+  viewPlansText: {
+    color: "#FFFFFF",
+    fontSize: 11,
     fontWeight: "900",
   },
 });
