@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { PaginationControls } from "@/components";
-import { usePagination } from "@/shared/hooks";
 import {
   formatNaira,
   getCartItemCount,
@@ -21,8 +20,8 @@ import {
   useMealCartStore,
 } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
-import { mealsService, type WeeklyMealSelection } from "../services";
-import type { Meal, MealsStackParamList } from "../types";
+import { mealsService, type MealsMenuParams, type WeeklyMealSelection } from "../services";
+import type { Meal, MealDetail, MealsStackParamList } from "../types";
 
 type MenuScreenProps = NativeStackScreenProps<MealsStackParamList, "Menu">;
 
@@ -34,19 +33,27 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
   const [menuError, setMenuError] = useState<string>();
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeDiet, setActiveDiet] = useState<string>();
-  const [selectedMeal, setSelectedMeal] = useState<Meal>();
+  const [selectedMeal, setSelectedMeal] = useState<MealDetail>();
   const [activeSelection, setActiveSelection] = useState<WeeklyMealSelection>();
   const [weeklySelections, setWeeklySelections] = useState<WeeklyMealSelection[]>([]);
   const [detailQuantity, setDetailQuantity] = useState(1);
   const [selectionError, setSelectionError] = useState<string>();
   const [query, setQuery] = useState("");
+  const [menuPage, setMenuPage] = useState(1);
+  const [menuPagination, setMenuPagination] = useState({ page: 1, totalPages: 1 });
+  const [sort, setSort] = useState<MealsMenuParams["sort"]>("name_asc");
+  const [reviewError, setReviewError] = useState<string>();
 
-  const categories = useMemo(
-    () => ["All", "Breakfast", "Lunch", "Dinner", "Snacks", "Smoothies"],
-    [],
-  );
-  const diets = useMemo(
-    () => ["High Protein", "Low Carb", "Weight Loss", "Vegetarian", "Vegan", "Keto"],
+  const [categories, setCategories] = useState(["All"]);
+  const [diets, setDiets] = useState<string[]>([]);
+  const sortOptions = useMemo(
+    () => [
+      { label: "Name", value: "name_asc" },
+      { label: "Price ↑", value: "price_asc" },
+      { label: "Price ↓", value: "price_desc" },
+      { label: "Rating", value: "rating_desc" },
+      { label: "Newest", value: "newest" },
+    ] satisfies Array<{ label: string; value: NonNullable<MealsMenuParams["sort"]> }>,
     [],
   );
 
@@ -56,11 +63,43 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
 
   useEffect(() => {
     let mounted = true;
+    const loadFilters = async () => {
+      try {
+        const response = await mealsService.getFilters();
+        if (mounted) {
+          setCategories(["All", ...response.categories]);
+          setDiets(response.tags.map((tag) => toTitleCase(tag)));
+        }
+      } catch (error) {
+        if (mounted) {
+          setMenuError(error instanceof Error ? error.message : "Unable to load meal filters.");
+        }
+      }
+    };
+    void loadFilters();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
     const loadMeals = async () => {
       try {
-        const response = await mealsService.getMenu({ limit: 100 });
+        const response = await mealsService.getMenu({
+          category: activeCategory === "All" ? undefined : activeCategory,
+          limit: 10,
+          page: menuPage,
+          q: query.trim() || undefined,
+          sort,
+          tag: activeDiet?.toLowerCase(),
+        });
         if (mounted) {
           setMeals(response.meals);
+          setMenuPagination({
+            page: response.pagination?.page ?? menuPage,
+            totalPages: response.pagination?.totalPages ?? 1,
+          });
           setMenuError(undefined);
         }
       } catch (error) {
@@ -73,7 +112,7 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [activeCategory, activeDiet, menuPage, query, sort]);
 
   useEffect(() => {
     let mounted = true;
@@ -96,24 +135,18 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
     };
   }, []);
 
-  const filteredMeals = useMemo(
-    () =>
-      meals.filter((meal) => {
-        const matchesCategory = activeCategory === "All" || meal.category === activeCategory;
-        const matchesDiet =
-          !activeDiet || meal.tags.includes(activeDiet.toLowerCase() as Meal["tags"][number]);
-        const matchesSearch = meal.name.toLowerCase().includes(query.toLowerCase());
-        return matchesCategory && matchesDiet && matchesSearch;
-      }),
-    [activeCategory, activeDiet, meals, query],
-  );
   const cartCount = useMemo(() => getCartItemCount(cartItems), [cartItems]);
   const subtotal = useMemo(() => getCartSubtotal(cartItems), [cartItems]);
-  const mealPagination = usePagination(filteredMeals);
 
-  const openMeal = (meal: Meal) => {
+  const openMeal = async (meal: Meal) => {
     setDetailQuantity(1);
-    setSelectedMeal(meal);
+    setReviewError(undefined);
+    setSelectedMeal({ ...meal, reviews: [] });
+    try {
+      setSelectedMeal(await mealsService.getMeal(meal.id));
+    } catch (error) {
+      setReviewError(error instanceof Error ? error.message : "Unable to load meal details.");
+    }
   };
 
   return (
@@ -134,10 +167,28 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
         <FilterStrip
           activeValue={activeCategory}
           items={categories}
-          onChange={setActiveCategory}
+          onChange={(value) => {
+            setActiveCategory(value);
+            setMenuPage(1);
+          }}
           primary
         />
-        <FilterStrip activeValue={activeDiet} items={diets} onChange={setActiveDiet} />
+        <FilterStrip
+          activeValue={activeDiet}
+          items={diets}
+          onChange={(value) => {
+            setActiveDiet(value === activeDiet ? undefined : value);
+            setMenuPage(1);
+          }}
+        />
+        <SortStrip
+          activeValue={sort}
+          items={sortOptions}
+          onChange={(value) => {
+            setSort(value);
+            setMenuPage(1);
+          }}
+        />
         <WeeklyPlanner
           error={selectionError}
           onChoose={(selection) => setActiveSelection(selection)}
@@ -159,17 +210,17 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
           showsVerticalScrollIndicator={false}
         >
           {menuError ? <Text style={styles.errorText}>{menuError}</Text> : null}
-          {mealPagination.pageItems.map((meal) => (
-            <MealCard key={meal.id} meal={meal} onPress={() => openMeal(meal)} />
+          {meals.map((meal) => (
+            <MealCard key={meal.id} meal={meal} onPress={() => void openMeal(meal)} />
           ))}
           <View style={styles.paginationWide}>
             <PaginationControls
-              canGoNext={mealPagination.canGoNext}
-              canGoPrevious={mealPagination.canGoPrevious}
-              onNext={mealPagination.goNext}
-              onPrevious={mealPagination.goPrevious}
-              page={mealPagination.page}
-              totalPages={mealPagination.totalPages}
+              canGoNext={menuPagination.page < menuPagination.totalPages}
+              canGoPrevious={menuPagination.page > 1}
+              onNext={() => setMenuPage((page) => page + 1)}
+              onPrevious={() => setMenuPage((page) => Math.max(1, page - 1))}
+              page={menuPagination.page}
+              totalPages={menuPagination.totalPages}
             />
           </View>
         </ScrollView>
@@ -210,7 +261,20 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
         onClose={() => setSelectedMeal(undefined)}
         onDecrement={() => setDetailQuantity((value) => Math.max(1, value - 1))}
         onIncrement={() => setDetailQuantity((value) => value + 1)}
+        onReviewSubmit={async (payload) => {
+          if (!selectedMeal) return;
+          try {
+            const review = await mealsService.createReview(selectedMeal.id, payload);
+            setSelectedMeal((current) =>
+              current ? { ...current, reviews: [review, ...current.reviews] } : current,
+            );
+            setReviewError(undefined);
+          } catch (error) {
+            setReviewError(error instanceof Error ? error.message : "Unable to submit review.");
+          }
+        }}
         quantity={detailQuantity}
+        reviewError={reviewError}
         selectionLabel={activeSelection ? `Select for ${activeSelection.dayLabel}` : undefined}
       />
     </SafeAreaView>
@@ -314,6 +378,31 @@ const FilterStrip = ({ activeValue, items, onChange, primary }: FilterStripProps
   </View>
 );
 
+type SortStripProps = {
+  activeValue?: MealsMenuParams["sort"];
+  items: Array<{ label: string; value: NonNullable<MealsMenuParams["sort"]> }>;
+  onChange: (value: NonNullable<MealsMenuParams["sort"]>) => void;
+};
+
+const SortStrip = ({ activeValue, items, onChange }: SortStripProps) => (
+  <View style={styles.filterBlock}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+      {items.map((item) => {
+        const isActive = activeValue === item.value;
+        return (
+          <Pressable
+            key={item.value}
+            onPress={() => onChange(item.value)}
+            style={[styles.chip, isActive && styles.activeOutlineChip]}
+          >
+            <Text style={[styles.chipText, isActive && styles.activeOutlineText]}>{item.label}</Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  </View>
+);
+
 const MealCard = ({ meal, onPress }: { meal: Meal; onPress: () => void }) => (
   <Pressable onPress={onPress} style={styles.mealCard}>
     <View>
@@ -343,12 +432,14 @@ const MealCard = ({ meal, onPress }: { meal: Meal; onPress: () => void }) => (
 );
 
 type MealDetailSheetProps = {
-  meal?: Meal;
+  meal?: MealDetail;
   onAdd: () => void;
   onClose: () => void;
   onDecrement: () => void;
   onIncrement: () => void;
+  onReviewSubmit: (payload: { body: string; rating: number; title: string }) => Promise<void>;
   quantity: number;
+  reviewError?: string;
   selectionLabel?: string;
 };
 
@@ -358,10 +449,29 @@ const MealDetailSheet = ({
   onClose,
   onDecrement,
   onIncrement,
+  onReviewSubmit,
   quantity,
+  reviewError,
   selectionLabel,
 }: MealDetailSheetProps) => {
   const insets = useSafeAreaInsets();
+  const [rating, setRating] = useState(5);
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewBody, setReviewBody] = useState("");
+  const [savingReview, setSavingReview] = useState(false);
+
+  const submitReview = async () => {
+    if (!reviewTitle.trim() || !reviewBody.trim()) return;
+    setSavingReview(true);
+    try {
+      await onReviewSubmit({ body: reviewBody.trim(), rating, title: reviewTitle.trim() });
+      setReviewTitle("");
+      setReviewBody("");
+      setRating(5);
+    } finally {
+      setSavingReview(false);
+    }
+  };
 
   return (
   <Modal animationType="slide" onRequestClose={onClose} transparent visible={Boolean(meal)}>
@@ -378,6 +488,9 @@ const MealDetailSheet = ({
               </View>
               <Text style={styles.detailPrice}>{formatNaira(meal.price)}</Text>
             </View>
+            <Text style={styles.ratingSummary}>
+              ★ {meal.averageRating?.toFixed(1) ?? "0.0"} · {meal.reviewCount ?? meal.reviews?.length ?? 0} reviews
+            </Text>
             <Text style={styles.detailDescription}>{meal.detailDescription}</Text>
             <View style={styles.nutritionRow}>
               <NutritionCard icon="flame-outline" label="Calories" value={`${meal.calories}kcal`} />
@@ -386,6 +499,56 @@ const MealDetailSheet = ({
               <NutritionCard icon="water-outline" label="Fat" value={`${meal.fat}g`} />
             </View>
             <Text style={styles.detailTag}>{meal.tags[0]}</Text>
+            <View style={styles.reviewsBlock}>
+              <Text style={styles.reviewsTitle}>Reviews</Text>
+              {meal.reviews?.length ? (
+                meal.reviews.slice(0, 3).map((review) => (
+                  <View key={review.id} style={styles.reviewCard}>
+                    <Text style={styles.reviewTitle}>{review.rating}★ {review.title}</Text>
+                    <Text style={styles.reviewMeta}>{review.reviewerName} · {review.status}</Text>
+                    <Text style={styles.reviewBody}>{review.body}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.emptyReviewText}>No reviews yet</Text>
+              )}
+              <View style={styles.reviewForm}>
+                <View style={styles.starRow}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Pressable key={star} onPress={() => setRating(star)}>
+                      <Ionicons
+                        color={resolveThemeColor(star <= rating ? "#FFB020" : "#D8D3CE")}
+                        name={star <= rating ? "star" : "star-outline"}
+                        size={18}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+                <TextInput
+                  onChangeText={setReviewTitle}
+                  placeholder="Review title"
+                  placeholderTextColor={resolveThemeColor("#8B8580")}
+                  style={styles.reviewInput}
+                  value={reviewTitle}
+                />
+                <TextInput
+                  multiline
+                  onChangeText={setReviewBody}
+                  placeholder="Share your experience"
+                  placeholderTextColor={resolveThemeColor("#8B8580")}
+                  style={[styles.reviewInput, styles.reviewTextArea]}
+                  value={reviewBody}
+                />
+                {reviewError ? <Text style={styles.errorText}>{reviewError}</Text> : null}
+                <Pressable
+                  disabled={savingReview || !reviewTitle.trim() || !reviewBody.trim()}
+                  onPress={() => void submitReview()}
+                  style={[styles.reviewButton, (savingReview || !reviewTitle.trim() || !reviewBody.trim()) && styles.reviewButtonDisabled]}
+                >
+                  <Text style={styles.reviewButtonText}>{savingReview ? "Submitting..." : "Submit Review"}</Text>
+                </Pressable>
+              </View>
+            </View>
             <View style={styles.detailFooter}>
               <View style={styles.quantityControl}>
                 <Pressable onPress={onDecrement} style={styles.quantityButton}>
@@ -410,6 +573,9 @@ const MealDetailSheet = ({
   </Modal>
   );
 };
+
+const toTitleCase = (value: string) =>
+  value.replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 const NutritionCard = ({
   icon,
@@ -658,6 +824,10 @@ const styles = createThemedStyleSheet({
     fontSize: 15,
     fontWeight: "900",
   },
+  emptyReviewText: {
+    color: "#817B75",
+    fontSize: 11,
+  },
   detailSheet: {
     backgroundColor: "#FAF9F8",
     borderTopLeftRadius: 10,
@@ -699,6 +869,82 @@ const styles = createThemedStyleSheet({
   },
   filterBlock: {
     marginTop: 10,
+  },
+  ratingSummary: {
+    color: "#FFB020",
+    fontSize: 11,
+    fontWeight: "900",
+    marginTop: 7,
+  },
+  reviewBody: {
+    color: "#817B75",
+    fontSize: 10,
+    lineHeight: 15,
+    marginTop: 5,
+  },
+  reviewButton: {
+    alignItems: "center",
+    backgroundColor: "#FF4A17",
+    borderRadius: 9,
+    height: 34,
+    justifyContent: "center",
+    marginTop: 8,
+    ...skeuo.action,
+  },
+  reviewButtonDisabled: {
+    opacity: 0.55,
+  },
+  reviewButtonText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  reviewCard: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8E2DD",
+    borderRadius: 9,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: 9,
+    ...skeuo.card,
+  },
+  reviewForm: {
+    gap: 7,
+    marginTop: 10,
+  },
+  reviewInput: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8E2DD",
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    color: "#171513",
+    fontSize: 11,
+    minHeight: 34,
+    paddingHorizontal: 10,
+    ...skeuo.pressed,
+  },
+  reviewMeta: {
+    color: "#8B8580",
+    fontSize: 9,
+    marginTop: 3,
+  },
+  reviewsBlock: {
+    gap: 8,
+    marginTop: 14,
+  },
+  reviewsTitle: {
+    color: "#171513",
+    fontSize: 13,
+    fontWeight: "900",
+  },
+  reviewTextArea: {
+    minHeight: 64,
+    paddingTop: 9,
+    textAlignVertical: "top",
+  },
+  reviewTitle: {
+    color: "#171513",
+    fontSize: 11,
+    fontWeight: "900",
   },
   weeklyHeader: {
     alignItems: "center",
@@ -875,6 +1121,10 @@ const styles = createThemedStyleSheet({
     flex: 1,
     fontSize: 12,
     padding: 0,
+  },
+  starRow: {
+    flexDirection: "row",
+    gap: 5,
   },
   subtitle: {
     color: "#817B75",

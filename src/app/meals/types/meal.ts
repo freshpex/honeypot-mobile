@@ -12,7 +12,24 @@ export type Meal = {
   carbs: number;
   fat: number;
   price: number;
+  averageRating?: number;
+  reviewCount?: number;
   tags: MealTag[];
+};
+
+export type MealReviewEntry = {
+  id: string;
+  body: string;
+  createdAt: string;
+  photoUrls: string[];
+  rating: number;
+  reviewerName: string;
+  status: "Pending" | "Published" | "Rejected";
+  title: string;
+};
+
+export type MealDetail = Meal & {
+  reviews: MealReviewEntry[];
 };
 
 export type MealsStackParamList = {
