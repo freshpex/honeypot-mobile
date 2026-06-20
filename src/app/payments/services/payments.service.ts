@@ -10,7 +10,7 @@ export type PaymentHistoryItem = {
   paymentMethod?: SavedCard | null;
   paymentMethodId?: string | null;
   reference: string;
-  status: "PAID" | "PENDING" | "FAILED";
+  status: "PAID" | "PENDING" | "FAILED" | "CANCELLED";
 };
 
 export type AddPaymentMethodPayload = {
@@ -31,6 +31,7 @@ export type ChargePaymentPayload = {
 export type InitializePaymentResponse = {
   amount: number;
   authorizationUrl: string;
+  id: string;
   provider: "paystack" | "flutterwave";
   reference: string;
   status: "PENDING" | "PAID" | "FAILED";

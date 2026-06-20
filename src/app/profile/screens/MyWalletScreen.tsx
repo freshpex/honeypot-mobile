@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
 import type { ProfileStackParamList } from "../types";
@@ -9,42 +8,45 @@ import type { ProfileStackParamList } from "../types";
 type MyWalletScreenProps = NativeStackScreenProps<ProfileStackParamList, "MyWallet">;
 
 export const MyWalletScreen = (_props: MyWalletScreenProps) => {
-  const [copiedField, setCopiedField] = useState<string | undefined>();
-
-  const markCopied = (field: string) => {
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(undefined), 1200);
-  };
-
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.fundCard}>
           <View style={styles.fundHeader}>
             <Ionicons color={resolveThemeColor("#FFFFFF")} name="wallet-outline" size={18} />
-            <Text style={styles.fundTitle}>Fund Your Wallet</Text>
+            <Text style={styles.fundTitle}>HoneyPot Wallet</Text>
           </View>
           <Text style={styles.fundSubtitle}>
-            Transfer to this account to top up your HoneyPot wallet
+            Coming Soon · wallet funding is not available yet.
           </Text>
+          <View style={styles.comingSoonBanner}>
+            <Ionicons color={resolveThemeColor("#9A6500")} name="alert-circle-outline" size={17} />
+            <Text style={styles.comingSoonText}>
+              Please do not transfer funds to any HoneyPot wallet account until this feature is launched.
+            </Text>
+          </View>
           <View style={styles.bankPanel}>
             <Text style={styles.bankLabel}>BANK NAME</Text>
-            <Text style={styles.bankValue}>HoneyPot Microfinance Bank</Text>
+            <Text style={styles.bankValue}>Coming Soon</Text>
             <View style={styles.divider} />
             <View style={styles.copyRow}>
               <View>
                 <Text style={styles.bankLabel}>ACCOUNT NUMBER</Text>
-                <Text style={styles.accountNumber}>020879502622</Text>
+                <Text style={styles.accountNumber}>Unavailable</Text>
               </View>
-              <CopyButton copied={copiedField === "account"} onPress={() => markCopied("account")} />
+              <View style={styles.disabledCopyButton}>
+                <Ionicons color={resolveThemeColor("#FFFFFF")} name="lock-closed-outline" size={17} />
+              </View>
             </View>
             <View style={styles.divider} />
             <View style={styles.copyRow}>
               <View>
                 <Text style={styles.bankLabel}>ACCOUNT NAME</Text>
-                <Text style={styles.bankValue}>Enoch</Text>
+                <Text style={styles.bankValue}>Not active</Text>
               </View>
-              <CopyButton copied={copiedField === "name"} onPress={() => markCopied("name")} />
+              <View style={styles.disabledCopyButton}>
+                <Ionicons color={resolveThemeColor("#FFFFFF")} name="lock-closed-outline" size={17} />
+              </View>
             </View>
           </View>
         </View>
@@ -52,8 +54,8 @@ export const MyWalletScreen = (_props: MyWalletScreenProps) => {
         <View style={styles.notice}>
           <Ionicons color={resolveThemeColor("#F59E0B")} name="alert-circle-outline" size={16} />
           <Text style={styles.noticeText}>
-            Transfer any amount to your dedicated account above. Funds reflect within minutes and
-            can be used to pay for orders at checkout.
+            Wallet payments and bank transfers are coming soon. For now, use a saved debit or
+            credit card at checkout.
           </Text>
         </View>
 
@@ -66,12 +68,6 @@ export const MyWalletScreen = (_props: MyWalletScreenProps) => {
     </SafeAreaView>
   );
 };
-
-const CopyButton = ({ copied, onPress }: { copied: boolean; onPress: () => void }) => (
-  <Pressable onPress={onPress} style={styles.copyButton}>
-    <Ionicons color={resolveThemeColor("#FFFFFF")} name={copied ? "checkmark" : "copy-outline"} size={17} />
-  </Pressable>
-);
 
 const styles = createThemedStyleSheet({
   accountNumber: {
@@ -126,6 +122,24 @@ const styles = createThemedStyleSheet({
     justifyContent: "center",
     width: 32,
   },
+  comingSoonBanner: {
+    alignItems: "flex-start",
+    backgroundColor: "#FFF8E4",
+    borderColor: "rgba(255,255,255,0.34)",
+    borderRadius: 9,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 13,
+    padding: 10,
+  },
+  comingSoonText: {
+    color: "#9A6500",
+    flex: 1,
+    fontSize: 11,
+    fontWeight: "800",
+    lineHeight: 16,
+  },
   copyRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -135,6 +149,17 @@ const styles = createThemedStyleSheet({
     backgroundColor: "rgba(255,255,255,0.25)",
     height: StyleSheet.hairlineWidth,
     marginVertical: 10,
+  },
+  disabledCopyButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.16)",
+    borderRadius: 16,
+    borderColor: "rgba(255,255,255,0.22)",
+    borderTopWidth: 1,
+    height: 32,
+    justifyContent: "center",
+    opacity: 0.65,
+    width: 32,
   },
   emptyState: {
     alignItems: "center",

@@ -49,6 +49,7 @@ export const ProfileHomeScreen = ({ navigation }: ProfileHomeScreenProps) => {
       {
         icon: "wallet-outline",
         title: "My Wallet",
+        subtitle: "Coming Soon · funding disabled",
         color: "#FFB020",
         tint: "#FFF4D8",
         onPress: () => navigation.navigate("MyWallet"),
@@ -196,7 +197,8 @@ const AddressSheet = ({
   return (
     <Modal animationType="slide" onRequestClose={onClose} transparent visible={Boolean(mode)}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 18 : 0}
         style={styles.sheetOverlay}
       >
         <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
@@ -305,7 +307,8 @@ const DietarySheet = ({ onClose, visible }: { onClose: () => void; visible: bool
   return (
     <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 18 : 0}
         style={styles.sheetOverlay}
       >
         <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
@@ -463,7 +466,7 @@ const styles = createThemedStyleSheet({
   sheetInput: { backgroundColor: "#FFFFFF", borderColor: "#E8E2DD", borderRadius: 8, borderWidth: StyleSheet.hairlineWidth, color: "#171513", elevation: 2, fontSize: 12, minHeight: 42, paddingHorizontal: 11, ...skeuo.pressed },
   sheetInputFocused: { borderColor: "#FF4A17", borderWidth: 1 },
   sheetOverlay: { backgroundColor: "rgba(0,0,0,0.76)", flex: 1, justifyContent: "flex-end" },
-  sheetScrollContent: { paddingBottom: 8 },
+  sheetScrollContent: { paddingBottom: 72 },
   sheetSubtitle: { color: "#817B75", fontSize: 10, marginTop: 5 },
   sheetTitle: { color: "#171513", fontSize: 15, fontWeight: "900" },
   twoCol: { flexDirection: "row", gap: 8 },

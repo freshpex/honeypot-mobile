@@ -1,26 +1,31 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { createThemedStyleSheet, skeuo } from "@/shared/theme";
 
 type GoogleAuthButtonProps = {
   disabled?: boolean;
+  isLoading?: boolean;
   onPress: () => void;
 };
 
-export const GoogleAuthButton = ({ disabled, onPress }: GoogleAuthButtonProps) => (
+export const GoogleAuthButton = ({ disabled, isLoading, onPress }: GoogleAuthButtonProps) => (
   <Pressable
-    disabled={disabled}
+    disabled={disabled || isLoading}
     onPress={onPress}
     style={({ pressed }) => [
       styles.button,
       pressed && styles.pressed,
-      disabled && styles.disabled,
+      (disabled || isLoading) && styles.disabled,
     ]}
   >
-    <View style={styles.contentRow}>
-      <GoogleLogo />
-      <Text style={styles.label}>Continue with Google</Text>
-    </View>
+    {isLoading ? (
+      <ActivityIndicator color="#161616" size="small" />
+    ) : (
+      <View style={styles.contentRow}>
+        <GoogleLogo />
+        <Text style={styles.label}>Continue with Google</Text>
+      </View>
+    )}
   </Pressable>
 );
 

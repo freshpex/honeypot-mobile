@@ -3,7 +3,9 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
 import {
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -492,7 +494,11 @@ const MealDetailSheet = ({
 
   return (
   <Modal animationType="slide" onRequestClose={onClose} transparent visible={Boolean(meal)}>
-    <View style={styles.detailOverlay}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 18 : 0}
+      style={styles.detailOverlay}
+    >
       <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
       {meal ? (
         <View style={[styles.detailSheet, { paddingBottom: Math.max(insets.bottom + 18, 28) }]}>
@@ -590,7 +596,7 @@ const MealDetailSheet = ({
           </View>
         </View>
       ) : null}
-    </View>
+    </KeyboardAvoidingView>
   </Modal>
   );
 };

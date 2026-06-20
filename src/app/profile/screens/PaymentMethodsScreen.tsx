@@ -63,7 +63,8 @@ export const PaymentMethodsScreen = ({ navigation }: PaymentMethodsScreenProps) 
   return (
     <SafeAreaView edges={[]} style={styles.safeArea}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 18 : 0}
         style={styles.keyboardAvoider}
       >
       <ScrollView
@@ -284,7 +285,7 @@ const styles = createThemedStyleSheet({
     gap: 8,
   },
   content: {
-    paddingBottom: 100,
+    paddingBottom: 150,
     paddingHorizontal: 12,
     paddingTop: 18,
   },

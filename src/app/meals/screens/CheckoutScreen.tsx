@@ -40,6 +40,7 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   const addresses = useCustomerStore((state) => state.addresses);
   const cards = useCustomerStore((state) => state.cards);
   const checkoutOrder = useCustomerStore((state) => state.checkoutOrder);
+  const confirmOrderPayment = useCustomerStore((state) => state.confirmOrderPayment);
   const error = useCustomerStore((state) => state.error);
   const isSyncing = useCustomerStore((state) => state.isSyncing);
   const loadAddresses = useCustomerStore((state) => state.loadAddresses);
@@ -86,18 +87,23 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
       return;
     }
     try {
-      await checkoutOrder({
+      const initialized = await initializeCheckoutPayment({
+        deliveryFee: DELIVERY_FEE,
+        itemCount,
+        paymentMethodId: selectedCard.id,
+        total,
+      });
+      const order = await checkoutOrder({
         deliveryAddressId: selectedAddress.id,
         deliveryFee: DELIVERY_FEE,
         items,
         paymentMethodId: selectedCard.id,
-        paymentReference: await collectPaymentReference({
-          deliveryFee: DELIVERY_FEE,
-          itemCount,
-          paymentMethodId: selectedCard.id,
-          total,
-        }),
+        paymentReference: initialized.reference,
       });
+      const completed = await openAndVerifyPayment(initialized.authorizationUrl, initialized.reference);
+      if (completed) {
+        await confirmOrderPayment(order.id);
+      }
     } catch {
       return;
     }
@@ -247,7 +253,7 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   );
 };
 
-const collectPaymentReference = async ({
+const initializeCheckoutPayment = async ({
   deliveryFee,
   itemCount,
   paymentMethodId,
@@ -259,24 +265,27 @@ const collectPaymentReference = async ({
   total: number;
 }) => {
   const callbackUrl = Linking.createURL("payment-complete");
-  const initialized = await paymentsService.initialize({
+  return paymentsService.initialize({
     amount: total,
     callbackUrl,
     deliveryFee,
     description: "One Off",
-    metadata: { itemCount },
+    metadata: { itemCount, kind: "order" },
     paymentMethodId,
   });
+};
 
-  const result = await WebBrowser.openAuthSessionAsync(initialized.authorizationUrl, callbackUrl);
+const openAndVerifyPayment = async (authorizationUrl: string, reference: string) => {
+  const callbackUrl = Linking.createURL("payment-complete");
+  const result = await WebBrowser.openAuthSessionAsync(authorizationUrl, callbackUrl);
   if (result.type === "cancel" || result.type === "dismiss") {
-    throw new Error("Payment was cancelled before completion.");
+    return false;
   }
-  const verified = await paymentsService.verify(initialized.reference);
+  const verified = await paymentsService.verify(reference);
   if (verified.status !== "PAID") {
-    throw new Error("Payment was not completed.");
+    return false;
   }
-  return verified.reference;
+  return true;
 };
 
 const SectionLabel = ({
@@ -518,7 +527,8 @@ const BottomSheetContent = ({
   return (
   <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 18 : 0}
       style={styles.sheetOverlay}
     >
       <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
@@ -848,7 +858,7 @@ const styles = createThemedStyleSheet({
     justifyContent: "flex-end",
   },
   sheetScrollContent: {
-    paddingBottom: 8,
+    paddingBottom: 76,
   },
   sheetSaveButton: {
     alignItems: "center",

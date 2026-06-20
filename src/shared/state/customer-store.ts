@@ -35,6 +35,7 @@ type CustomerState = {
   isSyncing: boolean;
   orders: CustomerOrder[];
   paymentHistory: PaymentHistoryItem[];
+  cancelAwaitingPayment: (orderId: string) => Promise<CustomerOrder>;
   checkoutOrder: (input: {
     deliveryAddressId: string;
     deliveryFee: number;
@@ -42,6 +43,7 @@ type CustomerState = {
     paymentMethodId: string;
     paymentReference: string;
   }) => Promise<CustomerOrder>;
+  confirmOrderPayment: (orderId: string) => Promise<CustomerOrder>;
   createAddress: (address: Omit<DeliveryAddress, "id">) => Promise<DeliveryAddress>;
   createCard: (card: Omit<SavedCard, "id" | "brand" | "last4"> & { number: string }) => Promise<SavedCard>;
   loadAddresses: () => Promise<void>;
@@ -52,6 +54,7 @@ type CustomerState = {
   removeAddressRemote: (addressId: string) => Promise<void>;
   removeCard: (cardId: string) => void;
   removeCardRemote: (cardId: string) => Promise<void>;
+  retryOrderPayment: (orderId: string, callbackUrl?: string) => Promise<{ order: CustomerOrder; payment: Awaited<ReturnType<typeof ordersService.retryPayment>>["payment"] }>;
   saveDietaryPreferences: (preferences: string[], allergies: string) => void;
   updateOrderStatus: (orderId: string, status: CustomerOrder["status"]) => void;
 };
@@ -65,6 +68,21 @@ export const useCustomerStore = create<CustomerState>((set) => ({
   isSyncing: false,
   orders: [],
   paymentHistory: [],
+  cancelAwaitingPayment: async (orderId) => {
+    set({ error: undefined, isSyncing: true });
+    try {
+      const order = await ordersService.cancelAwaitingPayment(orderId);
+      set((state) => ({
+        isSyncing: false,
+        orders: state.orders.map((item) => (item.id === order.id ? order : item)),
+      }));
+      return order;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to cancel order.";
+      set({ error: message, isSyncing: false });
+      throw error;
+    }
+  },
   checkoutOrder: async ({ deliveryAddressId, deliveryFee, items, paymentMethodId, paymentReference }) => {
     set({ error: undefined, isSyncing: true });
     try {
@@ -82,6 +100,21 @@ export const useCustomerStore = create<CustomerState>((set) => ({
       return order;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to place order.";
+      set({ error: message, isSyncing: false });
+      throw error;
+    }
+  },
+  confirmOrderPayment: async (orderId) => {
+    set({ error: undefined, isSyncing: true });
+    try {
+      const order = await ordersService.confirmPayment(orderId);
+      set((state) => ({
+        isSyncing: false,
+        orders: [order, ...state.orders.filter((item) => item.id !== order.id)],
+      }));
+      return order;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to confirm payment.";
       set({ error: message, isSyncing: false });
       throw error;
     }
@@ -189,6 +222,21 @@ export const useCustomerStore = create<CustomerState>((set) => ({
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to remove payment method.";
+      set({ error: message, isSyncing: false });
+      throw error;
+    }
+  },
+  retryOrderPayment: async (orderId, callbackUrl) => {
+    set({ error: undefined, isSyncing: true });
+    try {
+      const response = await ordersService.retryPayment(orderId, callbackUrl);
+      set((state) => ({
+        isSyncing: false,
+        orders: [response.order, ...state.orders.filter((item) => item.id !== response.order.id)],
+      }));
+      return response;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to retry payment.";
       set({ error: message, isSyncing: false });
       throw error;
     }

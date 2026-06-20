@@ -3,6 +3,7 @@ import type { DeliveryAddress } from "@/shared/state";
 export type OrdersModuleName = "orders";
 
 export type OrderStatusLabel =
+  | "Awaiting Payment"
   | "Confirmed"
   | "Preparing"
   | "Out for Delivery"
@@ -43,9 +44,12 @@ export type CustomerOrder = {
   date: string;
   deliveryAddress?: DeliveryAddress;
   paymentCardLast4?: string;
+  paymentAuthorizationUrl?: string;
   paymentMethod: "Wallet" | "Card";
+  paymentReference?: string;
+  paymentStatus?: "PAID" | "PENDING" | "FAILED" | "CANCELLED";
   status: OrderStatusLabel;
-  statusCode: "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
+  statusCode: "AWAITING_PAYMENT" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
   type: "One Off" | "Subscription";
   subtotal: number;
   deliveryFee: number;

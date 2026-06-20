@@ -136,9 +136,6 @@ export const DashboardScreen = () => {
             <Ionicons color={resolveThemeColor("#C9C5C1")} name="calendar-outline" size={32} />
             <Text style={styles.emptyPlanTitle}>No active plan</Text>
             <Text style={styles.emptyPlanCopy}>Subscribe to start enjoying healthy meals delivered to your door.</Text>
-            <Pressable onPress={() => navigation.navigate("Plan")} style={styles.viewPlansButton}>
-              <Text style={styles.viewPlansText}>View Plans</Text>
-            </Pressable>
           </View>
         ) : (
           <Pressable onPress={() => navigation.navigate("Plan")} style={styles.statusCard}>

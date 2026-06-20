@@ -44,7 +44,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
       title="Welcome back"
     >
       <View style={authScreenStyles.card}>
-        <GoogleAuthButton disabled={auth.isLoading} onPress={auth.continueWithGoogle} />
+        <GoogleAuthButton disabled={auth.isLoading} isLoading={auth.isLoading} onPress={auth.continueWithGoogle} />
         <Divider />
         <FormField
           autoCapitalize="none"

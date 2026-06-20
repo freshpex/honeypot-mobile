@@ -47,7 +47,7 @@ export const RegisterScreen = ({ navigation }: RegisterScreenProps) => {
       title="Create your account"
     >
       <View style={authScreenStyles.card}>
-        <GoogleAuthButton disabled={auth.isLoading} onPress={auth.continueWithGoogle} />
+        <GoogleAuthButton disabled={auth.isLoading} isLoading={auth.isLoading} onPress={auth.continueWithGoogle} />
         <Divider />
         <FormField
           autoCapitalize="none"

@@ -1,4 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import { useEffect, useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, Polyline, UrlTile } from "react-native-maps";
@@ -7,6 +9,7 @@ import { PaginationControls } from "@/components";
 import { usePagination } from "@/shared/hooks";
 import { formatNaira, useCustomerStore } from "@/shared/state";
 import { resolveThemeColor, createThemedStyleSheet, skeuo } from "@/shared/theme";
+import { paymentsService } from "@/app/payments/services";
 import { ordersService } from "../services";
 import type { TrackingResponse } from "../types";
 
@@ -14,8 +17,13 @@ export const OrdersScreen = () => {
   const insets = useSafeAreaInsets();
   const tabs = useMemo(() => ["Active", "Delivered", "Cancelled"], []);
   const orders = useCustomerStore((state) => state.orders);
+  const cancelAwaitingPayment = useCustomerStore((state) => state.cancelAwaitingPayment);
+  const confirmOrderPayment = useCustomerStore((state) => state.confirmOrderPayment);
+  const isSyncing = useCustomerStore((state) => state.isSyncing);
   const loadOrders = useCustomerStore((state) => state.loadOrders);
+  const retryOrderPayment = useCustomerStore((state) => state.retryOrderPayment);
   const [activeTab, setActiveTab] = useState("Active");
+  const [paymentActionOrderId, setPaymentActionOrderId] = useState<string>();
   const [tracking, setTracking] = useState<TrackingResponse>();
   const [trackingError, setTrackingError] = useState<string>();
   const statusQuery = useMemo(() => activeTab.toLowerCase() as "active" | "delivered" | "cancelled", [activeTab]);
@@ -28,7 +36,7 @@ export const OrdersScreen = () => {
     () =>
       orders.filter((order) => {
         if (activeTab === "Active") {
-          return ["Confirmed", "Preparing", "Out for Delivery"].includes(order.status);
+          return ["Awaiting Payment", "Confirmed", "Preparing", "Out for Delivery"].includes(order.status);
         }
         if (activeTab === "Delivered") return order.status === "Delivered";
         return order.status === "Cancelled";
@@ -38,15 +46,16 @@ export const OrdersScreen = () => {
   const orderRows = useMemo(
     () =>
       visibleOrders.map((order) => ({
-            date: order.date,
-            id: `#${order.reference}`,
-            meal: `${order.items[0]?.name ?? "HoneyPot meal"} x${order.items[0]?.quantity ?? 1}`,
-            orderId: order.id,
-            status: order.status,
-            total: formatNaira(order.total),
-            type: order.type,
-          })),
-    [activeTab, visibleOrders],
+        date: order.date,
+        id: `#${order.reference}`,
+        meal: `${order.items[0]?.name ?? "HoneyPot meal"} x${order.items[0]?.quantity ?? 1}`,
+        order,
+        orderId: order.id,
+        status: order.status,
+        total: formatNaira(order.total),
+        type: order.type,
+      })),
+    [visibleOrders],
   );
   const orderPagination = usePagination(orderRows);
 
@@ -56,6 +65,71 @@ export const OrdersScreen = () => {
       setTracking(await ordersService.getTracking(orderId));
     } catch (error) {
       setTrackingError(error instanceof Error ? error.message : "Unable to load tracking.");
+    }
+  };
+
+  const handleRetryPayment = async (orderId: string) => {
+    const targetOrder = orders.find((order) => order.id === orderId);
+    if (!targetOrder) {
+      setTrackingError("Order was not found.");
+      return;
+    }
+
+    setTrackingError(undefined);
+    setPaymentActionOrderId(orderId);
+    try {
+      const callbackUrl = Linking.createURL("payment-complete");
+      let authorizationUrl = targetOrder.paymentAuthorizationUrl;
+      let reference = targetOrder.paymentReference;
+      let confirmationOrderId = targetOrder.id;
+
+      if (!authorizationUrl || !reference || targetOrder.paymentStatus !== "PENDING") {
+        const retried = await retryOrderPayment(targetOrder.id, callbackUrl);
+        authorizationUrl = retried.payment.authorizationUrl;
+        reference = retried.payment.reference;
+        confirmationOrderId = retried.order.id;
+      }
+
+      if (!authorizationUrl || !reference) {
+        throw new Error("Payment link is not available for this order.");
+      }
+
+      const result = await WebBrowser.openAuthSessionAsync(authorizationUrl, callbackUrl);
+      if (result.type === "cancel" || result.type === "dismiss") {
+        return;
+      }
+
+      const verified = await paymentsService.verify(reference);
+      if (verified.status !== "PAID") {
+        throw new Error("Payment was not completed. You can retry from this order.");
+      }
+
+      const confirmedOrder = await confirmOrderPayment(confirmationOrderId);
+      if (tracking?.order.id === confirmationOrderId) {
+        setTracking({
+          ...tracking,
+          order: confirmedOrder,
+        });
+      }
+      await loadOrders(statusQuery);
+    } catch (error) {
+      setTrackingError(error instanceof Error ? error.message : "Unable to retry payment.");
+    } finally {
+      setPaymentActionOrderId(undefined);
+    }
+  };
+
+  const handleCancelAwaitingPayment = async (orderId: string) => {
+    setTrackingError(undefined);
+    setPaymentActionOrderId(orderId);
+    try {
+      await cancelAwaitingPayment(orderId);
+      setTracking(undefined);
+      await loadOrders(statusQuery);
+    } catch (error) {
+      setTrackingError(error instanceof Error ? error.message : "Unable to cancel this order.");
+    } finally {
+      setPaymentActionOrderId(undefined);
     }
   };
 
@@ -102,6 +176,32 @@ export const OrdersScreen = () => {
                   <Text style={styles.orderType}>{order.type}</Text>
                   <Text style={styles.orderTotal}>{order.total}</Text>
                 </View>
+                {order.status === "Awaiting Payment" ? (
+                  <View style={styles.paymentActionRow}>
+                    <Pressable
+                      disabled={isSyncing || paymentActionOrderId === order.orderId}
+                      onPress={() => void handleRetryPayment(order.orderId)}
+                      style={[
+                        styles.retryPaymentButton,
+                        (isSyncing || paymentActionOrderId === order.orderId) && styles.disabledButton,
+                      ]}
+                    >
+                      <Text style={styles.retryPaymentText}>
+                        {paymentActionOrderId === order.orderId ? "Opening..." : "Retry Payment"}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      disabled={isSyncing || paymentActionOrderId === order.orderId}
+                      onPress={() => void handleCancelAwaitingPayment(order.orderId)}
+                      style={[
+                        styles.cancelPaymentButton,
+                        (isSyncing || paymentActionOrderId === order.orderId) && styles.disabledButton,
+                      ]}
+                    >
+                      <Text style={styles.cancelPaymentText}>Cancel</Text>
+                    </Pressable>
+                  </View>
+                ) : null}
               </Pressable>
             ))}
             <PaginationControls
@@ -127,6 +227,9 @@ export const OrdersScreen = () => {
       ) : null}
       <TrackingSheet
         onClose={() => setTracking(undefined)}
+        onCancelPayment={handleCancelAwaitingPayment}
+        onRetryPayment={handleRetryPayment}
+        paymentActionOrderId={paymentActionOrderId}
         tracking={tracking}
         bottomInset={insets.bottom}
       />
@@ -136,11 +239,17 @@ export const OrdersScreen = () => {
 
 const TrackingSheet = ({
   bottomInset,
+  onCancelPayment,
   onClose,
+  onRetryPayment,
+  paymentActionOrderId,
   tracking,
 }: {
   bottomInset: number;
+  onCancelPayment: (orderId: string) => void;
   onClose: () => void;
+  onRetryPayment: (orderId: string) => void;
+  paymentActionOrderId?: string;
   tracking?: TrackingResponse;
 }) => {
   const route = useMemo(
@@ -214,6 +323,32 @@ const TrackingSheet = ({
                 </View>
               </View>
             ) : null}
+            {tracking.order.status === "Awaiting Payment" ? (
+              <View style={styles.sheetPaymentActions}>
+                <Pressable
+                  disabled={paymentActionOrderId === tracking.order.id}
+                  onPress={() => onRetryPayment(tracking.order.id)}
+                  style={[
+                    styles.retryPaymentButton,
+                    paymentActionOrderId === tracking.order.id && styles.disabledButton,
+                  ]}
+                >
+                  <Text style={styles.retryPaymentText}>
+                    {paymentActionOrderId === tracking.order.id ? "Opening..." : "Retry Payment"}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  disabled={paymentActionOrderId === tracking.order.id}
+                  onPress={() => onCancelPayment(tracking.order.id)}
+                  style={[
+                    styles.cancelPaymentButton,
+                    paymentActionOrderId === tracking.order.id && styles.disabledButton,
+                  ]}
+                >
+                  <Text style={styles.cancelPaymentText}>Cancel Order</Text>
+                </Pressable>
+              </View>
+            ) : null}
             <ScrollView contentContainerStyle={styles.timeline}>
               {tracking.events.map((event) => (
                 <View key={event.id} style={styles.timelineRow}>
@@ -246,6 +381,26 @@ const styles = createThemedStyleSheet({
     flex: 1,
     paddingHorizontal: 27,
     paddingTop: 10,
+  },
+  cancelPaymentButton: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8E2DD",
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    elevation: 2,
+    flex: 1,
+    height: 34,
+    justifyContent: "center",
+    ...skeuo.pressed,
+  },
+  cancelPaymentText: {
+    color: "#817B75",
+    fontSize: 10,
+    fontWeight: "900",
+  },
+  disabledButton: {
+    opacity: 0.58,
   },
   emptyState: {
     alignItems: "center",
@@ -341,6 +496,11 @@ const styles = createThemedStyleSheet({
     fontSize: 10,
     marginTop: 12,
   },
+  paymentActionRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 13,
+  },
   orderTotal: {
     color: "#171513",
     fontSize: 13,
@@ -380,6 +540,23 @@ const styles = createThemedStyleSheet({
   riderTextWrap: {
     flex: 1,
   },
+  retryPaymentButton: {
+    alignItems: "center",
+    backgroundColor: "#FF4A17",
+    borderColor: "#FF8B68",
+    borderRadius: 8,
+    borderTopWidth: 1,
+    elevation: 5,
+    flex: 1,
+    height: 34,
+    justifyContent: "center",
+    ...skeuo.action,
+  },
+  retryPaymentText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "900",
+  },
   sheetHandle: {
     alignSelf: "center",
     backgroundColor: "#D8D3CE",
@@ -397,6 +574,11 @@ const styles = createThemedStyleSheet({
     backgroundColor: "rgba(0,0,0,0.72)",
     flex: 1,
     justifyContent: "flex-end",
+  },
+  sheetPaymentActions: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
   },
   sheetSubtitle: {
     color: "#817B75",
