@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { EmptyState, PaginationControls, Screen } from "@/components";
 import { usePagination } from "@/shared/hooks";
@@ -17,7 +17,7 @@ export const NotificationsScreen = () => {
   const [error, setError] = useState<string>();
   const notificationPages = usePagination(items);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const response = await notificationsService.getNotifications(1, 100);
       setItems(response.items);
@@ -27,11 +27,11 @@ export const NotificationsScreen = () => {
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to load notifications.");
     }
-  };
+  }, []);
 
   useEffect(() => {
-    void load();
-  }, []);
+    void Promise.resolve().then(load);
+  }, [load]);
 
   const preferenceRows = useMemo(() => preferences, [preferences]);
 

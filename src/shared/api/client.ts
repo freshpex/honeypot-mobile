@@ -43,7 +43,7 @@ const request = async <TResponse, TBody = unknown>(
   const data = await response.json().catch(() => undefined);
 
   if (!response.ok) {
-    throw new ApiClientError(data?.message ?? "Request failed", response.status);
+    throw new ApiClientError(errorMessageFromResponse(data), response.status);
   }
 
   return data as TResponse;
@@ -67,5 +67,20 @@ const networkErrorMessage = (error: unknown) => {
     return "Unable to reach HoneyPot API. Check EXPO_PUBLIC_API_BASE_URL for this build and try again.";
   }
   return "Unable to reach HoneyPot API. Please check your connection and try again.";
+};
+
+const errorMessageFromResponse = (data: unknown) => {
+  if (!data || typeof data !== "object") return "Request failed";
+  const message = (data as { message?: unknown; error?: unknown; code?: unknown }).message;
+  if (typeof message === "string") return message;
+  if (message && typeof message === "object") {
+    const nested = message as { message?: unknown; error?: unknown };
+    if (typeof nested.message === "string") return nested.message;
+    if (typeof nested.error === "string") return nested.error;
+  }
+  const error = (data as { error?: unknown }).error;
+  if (typeof error === "string") return error;
+  const code = (data as { code?: unknown }).code;
+  return typeof code === "string" ? code.replace(/_/g, " ") : "Request failed";
 };
 

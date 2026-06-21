@@ -36,4 +36,10 @@ export type MealsStackParamList = {
   Menu: undefined;
   Cart: undefined;
   Checkout: undefined;
+  PaymentResult: {
+    message?: string;
+    orderId?: string;
+    orderReference?: string;
+    status: "success" | "pending" | "failed" | "cancelled";
+  };
 };

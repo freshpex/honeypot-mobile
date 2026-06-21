@@ -19,6 +19,7 @@ export const OrdersScreen = () => {
   const orders = useCustomerStore((state) => state.orders);
   const cancelAwaitingPayment = useCustomerStore((state) => state.cancelAwaitingPayment);
   const confirmOrderPayment = useCustomerStore((state) => state.confirmOrderPayment);
+  const customerError = useCustomerStore((state) => state.error);
   const isSyncing = useCustomerStore((state) => state.isSyncing);
   const loadOrders = useCustomerStore((state) => state.loadOrders);
   const retryOrderPayment = useCustomerStore((state) => state.retryOrderPayment);
@@ -153,7 +154,21 @@ export const OrdersScreen = () => {
           })}
         </View>
 
-        {orderRows.length ? (
+        {customerError ? (
+          <View style={styles.loadErrorCard}>
+            <Ionicons color={resolveThemeColor("#C8320D")} name="alert-circle-outline" size={24} />
+            <Text style={styles.loadErrorTitle}>Unable to load orders</Text>
+            <Text style={styles.loadErrorText}>{customerError}</Text>
+            <Pressable onPress={() => void loadOrders(statusQuery)} style={styles.loadRetryButton}>
+              <Text style={styles.loadRetryText}>Retry</Text>
+            </Pressable>
+          </View>
+        ) : isSyncing && !orderRows.length ? (
+          <View style={styles.emptyState}>
+            <Ionicons color={resolveThemeColor("#C9C5C1")} name="hourglass-outline" size={32} />
+            <Text style={styles.emptyText}>Loading orders...</Text>
+          </View>
+        ) : orderRows.length ? (
           <View style={styles.orderList}>
             {orderPagination.pageItems.map((order) => (
               <Pressable
@@ -437,6 +452,48 @@ const styles = createThemedStyleSheet({
     marginTop: 12,
     overflow: "hidden",
     width: "100%",
+  },
+  loadErrorCard: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFD1C1",
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    elevation: 4,
+    marginTop: 28,
+    padding: 18,
+    ...skeuo.card,
+  },
+  loadErrorText: {
+    color: "#817B75",
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 6,
+    textAlign: "center",
+  },
+  loadErrorTitle: {
+    color: "#171513",
+    fontSize: 14,
+    fontWeight: "900",
+    marginTop: 9,
+  },
+  loadRetryButton: {
+    alignItems: "center",
+    backgroundColor: "#FF4A17",
+    borderColor: "#FF8B68",
+    borderRadius: 8,
+    borderTopWidth: 1,
+    elevation: 5,
+    height: 32,
+    justifyContent: "center",
+    marginTop: 14,
+    minWidth: 120,
+    ...skeuo.action,
+  },
+  loadRetryText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "900",
   },
   mapFallback: {
     alignItems: "center",

@@ -57,7 +57,7 @@ export const MenuScreen = ({ navigation }: MenuScreenProps) => {
       { label: "Price ↓", value: "price_desc" },
       { label: "Rating", value: "rating_desc" },
       { label: "Newest", value: "newest" },
-    ] satisfies Array<{ label: string; value: NonNullable<MealsMenuParams["sort"]> }>,
+    ] satisfies { label: string; value: NonNullable<MealsMenuParams["sort"]> }[],
     [],
   );
 
@@ -397,7 +397,7 @@ const FilterStrip = ({ activeValue, items, onChange, primary }: FilterStripProps
 
 type SortStripProps = {
   activeValue?: MealsMenuParams["sort"];
-  items: Array<{ label: string; value: NonNullable<MealsMenuParams["sort"]> }>;
+  items: { label: string; value: NonNullable<MealsMenuParams["sort"]> }[];
   onChange: (value: NonNullable<MealsMenuParams["sort"]>) => void;
 };
 

@@ -18,11 +18,11 @@ export type LoyaltySummary = {
     pointsRequired: number;
   };
   transactions: HoneyPointTransaction[];
-  leaderboard: Array<{
+  leaderboard: {
     rank: number;
     name: string;
     points: number;
-  }>;
+  }[];
 };
 
 export const loyaltyService = {

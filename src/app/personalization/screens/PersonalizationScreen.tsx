@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Screen } from "@/components";
 import { formatNaira } from "@/shared/state";
@@ -53,7 +53,7 @@ export const PersonalizationScreen = () => {
   const [error, setError] = useState<string>();
   const [saving, setSaving] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const response = await personalizationService.getProfile();
       setProfile(response);
@@ -64,11 +64,11 @@ export const PersonalizationScreen = () => {
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to load preferences.");
     }
-  };
+  }, []);
 
   useEffect(() => {
-    void load();
-  }, []);
+    void Promise.resolve().then(load);
+  }, [load]);
 
   const goals = useMemo(() => Object.keys(goalPresets), []);
   const recommendations = useMemo(() => profile?.recommendations ?? [], [profile?.recommendations]);

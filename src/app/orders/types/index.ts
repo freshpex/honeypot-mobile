@@ -29,12 +29,12 @@ export type CartMeal = {
 
 export type CartResponse = {
   itemCount: number;
-  items: Array<{
+  items: {
     id: string;
     lineTotal: number;
     meal: CartMeal;
     quantity: number;
-  }>;
+  }[];
   subtotal: number;
 };
 
@@ -70,7 +70,7 @@ export type OrderListResponse = {
 export type CheckoutPayload = {
   deliveryAddressId: string;
   deliveryFee: number;
-  items: Array<{ mealId: string; quantity: number }>;
+  items: { mealId: string; quantity: number }[];
   paymentMethodId: string;
   paymentReference: string;
 };
@@ -80,14 +80,14 @@ export type TrackingResponse = {
   map: {
     provider: "openstreetmap";
     tileUrlTemplate: string;
-    route: Array<{ latitude: number; longitude: number }>;
+    route: { latitude: number; longitude: number }[];
   };
   rider?: {
     name: string;
     phone?: string;
     currentLocation: { latitude: number; longitude: number };
   };
-  events: Array<{
+  events: {
     id: string;
     status: OrderStatusLabel;
     title: string;
@@ -95,6 +95,6 @@ export type TrackingResponse = {
     latitude?: number;
     longitude?: number;
     happenedAt: string;
-  }>;
+  }[];
 };
 

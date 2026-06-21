@@ -5,6 +5,7 @@ import type { MealsStackParamList } from "../types";
 import { CartScreen } from "./CartScreen";
 import { CheckoutScreen } from "./CheckoutScreen";
 import { MenuScreen } from "./MenuScreen";
+import { PaymentResultScreen } from "./PaymentResultScreen";
 
 const Stack = createNativeStackNavigator<MealsStackParamList>();
 
@@ -26,6 +27,7 @@ export const MealsScreen = () => (
     <Stack.Screen component={MenuScreen} name="Menu" />
     <Stack.Screen component={CartScreen} name="Cart" />
     <Stack.Screen component={CheckoutScreen} name="Checkout" />
+    <Stack.Screen component={PaymentResultScreen} name="PaymentResult" />
   </Stack.Navigator>
 );
 
@@ -33,4 +35,5 @@ const mealTitles: Record<keyof MealsStackParamList, string> = {
   Cart: "Cart",
   Checkout: "Checkout",
   Menu: "Menu",
+  PaymentResult: "Payment Status",
 };

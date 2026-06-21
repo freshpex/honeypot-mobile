@@ -56,19 +56,17 @@ export const SubscriptionsScreen = () => {
     void loadCards();
   }, [loadCards]);
 
-  useEffect(() => {
-    setPendingPlan(selectedPlan ?? plans[0]);
-  }, [plans, selectedPlan]);
-
-  useEffect(() => {
-    setSelectedCardId((current) =>
-      current && cards.some((card) => card.id === current) ? current : cards[0]?.id,
-    );
-  }, [cards]);
-
-  const selectedCard = useMemo(
-    () => cards.find((card) => card.id === selectedCardId),
+  const effectivePendingPlan = useMemo(
+    () => pendingPlan ?? selectedPlan ?? plans[0],
+    [pendingPlan, plans, selectedPlan],
+  );
+  const effectiveSelectedCardId = useMemo(
+    () => (selectedCardId && cards.some((card) => card.id === selectedCardId) ? selectedCardId : cards[0]?.id),
     [cards, selectedCardId],
+  );
+  const selectedCard = useMemo(
+    () => cards.find((card) => card.id === effectiveSelectedCardId),
+    [cards, effectiveSelectedCardId],
   );
 
   const stats = useMemo(
@@ -102,7 +100,7 @@ export const SubscriptionsScreen = () => {
   );
 
   const handleSubscribe = async () => {
-    if (!pendingPlan || !selectedCard) {
+    if (!effectivePendingPlan || !selectedCard) {
       setPaymentError("Add or select a payment card before subscribing.");
       return;
     }
@@ -111,11 +109,11 @@ export const SubscriptionsScreen = () => {
     try {
       const callbackUrl = Linking.createURL("payment-complete");
       const initialized = await paymentsService.initialize({
-        amount: pendingPlan.priceAmount ?? 0,
+        amount: effectivePendingPlan.priceAmount ?? 0,
         callbackUrl,
         deliveryFee: 0,
-        description: `${pendingPlan.name} Plan`,
-        metadata: { kind: "subscription", planId: pendingPlan.id },
+        description: `${effectivePendingPlan.name} Plan`,
+        metadata: { kind: "subscription", planId: effectivePendingPlan.id },
         paymentMethodId: selectedCard.id,
       });
       const paymentResult = await WebBrowser.openAuthSessionAsync(initialized.authorizationUrl, callbackUrl);
@@ -128,7 +126,7 @@ export const SubscriptionsScreen = () => {
         setPaymentError("Payment was not completed. Please retry or choose another card.");
         return;
       }
-      await subscribe(pendingPlan, verified.reference);
+      await subscribe(effectivePendingPlan, verified.reference);
     } catch (caughtError) {
       setPaymentError(caughtError instanceof Error ? caughtError.message : "Unable to complete payment.");
       return;
@@ -220,8 +218,8 @@ export const SubscriptionsScreen = () => {
       </ScrollView>
 
       <ChoosePlanSheet
-        activePlan={pendingPlan}
-        activeCardId={selectedCardId}
+        activePlan={effectivePendingPlan}
+        activeCardId={effectiveSelectedCardId}
         cards={cards}
         isLoading={isLoading || isPaymentProcessing}
         onClose={() => setIsPlanSheetOpen(false)}

@@ -12,7 +12,6 @@ import type { ProfileStackParamList } from "../types";
 type PaymentHistoryScreenProps = NativeStackScreenProps<ProfileStackParamList, "PaymentHistory">;
 
 export const PaymentHistoryScreen = (_props: PaymentHistoryScreenProps) => {
-  const orders = useCustomerStore((state) => state.orders);
   const error = useCustomerStore((state) => state.error);
   const isSyncing = useCustomerStore((state) => state.isSyncing);
   const loadPaymentHistory = useCustomerStore((state) => state.loadPaymentHistory);

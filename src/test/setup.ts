@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 jest.mock("react-native-maps", () => {
   const React = require("react");
   const { View } = require("react-native");

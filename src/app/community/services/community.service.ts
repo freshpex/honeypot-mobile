@@ -15,7 +15,7 @@ export type MealReview = {
 
 export type CommunityResponse = {
   reviews: MealReview[];
-  leaderboard: Array<{ rank: number; name: string; points: number }>;
+  leaderboard: { rank: number; name: string; points: number }[];
   pagination: {
     page: number;
     limit: number;

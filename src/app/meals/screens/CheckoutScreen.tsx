@@ -47,6 +47,7 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
   const loadCards = useCustomerStore((state) => state.loadCards);
   const [addressSheetOpen, setAddressSheetOpen] = useState(false);
   const [cardSheetOpen, setCardSheetOpen] = useState(false);
+  const [paymentError, setPaymentError] = useState<string>();
   const [selectedAddressId, setSelectedAddressId] = useState<string>();
   const [selectedCardId, setSelectedCardId] = useState<string>();
   const itemCount = useMemo(() => getCartItemCount(items), [items]);
@@ -86,6 +87,9 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
     if (!canConfirm || !selectedAddress || !selectedCard) {
       return;
     }
+    setPaymentError(undefined);
+    let orderId: string | undefined;
+    let orderReference: string | undefined;
     try {
       const initialized = await initializeCheckoutPayment({
         deliveryFee: DELIVERY_FEE,
@@ -100,15 +104,38 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
         paymentMethodId: selectedCard.id,
         paymentReference: initialized.reference,
       });
+      orderId = order.id;
+      orderReference = order.reference;
       const completed = await openAndVerifyPayment(initialized.authorizationUrl, initialized.reference);
       if (completed) {
-        await confirmOrderPayment(order.id);
+        const confirmed = await confirmOrderPayment(order.id);
+        await loadCart();
+        navigation.replace("PaymentResult", {
+          orderId: confirmed.id,
+          orderReference: confirmed.reference,
+          status: "success",
+        });
+        return;
       }
-    } catch {
+      await loadCart();
+      navigation.replace("PaymentResult", {
+        message: "Payment was closed or not completed. Your order is waiting for payment in Orders.",
+        orderId,
+        orderReference,
+        status: "pending",
+      });
+      return;
+    } catch (caughtError) {
+      const message = readableError(caughtError);
+      setPaymentError(message);
+      navigation.replace("PaymentResult", {
+        message,
+        orderId,
+        orderReference,
+        status: orderId ? "pending" : "failed",
+      });
       return;
     }
-    await loadCart();
-    navigation.getParent()?.navigate("Orders");
   };
 
   return (
@@ -220,6 +247,7 @@ export const CheckoutScreen = ({ navigation }: CheckoutScreenProps) => {
                 </Text>
               ) : null}
               {error ? <Text style={styles.validationText}>{error}</Text> : null}
+              {paymentError ? <Text style={styles.validationText}>{paymentError}</Text> : null}
 
               <Pressable
                 disabled={!canConfirm || isSyncing}
@@ -265,7 +293,7 @@ const initializeCheckoutPayment = async ({
   total: number;
 }) => {
   const callbackUrl = Linking.createURL("payment-complete");
-  return paymentsService.initialize({
+  const initialized = await paymentsService.initialize({
     amount: total,
     callbackUrl,
     deliveryFee,
@@ -273,6 +301,10 @@ const initializeCheckoutPayment = async ({
     metadata: { itemCount, kind: "order" },
     paymentMethodId,
   });
+  if (!initialized.authorizationUrl || typeof initialized.authorizationUrl !== "string") {
+    throw new Error("Payment provider did not return a checkout link.");
+  }
+  return initialized;
 };
 
 const openAndVerifyPayment = async (authorizationUrl: string, reference: string) => {
@@ -286,6 +318,16 @@ const openAndVerifyPayment = async (authorizationUrl: string, reference: string)
     return false;
   }
   return true;
+};
+
+const readableError = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+  return "Unable to start payment. Please try again.";
 };
 
 const SectionLabel = ({

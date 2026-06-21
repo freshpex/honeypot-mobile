@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PaginationControls, Screen } from "@/components";
 import { usePagination } from "@/shared/hooks";
@@ -11,7 +11,7 @@ export const LoyaltyScreen = () => {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       setSummary(await loyaltyService.getSummary(100));
@@ -21,11 +21,11 @@ export const LoyaltyScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    void load();
-  }, []);
+    void Promise.resolve().then(load);
+  }, [load]);
 
   const transactions = useMemo(() => summary?.transactions ?? [], [summary?.transactions]);
   const transactionPages = usePagination(transactions);

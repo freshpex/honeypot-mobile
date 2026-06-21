@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { EmptyState, PaginationControls, Screen } from "@/components";
 import { usePagination } from "@/shared/hooks";
@@ -11,7 +11,7 @@ export const CommunityScreen = () => {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       setCommunity(await communityService.getCommunity(1, 100));
@@ -21,11 +21,11 @@ export const CommunityScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    void load();
-  }, []);
+    void Promise.resolve().then(load);
+  }, [load]);
 
   const reviews = useMemo(() => community?.reviews ?? [], [community?.reviews]);
   const reviewPages = usePagination(reviews);

@@ -11,7 +11,6 @@ const fallbackMessage =
 
 GoogleSignin.configure({
   iosClientId: env.GOOGLE_IOS_CLIENT_ID,
-  offlineAccess: true,
   webClientId: env.GOOGLE_WEB_CLIENT_ID,
 });
 
@@ -50,9 +49,6 @@ export const useAuth = () => {
         if (!env.GOOGLE_WEB_CLIENT_ID) {
           throw new Error("Google sign-in is missing the Web client ID.");
         }
-        if (Platform.OS === "android" && !env.GOOGLE_ANDROID_CLIENT_ID) {
-          throw new Error("Google sign-in is missing the Android client ID.");
-        }
         if (Platform.OS === "ios" && !env.GOOGLE_IOS_CLIENT_ID) {
           throw new Error("Google sign-in is missing the iOS client ID.");
         }
@@ -83,6 +79,12 @@ export const googleAuthErrorMessage = (caughtError: unknown) => {
     if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
       return "Google Play Services is unavailable or needs an update.";
     }
+    if (code === "DEVELOPER_ERROR" || code === "10") {
+      return "Google sign-in is not configured for this app build. Rebuild after confirming the Android package/SHA-1 and iOS URL scheme in Google Cloud.";
+    }
+  }
+  if (caughtError instanceof Error && /DEVELOPER_ERROR|troubleshooting/i.test(caughtError.message)) {
+    return "Google sign-in is not configured for this app build. Rebuild after confirming the Android package/SHA-1 and iOS URL scheme in Google Cloud.";
   }
   return caughtError instanceof Error ? caughtError.message : fallbackMessage;
 };
