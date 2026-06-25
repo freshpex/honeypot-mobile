@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Platform } from "react-native";
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
-import { env } from "@/config";
+import {
+  GoogleSignin,
+  isCancelledResponse,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+import { env, getGoogleOAuthConfigurationError } from "@/config";
 import { useAuthStore } from "@/shared/state";
 import { authService } from "../services";
 import type { LoginPayload, RegisterPayload, ResetPasswordPayload } from "../types";
@@ -12,6 +18,7 @@ const fallbackMessage =
 GoogleSignin.configure({
   iosClientId: env.GOOGLE_IOS_CLIENT_ID,
   webClientId: env.GOOGLE_WEB_CLIENT_ID,
+  offlineAccess: false,
 });
 
 export const useAuth = () => {
@@ -45,24 +52,20 @@ export const useAuth = () => {
     isLoading,
     clearError: () => setError(undefined),
     continueWithGoogle: () =>
-      authenticate(async () => {
-        if (!env.GOOGLE_WEB_CLIENT_ID) {
-          throw new Error("Google sign-in is missing the Web client ID.");
-        }
-        if (Platform.OS === "ios" && !env.GOOGLE_IOS_CLIENT_ID) {
-          throw new Error("Google sign-in is missing the iOS client ID.");
-        }
+      run(async () => {
+        const configurationError = getGoogleOAuthConfigurationError();
+        if (configurationError) throw new GoogleOAuthConfigurationError(configurationError);
         if (Platform.OS === "android") {
           await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
         }
         const result = await GoogleSignin.signIn();
-        if (result.type === "cancelled") {
-          throw new Error("Google sign-in was cancelled.");
-        }
-        if (!result.data.idToken) {
+        if (isCancelledResponse(result)) return undefined;
+        if (!isSuccessResponse(result) || !result.data.idToken) {
           throw new Error("Google did not return a secure ID token.");
         }
-        return authService.continueWithGoogle({ idToken: result.data.idToken });
+        const response = await authService.continueWithGoogle({ idToken: result.data.idToken });
+        await setSession(response);
+        return response;
       }),
     login: (payload: LoginPayload) => authenticate(() => authService.login(payload)),
     register: (payload: RegisterPayload) => authenticate(() => authService.register(payload)),
@@ -72,19 +75,25 @@ export const useAuth = () => {
 };
 
 export const googleAuthErrorMessage = (caughtError: unknown) => {
-  if (caughtError instanceof Error && "code" in caughtError) {
-    const code = String((caughtError as { code?: string }).code);
+  if (caughtError instanceof GoogleOAuthConfigurationError) return caughtError.message;
+  if (isErrorWithCode(caughtError)) {
+    const code = String(caughtError.code);
     if (code === statusCodes.SIGN_IN_CANCELLED) return "Google sign-in was cancelled.";
     if (code === statusCodes.IN_PROGRESS) return "Google sign-in is already in progress.";
     if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
       return "Google Play Services is unavailable or needs an update.";
     }
     if (code === "DEVELOPER_ERROR" || code === "10") {
-      return "Google sign-in is not configured for this app build. Rebuild after confirming the Android package/SHA-1 and iOS URL scheme in Google Cloud.";
+      return Platform.OS === "android"
+        ? "Google rejected this Android build signature. Register the exact SHA-1 of the installed APK for package com.honeypot.mobile, then create a new native build."
+        : "Google rejected this iOS app configuration. Confirm bundle ID com.honeypot.mobile and its reversed iOS client URL scheme, then create a new native build.";
     }
+    return `Google sign-in failed (${code}). Please try again or contact support.`;
   }
   if (caughtError instanceof Error && /DEVELOPER_ERROR|troubleshooting/i.test(caughtError.message)) {
-    return "Google sign-in is not configured for this app build. Rebuild after confirming the Android package/SHA-1 and iOS URL scheme in Google Cloud.";
+    return "Google rejected this native app configuration. Install a newly rebuilt app after verifying its exact package, signing SHA-1, client IDs, and iOS URL scheme.";
   }
   return caughtError instanceof Error ? caughtError.message : fallbackMessage;
 };
+
+class GoogleOAuthConfigurationError extends Error {}

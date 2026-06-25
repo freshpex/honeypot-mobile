@@ -27,6 +27,10 @@ jest.mock("@react-native-google-signin/google-signin", () => ({
     }),
     signOut: jest.fn().mockResolvedValue(null),
   },
+  isCancelledResponse: (response: { type?: string }) => response.type === "cancelled",
+  isErrorWithCode: (error: unknown) =>
+    Boolean(error && typeof error === "object" && "code" in error),
+  isSuccessResponse: (response: { type?: string }) => response.type === "success",
   statusCodes: {
     IN_PROGRESS: "IN_PROGRESS",
     PLAY_SERVICES_NOT_AVAILABLE: "PLAY_SERVICES_NOT_AVAILABLE",
